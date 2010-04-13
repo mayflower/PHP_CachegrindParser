@@ -2,6 +2,7 @@
 namespace PhpCachegrindParser;
 
 require_once "Output/XMLFormatter.php";
+require_once "Output/DotFormatter.php";
 require_once "Input/Parser.php";
 
 define("VERSION", 0.1);
@@ -65,8 +66,11 @@ function parseOptions() {
 
     // Select the Formatter
     switch ($opts["format"]) {
-        case "xml":
-            $ret["formatter"] = new Output\XMLFormatter;
+        case 'xml':
+            $ret["formatter"] = new Output\XMLFormatter();
+            break;
+        case 'dot':
+            $ret["formatter"] = new Output\DotFormatter();
             break;
         default:
             usageFormatters();

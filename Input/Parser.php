@@ -3,6 +3,7 @@ namespace PhpCachegrindParser\Input;
 
 require_once "Data/RawEntry.php";
 require_once "Data/RawCall.php";
+require_once "Data/CallTree.php";
 use \PhpCachegrindParser\Data as Data;
 
 class Parser
@@ -74,6 +75,50 @@ class Parser
             $curLine += 1;
         }
         return $entries;
+    }
+
+    /**
+     * Returns the call tree.
+     *
+     * Note: If you need both the entry list and the call tree, add caching
+     * to the Parser class.
+     *
+     * @return The calltree.
+     */
+    public function getCallTree() {
+
+        $entries = array_reverse($this->getEntryList());
+
+        while (strcmp($entries[0]->getFuncname(), '{main}') != 0) {
+            // We don't want anything not called by {main}
+            array_shift($entries);
+        }
+
+        $parent = array();
+        $childrenLeft = array();
+
+        // Add main to the parents stack
+        $mainEntry = array_shift($entries);
+        $root = Data\CallTree::fromRawEntry($mainEntry);
+        array_push($parent, $root);
+        array_push($childrenLeft, count($mainEntry->getSubcalls()));
+
+        foreach($entries as $entry) {
+            $node = Data\CallTree::fromRawEntry($entry);
+            end($parent)->addChild($node);
+            array_push($childrenLeft, array_pop($childrenLeft) -1);
+
+            if(end($childrenLeft) == 0) {
+                array_pop($parent);
+                array_pop($childrenLeft);
+            }
+            $subcalls = count($entry->getSubcalls());
+            if ($subcalls != 0) {
+                array_push($parent, $node);
+                array_push($childrenLeft, $subcalls);
+            }
+        }
+        return $root;
     }
 
     /*
