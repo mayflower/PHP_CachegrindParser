@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file contains the class PhpCachegrindParser\Data\CallTree.
+ * This file contains the class PhpCachegrindParser\Data\CallTreeNode.
  *
  * PHP version 5
  *
@@ -11,121 +11,49 @@
 namespace PhpCachegrindParser\Data;
 
 /**
- * This class represents a node in the call tree.
+ * This class represents a call tree.
  *
- * It contains the name of the function/method, the file it was defined in,
- * it's costs and a CallTree object for each function it called.
+ * It stores the tree itself and the information given in the
+ * cg file's summary line
  */
 class CallTree
 {
-
-    private $fl;
-    private $fn;
-
-    private $costs;
-    private $inclusiveCostsCache;
-
-    private $children = array();
+    private $rootNode;
+    private $summary;
 
     /**
-     * Creates a new CallTree object with the given values
+     * Creates a new CallTreeNode object with the given data.
      *
-     * @param string $filename The filename.
-     * @param string $funcname The function name.
-     * @param array  $costs Array with: 'time'    => integer
-     *                                  'mem'     => integer
-     *                                  'cycles'  => integer
-     *                                  'peakmem' => integer
+     * @param PhpCachegrindParser\Data\CallTreeNode $rootNode The root node
+     * @param array $summary An array containing: 'time'    => integer
+     *                                            'cycles'  => integer
+     *                                            'mem'     => integer 
+     *                                            'peakmem' => integer
      */
-    function __construct($filename, $funcname, $costs)
+    function __construct(CallTreeNode $rootNode, $summary)
     {
-        $this->fl = $filename;
-        $this->fn = $funcname;
-        $this->costs = $costs;
+        $this->rootNode = $rootNode;
+        $this->summary  = $summary;
     }
 
     /**
-     * Convenience function to get a CallTree from an RawEntry.
-     */
-    public static function fromRawEntry($entry)
-    {
-        return new CallTree($entry->getFilename(),
-                            $entry->getFuncname(),
-                            $entry->getCosts());
-    }
-
-    /**
-     * Adds a subcall to this node.
+     * Gets the root node.
      *
-     * @param PhpCachegrind\Data\CallTree $child The child node to add.
+     * @return PhpCachegrindParser\Data\CallTreeNode The calltree's root node.
      */
-    public function addChild(CallTree $child)
-    {
-        $this->children[] = $child;
+    public function getRoot() {
+        return $this->rootNode;
     }
 
     /**
-     * Returns the costs of this entry.
+     * Gets the summary.
      *
-     * @return array  $costs Array with: 'time'    => integer
-     *                                   'mem'     => integer
-     *                                   'cycles'  => integer
-     *                                   'peakmem' => integer
+     * @return array An array containing: 'time'    => integer
+     *                                    'cycles'  => integer
+     *                                    'mem'     => integer 
+     *                                    'peakmem' => integer
      */
-    public function getCosts() {
-        return $this->costs;
-    }
-
-    /**
-     * Returns the costs of this call plus the inclusive
-     * costs of all functions called by this one.
-     *
-     * @return integer The functions inclusive costs.
-     */
-    public function getInclusiveCosts()
-    {
-        if (!$this->inclusiveCostsCache) {
-            $inclCosts = $this->costs;
-
-            foreach ($this->children as $child) {
-                $childInclCosts = $child->getInclusiveCosts();
-                $inclCosts['time']   += $childInclCosts['time'];
-                $inclCosts['cycles'] += $childInclCosts['cycles'];
-                $inclCosts['mem']         = max($inclCosts['mem'],
-                                                $childInclCosts['mem']);
-                $inclCosts['peakmem'] = max($inclCosts['peakmem'],
-                                                $childInclCosts['peakmem']);
-            }
-            $this->inclusiveCostsCache = $inclCosts;
-        }
-        return $this->inclusiveCostsCache;
-    }
-
-    /**
-     * Returns the name of the file this function is located in.
-     *
-     * @return string File name.
-     */
-    public function getFilename() {
-        return $this->fl;
-    }
-
-    /**
-     * Returns the name of this function.
-     *
-     * @return string Function name.
-     */
-    public function getFuncname() {
-        return $this->fn;
-    }
-
-    /**
-     * Returns the children of this node.
-     *
-     * @return array Array with PhpCachegrindParser\Data\CallTree objects that
-     *               are called by this function.
-     */
-    public function getChildren() {
-        return $this->children;
+    public function getSummary() {
+        return $this->summary;
     }
 }

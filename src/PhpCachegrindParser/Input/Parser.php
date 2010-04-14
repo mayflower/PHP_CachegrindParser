@@ -13,6 +13,7 @@ namespace PhpCachegrindParser\Input;
 require_once "Data/RawEntry.php";
 require_once "Data/RawCall.php";
 require_once "Data/CallTree.php";
+require_once "Data/CallTreeNode.php";
 use \PhpCachegrindParser\Data as Data;
 
 /**
@@ -140,11 +141,11 @@ class Parser
             'peakmem' => 0,
         );
         $rootEntry = new Data\RawEntry("", "{root}", $rootCosts);
-        $root = Data\CallTree::fromRawEntry($rootEntry);
+        $root = Data\CallTreeNode::fromRawEntry($rootEntry);
         array_push($parent, $root);
 
         foreach($entries as $entry) {
-            $node = Data\CallTree::fromRawEntry($entry);
+            $node = Data\CallTreeNode::fromRawEntry($entry);
             end($parent)->addChild($node);
             array_push($childrenLeft, array_pop($childrenLeft) -1);
 
