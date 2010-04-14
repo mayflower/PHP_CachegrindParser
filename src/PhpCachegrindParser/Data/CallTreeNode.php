@@ -95,10 +95,10 @@ class CallTreeNode
                 $childInclCosts = $child->getInclusiveCosts();
                 $inclCosts['time']   += $childInclCosts['time'];
                 $inclCosts['cycles'] += $childInclCosts['cycles'];
-                $inclCosts['mem']         = max($inclCosts['mem'],
-                                                $childInclCosts['mem']);
+                $inclCosts['mem']     = max($inclCosts['mem'],
+                                            $childInclCosts['mem']);
                 $inclCosts['peakmem'] = max($inclCosts['peakmem'],
-                                                $childInclCosts['peakmem']);
+                                            $childInclCosts['peakmem']);
             }
             $this->inclusiveCostsCache = $inclCosts;
         }
