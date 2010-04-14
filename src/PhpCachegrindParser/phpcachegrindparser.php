@@ -10,6 +10,8 @@
 
 namespace PhpCachegrindParser;
 
+set_include_path(get_include_path() . PATH_SEPARATOR . __DIR__);
+
 require_once "Output/XMLFormatter.php";
 require_once "Output/DotFormatter.php";
 require_once "Input/Parser.php";
