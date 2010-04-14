@@ -100,16 +100,11 @@ class Parser
 
         $entries = array_reverse($this->getEntryList());
 
-        while (strcmp($entries[0]->getFuncname(), '{main}') != 0) {
-            // We don't want anything not called by {main}
-            array_shift($entries);
-        }
-
         $parent = array();
         $childrenLeft = array();
 
-        // Add main to the parents stack
-        $mainEntry = array_shift($entries);
+        // Add root to the parents stack
+        $mainEntry = new Data\RawEntry("", "{root}", array());
         $root = Data\CallTree::fromRawEntry($mainEntry);
         array_push($parent, $root);
         array_push($childrenLeft, count($mainEntry->getSubcalls()));
