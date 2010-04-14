@@ -21,6 +21,8 @@ use \PhpCachegrindParser\Data as Data;
  * For each input, a instance of parser has to be created.
  * It then parses the input when an object representation is
  * requested.
+ * Additionally, Filter objects can be added that can be used
+ * to filter the call tree.
  *
  * At the moment, it does not do any caching.
  */
@@ -28,6 +30,9 @@ class Parser
 {
     /** Stores the input for later use. */
     private $inputData;
+
+    /** Stores the filters we will use when parsing. */
+    private $filter;
 
     /**
      * Creates a new Parser instance.
@@ -37,6 +42,15 @@ class Parser
     function __construct($inputData)
     {
         $this->inputData = $inputData;
+    }
+
+    /**
+     * Adds a filter to the parser.
+     *
+     * @param PhpCachegrindParser\Input\Filter The filter.
+     */
+    public function addFilter(Filter $filter) {
+        $this->filter[] = $filter;
     }
 
     /**
@@ -119,10 +133,10 @@ class Parser
         $childrenLeft = array();
 
         // Add root to the parents stack
-        $mainEntry = new Data\RawEntry("", "{root}", array());
-        $root = Data\CallTree::fromRawEntry($mainEntry);
+        $rootEntry = new Data\RawEntry("", "{root}", array());
+        $root = Data\CallTree::fromRawEntry($rootEntry);
         array_push($parent, $root);
-        array_push($childrenLeft, count($mainEntry->getSubcalls()));
+        array_push($childrenLeft, count($rootEntry->getSubcalls()));
 
         foreach($entries as $entry) {
             $node = Data\CallTree::fromRawEntry($entry);
@@ -138,6 +152,11 @@ class Parser
                 array_push($parent, $node);
                 array_push($childrenLeft, $subcalls);
             }
+        }
+
+        // Filter the tree
+        foreach ($this->filters as $filter) {
+            $filter->$filter($root);
         }
         return $root;
     }
