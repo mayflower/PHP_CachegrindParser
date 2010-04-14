@@ -10,8 +10,8 @@
 
 namespace CachegrindParser\Output;
 
-require_once "Output/Formatter.php";
-require_once "Data/RawEntry.php";
+require_once "CachegrindParser/Output/Formatter.php";
+require_once "CachegrindParser/Data/RawEntry.php";
 use \CachegrindParser\Data as Data;
 
 /**

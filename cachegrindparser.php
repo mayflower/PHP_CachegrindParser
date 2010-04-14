@@ -10,9 +10,9 @@
 
 set_include_path(get_include_path() . PATH_SEPARATOR . __DIR__);
 
-require_once "Output/XMLFormatter.php";
-require_once "Output/DotFormatter.php";
-require_once "Input/Parser.php";
+require_once "CachegrindParser/Output/XMLFormatter.php";
+require_once "CachegrindParser/Output/DotFormatter.php";
+require_once "CachegrindParser/Input/Parser.php";
 
 define("VERSION", "development");
 
@@ -21,7 +21,7 @@ define("VERSION", "development");
 $parameters = parseOptions();
 
 // 2. Create a Parser object
-$parser = new Input\Parser($parameters["input"]);
+$parser = new CachegrindParser\Input\Parser($parameters["input"]);
 
 // 3. Format it according to (1)
 $output = $parameters["formatter"]->format($parser);
@@ -77,10 +77,10 @@ function parseOptions()
     // Select the Formatter
     switch ($opts["format"]) {
     case 'xml':
-        $ret["formatter"] = new Output\XMLFormatter();
+        $ret["formatter"] = new CachegrindParser\Output\XMLFormatter();
         break;
     case 'dot':
-        $ret["formatter"] = new Output\DotFormatter();
+        $ret["formatter"] = new CachegrindParser\Output\DotFormatter();
         break;
     default:
         usageFormatters();

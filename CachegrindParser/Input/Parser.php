@@ -10,10 +10,10 @@
 
 namespace CachegrindParser\Input;
 
-require_once "Data/RawEntry.php";
-require_once "Data/RawCall.php";
-require_once "Data/CallTree.php";
-require_once "Data/CallTreeNode.php";
+require_once "CachegrindParser/Data/RawEntry.php";
+require_once "CachegrindParser/Data/RawCall.php";
+require_once "CachegrindParser/Data/CallTree.php";
+require_once "CachegrindParser/Data/CallTreeNode.php";
 use \CachegrindParser\Data as Data;
 
 /**
