@@ -65,6 +65,18 @@ class CallTree
     }
 
     /**
+     * Returns the costs of this entry.
+     *
+     * @return array  $costs Array with: 'time'    => integer
+     *                                   'mem'     => integer
+     *                                   'cycles'  => integer
+     *                                   'peakmem' => integer
+     */
+    public function getCosts() {
+        return $this->costs;
+    }
+
+    /**
      * Returns the costs of this call plus the inclusive
      * costs of all functions called by this one.
      *
