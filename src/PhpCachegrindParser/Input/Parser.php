@@ -15,12 +15,25 @@ require_once "Data/RawCall.php";
 require_once "Data/CallTree.php";
 use \PhpCachegrindParser\Data as Data;
 
+/**
+ * This class converts input to an object representation.
+ *
+ * For each input, a instance of parser has to be created.
+ * It then parses the input when an object representation is
+ * requested.
+ *
+ * At the moment, it does not do any caching.
+ */
 class Parser
 {
+    /** Stores the input for later use. */
     private $inputData;
 
-    private $cachedEntryList;
-
+    /**
+     * Creates a new Parser instance.
+     *
+     * @param string $inputData The input to work on.
+     */
     function __construct($inputData)
     {
         $this->inputData = $inputData;
@@ -32,7 +45,7 @@ class Parser
      * Each function block in the input file is represented by an object
      * in this array.
      *
-     * @return Array of PhpCachegrindParser\Entry objects.
+     * @return array Array of PhpCachegrindParser\Entry objects.
      */
     public function getEntryList()
     {
@@ -47,7 +60,8 @@ class Parser
         while($curLine + 1 < count($lines)) {
             if (strncmp($lines[$curLine], 'fl=', 3) != 0) {
                 // Don't know what to do, panic
-                die("error on line " . __LINE__ . ", couldn't parse line $curLine\n");
+                die("parse error on line $curLine. (Script line: "
+                    . __LINE__ . ")\n");
             } else {
                 // Regular block
                 // Strip fl= from file name and fn from funcname.
@@ -67,7 +81,8 @@ class Parser
                 while(strcmp('',$lines[$curLine]) != 0) {
                     if (strncmp('cfn=', $lines[$curLine], 4) != 0) {
                         // This doesn't look like a call, panik
-                        die("parse error on line $curLine. (Script line: " . __LINE__ . ")\n");
+                        die("parse error on line $curLine. (Script line: "
+                            . __LINE__ . ")\n");
                     }
 
                     $calleeName = substr($lines[$curLine], 4);
@@ -93,7 +108,7 @@ class Parser
      * Note: If you need both the entry list and the call tree, add caching
      * to the Parser class.
      *
-     * @return The calltree.
+     * @return PhpCachegrindParser\Data\CallTree The calltree.
      */
     public function getCallTree()
     {
@@ -130,7 +145,7 @@ class Parser
     /*
      * Parses a call line.
      *
-     * @return Array with calls, meaning how often the call happened.
+     * @return array Array with calls, meaning how often the call happened.
      */
     private static function parseCallLine($line)
     {
@@ -143,7 +158,8 @@ class Parser
     /*
      * Parses a cost line.
      *
-     * @return Array with line, time, mem, cycles and peakmem.
+     * @return array Associative array with line, time, mem,
+     *               cycles and peakmem.
      */
     private static function parseCostLine($line)
     {

@@ -10,13 +10,17 @@
 
 namespace PhpCachegrindParser\Output;
 
+/**
+ * Interface that output formatters must implement.
+ */
 interface Formatter
 {
     /**
      * Formats the Data provided by the given parser.
      *
-     * @param parser The parser that will provide the data.
-     * @return The formatted data as a string.
+     * @param PhpCachegrindParser\Input\Parser parser The parser that
+     *                                                will provide the data.
+     * @return string The formatted data.
      */
     public function format($parser);
 }

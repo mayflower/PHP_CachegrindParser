@@ -14,8 +14,15 @@ require_once "Output/Formatter.php";
 require_once "Data/RawEntry.php";
 use \PhpCachegrindParser\Data as Data;
 
+/**
+ * Creates an hierarchical xml formatting.
+ */
 class XMLFormatter implements Formatter
 {
+
+    /**
+     * Implements format($parser) declared in interface Formatter.
+     */
     public function format($parser)
     {
         $entrylist = $parser->getEntryList();
@@ -27,7 +34,8 @@ class XMLFormatter implements Formatter
         return $root->asXML();
     }
 
-    private static function addEntry(\SimpleXMLElement $root, Data\RawEntry $entry)
+    private static function addEntry(\SimpleXMLElement $root,
+                                     Data\RawEntry $entry)
     {
         // Four things to do here:
         // 1. Get or create the file element
@@ -73,7 +81,8 @@ class XMLFormatter implements Formatter
         }
 
         foreach($entry->getSubcalls() as $call) {
-            $subcallElement = self::insertFunction($calledFunctionsElement, $call->getFuncname());
+            $subcallElement = self::insertFunction($calledFunctionsElement,
+                                                   $call->getFuncname());
             $subcallElement['calls'] += $call->getCalls();
             // Add the costs.
             self::insertCosts($subcallElement, $call->getCosts());
@@ -81,13 +90,18 @@ class XMLFormatter implements Formatter
     }
 
     /*
-     * Inserts a class and method element into the given parent if they don't already exist.
+     * Inserts a class and method element into the given parent if they
+     * don't already exist.
      *
-     * @return The <method> element.
+     * @param  SimpleXMLElement $fileElement The element to insert the <class>
+     *                                       and <method element into.
+     * @param  string           $funcString   String with ClassName->methodName
+     * @return SimpleXMLElement The <method> element.
      */
-    private static function insertMethod(\SimpleXMLElement $fileElement, $signature)
+    private static function insertMethod(\SimpleXMLElement $fileElement,
+                                         $funcString)
     {
-        $sig = explode('->', $signature);
+        $sig = explode('->', $funcString);
         $className = $sig[0];
         $methodName = $sig[1];
 
@@ -99,7 +113,8 @@ class XMLFormatter implements Formatter
             $classElement->name = $className;
         }
 
-        $methodElement = $classElement->xpath("./method[@name=\"{$methodName}\"]");
+        $methodElement = $classElement->xpath('./method[@name="'
+                                              . $methodName . '"]');
         if ($methodElement) {
             $methodElement = $methodElement[0];
         } else {
@@ -110,13 +125,19 @@ class XMLFormatter implements Formatter
     }
 
     /*
-     * Inserts a function Element in the given parent if it doesn't already exist.
+     * Inserts a function Element in the given parent if it doesn't
+     * already exist.
      *
+     * @param  SimpleXMLElement $parentElement The element to insert the
+     *                                         <function> element into.
+     * @param  string           $funcString   String with ClassName->methodName
      * @return The <function> element.
      */
-    private static function insertFunction(\SimpleXMLElement $parentElement, $funcName)
+    private static function insertFunction(\SimpleXMLElement $parentElement,
+                                           $funcName)
     {
-        $funcElement = $parentElement->xpath("./function[@name=\"{$funcName}\"]");
+        $funcElement = $parentElement->xpath('./function[@name="'
+                                             . $funcName . '"]');
         if ($funcElement) {
             $funcElement = $funcElement[0];
         } else {

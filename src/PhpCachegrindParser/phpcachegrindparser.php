@@ -39,9 +39,9 @@ file_put_contents($parameters["output"], $output, LOCK_EX);
  *
  * Dies after printing some help if the command-line options are wrong.
  *
- * @return Array with: input => input data
- *                     output => output filename
- *                     formatter => output formatter
+ * @return array Array with: input => input data
+ *                           output => output filename
+ *                           formatter => output formatter
  */
 function parseOptions()
 {
