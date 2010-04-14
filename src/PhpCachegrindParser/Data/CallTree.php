@@ -85,14 +85,20 @@ class CallTree
     public function getInclusiveCosts()
     {
         if (!$this->inclusiveCostsCache) {
-            $c = $costs;
+            $inclCosts = $this->costs;
 
-            foreach ($children as $child) {
-                $c = self::mergeCosts($c, $child->getInclusiveCosts());
+            foreach ($this->children as $child) {
+                $childInclCosts = $child->getInclusiveCosts();
+                $inclCosts['time']   += $childInclCosts['time'];
+                $inclCosts['cycles'] += $childInclCosts['cycles'];
+                $inclCosts['mem']         = max($inclCosts['mem'],
+                                                $childInclCosts['mem']);
+                $inclCosts['peakmem'] = max($inclCosts['peakmem'],
+                                                $childInclCosts['peakmem']);
             }
-            $this->inclusiveCostsCache = $c;
+            $this->inclusiveCostsCache = $inclCosts;
         }
-        return $inclusiveCostsCache;
+        return $this->inclusiveCostsCache;
     }
 
     /**
@@ -121,18 +127,5 @@ class CallTree
      */
     public function getChildren() {
         return $this->children;
-    }
-
-    /*
-     * Merges two arrays.
-     *
-     * @return The merged array.
-     */
-    private static function mergeCosts($c1, $c2)
-    {
-        foreach($c2 as $k => $v) {
-            $c1[$k] += $v;
-        }
-        return $c1;
     }
 }

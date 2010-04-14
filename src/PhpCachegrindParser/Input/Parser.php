@@ -32,7 +32,7 @@ class Parser
     private $inputData;
 
     /** Stores the filters we will use when parsing. */
-    private $filter;
+    private $filters = array();
 
     /**
      * Creates a new Parser instance.
@@ -133,10 +133,15 @@ class Parser
         $childrenLeft = array();
 
         // Add root to the parents stack
-        $rootEntry = new Data\RawEntry("", "{root}", array());
+        $rootCosts = array(
+            'time' => 0,
+            'mem'  => 0,
+            'cycles' => 0,
+            'peakmem' => 0,
+        );
+        $rootEntry = new Data\RawEntry("", "{root}", $rootCosts);
         $root = Data\CallTree::fromRawEntry($rootEntry);
         array_push($parent, $root);
-        array_push($childrenLeft, count($rootEntry->getSubcalls()));
 
         foreach($entries as $entry) {
             $node = Data\CallTree::fromRawEntry($entry);
@@ -158,6 +163,8 @@ class Parser
         foreach ($this->filters as $filter) {
             $filter->$filter($root);
         }
+
+        print_r($root->getInclusiveCosts());
         return $root;
     }
 
