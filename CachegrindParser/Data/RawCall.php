@@ -1,14 +1,14 @@
 <?php
 
 /**
- * This file contains the class PhpCachegrindParser\Data\RawCall.
+ * This file contains the class CachegrindParser\Data\RawCall.
  *
  * PHP version 5
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
 
-namespace PhpCachegrindParser\Data;
+namespace CachegrindParser\Data;
 
 /**
  * This class represents one cfn block from a cachegrind log file.

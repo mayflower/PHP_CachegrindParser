@@ -1,14 +1,14 @@
 <?php
 
 /**
- * This file contains the class PhpCachegrindParser\Data\RawEntry.
+ * This file contains the class CachegrindParser\Data\RawEntry.
  *
  * PHP version 5
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
 
-namespace PhpCachegrindParser\Data;
+namespace CachegrindParser\Data;
 
 /**
  * Represents a function block in the input file.

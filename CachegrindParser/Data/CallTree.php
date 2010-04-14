@@ -1,14 +1,14 @@
 <?php
 
 /**
- * This file contains the class PhpCachegrindParser\Data\CallTreeNode.
+ * This file contains the class CachegrindParser\Data\CallTreeNode.
  *
  * PHP version 5
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
 
-namespace PhpCachegrindParser\Data;
+namespace CachegrindParser\Data;
 
 /**
  * This class represents a call tree.
@@ -24,7 +24,7 @@ class CallTree
     /**
      * Creates a new CallTreeNode object with the given data.
      *
-     * @param PhpCachegrindParser\Data\CallTreeNode $rootNode The root node
+     * @param CachegrindParser\Data\CallTreeNode $rootNode The root node
      * @param array $summary An array containing: 'time'    => integer
      *                                            'cycles'  => integer
      *                                            'mem'     => integer 
@@ -39,7 +39,7 @@ class CallTree
     /**
      * Gets the root node.
      *
-     * @return PhpCachegrindParser\Data\CallTreeNode The calltree's root node.
+     * @return CachegrindParser\Data\CallTreeNode The calltree's root node.
      */
     public function getRoot()
     {

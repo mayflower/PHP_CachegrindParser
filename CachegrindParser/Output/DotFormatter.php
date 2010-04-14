@@ -1,14 +1,14 @@
 <?php
 
 /**
- * This file contains the class PhpCachegrindParser\Output\DotFormatter.
+ * This file contains the class CachegrindParser\Output\DotFormatter.
  *
  * PHP version 5
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
 
-namespace PhpCachegrindParser\Output;
+namespace CachegrindParser\Output;
 
 /**
  * This class formats the call tree to the dot format.

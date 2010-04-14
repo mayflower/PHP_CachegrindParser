@@ -1,18 +1,18 @@
 <?php
 
 /**
- * This file contains the class PhpCachegrindParser\Output\XMLFormatter.
+ * This file contains the class CachegrindParser\Output\XMLFormatter.
  *
  * PHP version 5
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
 
-namespace PhpCachegrindParser\Output;
+namespace CachegrindParser\Output;
 
 require_once "Output/Formatter.php";
 require_once "Data/RawEntry.php";
-use \PhpCachegrindParser\Data as Data;
+use \CachegrindParser\Data as Data;
 
 /**
  * Creates an hierarchical xml formatting.

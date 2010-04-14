@@ -1,20 +1,20 @@
 <?php
 
 /**
- * This file contains the class PhpCachegrindParser\Input\Parser.
+ * This file contains the class CachegrindParser\Input\Parser.
  *
  * PHP version 5
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
 
-namespace PhpCachegrindParser\Input;
+namespace CachegrindParser\Input;
 
 require_once "Data/RawEntry.php";
 require_once "Data/RawCall.php";
 require_once "Data/CallTree.php";
 require_once "Data/CallTreeNode.php";
-use \PhpCachegrindParser\Data as Data;
+use \CachegrindParser\Data as Data;
 
 /**
  * This class converts input to an object representation.
@@ -48,7 +48,7 @@ class Parser
     /**
      * Adds a filter to the parser.
      *
-     * @param PhpCachegrindParser\Input\Filter The filter.
+     * @param CachegrindParser\Input\Filter The filter.
      */
     public function addFilter(Filter $filter)
     {
@@ -61,7 +61,7 @@ class Parser
      * Each function block in the input file is represented by an object
      * in this array.
      *
-     * @return array Array of PhpCachegrindParser\Entry objects.
+     * @return array Array of CachegrindParser\Entry objects.
      */
     public function getEntryList()
     {
@@ -124,7 +124,7 @@ class Parser
      * Note: If you need both the entry list and the call tree, add caching
      * to the Parser class.
      *
-     * @return PhpCachegrindParser\Data\CallTree The calltree.
+     * @return CachegrindParser\Data\CallTree The calltree.
      */
     public function getCallTree()
     {

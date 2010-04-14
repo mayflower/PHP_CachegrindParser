@@ -1,14 +1,14 @@
 <?php
 
 /**
- * This file contains the class PhpCachegrindParser\Data\CallTreeNode.
+ * This file contains the class CachegrindParser\Data\CallTreeNode.
  *
  * PHP version 5
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
 
-namespace PhpCachegrindParser\Data;
+namespace CachegrindParser\Data;
 
 /**
  * This class represents a node in the call tree.
@@ -128,7 +128,7 @@ class CallTreeNode
     /**
      * Returns the children of this node.
      *
-     * @return array Array with PhpCachegrindParser\Data\CallTreeNode
+     * @return array Array with CachegrindParser\Data\CallTreeNode
      *               objects that are called by this function.
      */
     public function getChildren()

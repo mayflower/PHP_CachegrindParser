@@ -1,14 +1,14 @@
 <?php
 
 /**
- * This file contains the class PhpCachegrindParser\Input\Filter.
+ * This file contains the class CachegrindParser\Input\Filter.
  *
  * PHP version 5
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
 
-namespace PhpCachegrindParser\Input;
+namespace CachegrindParser\Input;
 
 require_once "Data/CallTree.php";
 
@@ -26,7 +26,7 @@ interface Filter
     /**
      * Filters the given tree.
      *
-     * @param PhpCachegrindParser\Data\CallTree The tree to filter.
+     * @param CachegrindParser\Data\CallTree The tree to filter.
      */
     abstract public function filter(\PhpCacheGrindParser\Data\CallTree $param);
 }
