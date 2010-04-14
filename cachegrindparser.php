@@ -8,8 +8,6 @@
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
 
-namespace PhpCachegrindParser;
-
 set_include_path(get_include_path() . PATH_SEPARATOR . __DIR__);
 
 require_once "Output/XMLFormatter.php";
