@@ -50,7 +50,8 @@ class Parser
      *
      * @param PhpCachegrindParser\Input\Filter The filter.
      */
-    public function addFilter(Filter $filter) {
+    public function addFilter(Filter $filter)
+    {
         $this->filter[] = $filter;
     }
 

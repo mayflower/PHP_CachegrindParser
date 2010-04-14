@@ -26,6 +26,7 @@ class CallTreeNode
     private $inclusiveCostsCache;
 
     private $children = array();
+    private $parent;
 
     /**
      * Creates a new CallTreeNode object with the given values
@@ -61,7 +62,9 @@ class CallTreeNode
      */
     public function addChild(CallTreeNode $child)
     {
+        assert(!isset($child->parent));
         $this->children[] = $child;
+        $child->parent = $this;
     }
 
     /**
@@ -72,7 +75,8 @@ class CallTreeNode
      *                                   'cycles'  => integer
      *                                   'peakmem' => integer
      */
-    public function getCosts() {
+    public function getCosts()
+    {
         return $this->costs;
     }
 
@@ -106,7 +110,8 @@ class CallTreeNode
      *
      * @return string File name.
      */
-    public function getFilename() {
+    public function getFilename()
+    {
         return $this->fl;
     }
 
@@ -115,7 +120,8 @@ class CallTreeNode
      *
      * @return string Function name.
      */
-    public function getFuncname() {
+    public function getFuncname()
+    {
         return $this->fn;
     }
 
@@ -125,7 +131,30 @@ class CallTreeNode
      * @return array Array with PhpCachegrindParser\Data\CallTreeNode
      *               objects that are called by this function.
      */
-    public function getChildren() {
+    public function getChildren()
+    {
         return $this->children;
+    }
+
+    /**
+     * Merges this node into it's parent.
+     *
+     * The inclusive costs of this node are added to the parent's costs,
+     * and this node is removed from the children of it's parent.
+     */
+    public function mergeIntoParent()
+    {
+        assert($this->parent); // Make sure we're not the root node.
+
+        $pc = $this->parent->costs;
+        $ic = $this->getInclusiveCosts();
+        $pc['time']    = $ic['time'];
+        $pc['cycles']  = $ic['cycles'];
+        $pc['mem']     = max($pc['mem'], $ic['mem']);
+        $pc['peakmem'] = max($pc['mem'], $ic['peakmem']);
+
+        $idx = array_search($parent->children, $this);
+        assert($idx); // Confirm that we're our parent's child.
+        unset($parent->children[$idx]);
     }
 }

@@ -41,7 +41,8 @@ class CallTree
      *
      * @return PhpCachegrindParser\Data\CallTreeNode The calltree's root node.
      */
-    public function getRoot() {
+    public function getRoot()
+    {
         return $this->rootNode;
     }
 
@@ -53,7 +54,8 @@ class CallTree
      *                                    'mem'     => integer 
      *                                    'peakmem' => integer
      */
-    public function getSummary() {
+    public function getSummary()
+    {
         return $this->summary;
     }
 }
