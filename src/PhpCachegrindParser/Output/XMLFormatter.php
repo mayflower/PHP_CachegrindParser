@@ -59,7 +59,7 @@ class XMLFormatter implements Formatter
             $fileElement = $fileElement[0];
         } else {
             $fileElement = $root->addChild('file');
-            $fileElement->name = $file;
+            $fileElement['name'] = $file;
         }
         
         // 2. Get or create the function/method element
@@ -110,7 +110,7 @@ class XMLFormatter implements Formatter
             $classElement = $classElement[0];
         } else {
             $classElement = $fileElement->addChild('class');
-            $classElement->name = $className;
+            $classElement['name'] = $className;
         }
 
         $methodElement = $classElement->xpath('./method[@name="'
@@ -119,7 +119,7 @@ class XMLFormatter implements Formatter
             $methodElement = $methodElement[0];
         } else {
             $methodElement = $classElement->addChild('method');
-            $methodElement->name = $methodName;
+            $methodElement['name'] = $methodName;
         }
         return $methodElement;
     }
@@ -142,7 +142,7 @@ class XMLFormatter implements Formatter
             $funcElement = $funcElement[0];
         } else {
             $funcElement = $parentElement->addChild('function');
-            $funcElement->name = $funcName;
+            $funcElement['name'] = $funcName;
         }
         return $funcElement;
     }
