@@ -1,4 +1,13 @@
 <?php
+
+/**
+ * This file contains the class PhpCachegrindParser\Output\XMLFormatter.
+ *
+ * PHP version 5
+ *
+ * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
+ */
+
 namespace PhpCachegrindParser\Output;
 
 require_once "Output/Formatter.php";
@@ -18,7 +27,8 @@ class XMLFormatter implements Formatter
         return $root->asXML();
     }
 
-    private static function addEntry(\SimpleXMLElement $root, Data\RawEntry $entry) {
+    private static function addEntry(\SimpleXMLElement $root, Data\RawEntry $entry)
+    {
         // Four things to do here:
         // 1. Get or create the file element
         // 2. Get or create the function/method element
@@ -75,7 +85,8 @@ class XMLFormatter implements Formatter
      *
      * @return The <method> element.
      */
-    private static function insertMethod(\SimpleXMLElement $fileElement, $signature) {
+    private static function insertMethod(\SimpleXMLElement $fileElement, $signature)
+    {
         $sig = explode('->', $signature);
         $className = $sig[0];
         $methodName = $sig[1];
@@ -103,7 +114,8 @@ class XMLFormatter implements Formatter
      *
      * @return The <function> element.
      */
-    private static function insertFunction(\SimpleXMLElement $parentElement, $funcName) {
+    private static function insertFunction(\SimpleXMLElement $parentElement, $funcName)
+    {
         $funcElement = $parentElement->xpath("./function[@name=\"{$funcName}\"]");
         if ($funcElement) {
             $funcElement = $funcElement[0];
@@ -117,7 +129,8 @@ class XMLFormatter implements Formatter
     /*
      * Inserts the costs into the given element.
      */
-    private static function insertCosts(\SimpleXMLElement $element, $costs) {
+    private static function insertCosts(\SimpleXMLElement $element, $costs)
+    {
         $costsElement = $element->costs;
         foreach ($costs as $name => $value) {
             $costsElement[$name] += $value;

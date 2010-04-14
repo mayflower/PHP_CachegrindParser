@@ -1,4 +1,13 @@
 <?php
+
+/**
+ * This file contains the class PhpCachegrindParser\Input\Parser.
+ *
+ * PHP version 5
+ *
+ * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
+ */
+
 namespace PhpCachegrindParser\Input;
 
 require_once "Data/RawEntry.php";
@@ -12,7 +21,8 @@ class Parser
 
     private $cachedEntryList;
 
-    function __construct($inputData) {
+    function __construct($inputData)
+    {
         $this->inputData = $inputData;
     }
 
@@ -85,7 +95,8 @@ class Parser
      *
      * @return The calltree.
      */
-    public function getCallTree() {
+    public function getCallTree()
+    {
 
         $entries = array_reverse($this->getEntryList());
 
@@ -126,7 +137,8 @@ class Parser
      *
      * @return Array with calls, meaning how often the call happened.
      */
-    private static function parseCallLine($line) {
+    private static function parseCallLine($line)
+    {
         $words = explode(' ', $line);
         return array(
             'calls' => (int) substr($words[0], 6),
@@ -138,7 +150,8 @@ class Parser
      *
      * @return Array with line, time, mem, cycles and peakmem.
      */
-    private static function parseCostLine($line) {
+    private static function parseCostLine($line)
+    {
         $tokens = explode(' ', $line);
         return array(
             'time'    => $tokens[1],

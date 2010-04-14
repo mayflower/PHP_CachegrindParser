@@ -1,11 +1,20 @@
 <?php
+
+/**
+ * This file contains PhpCachegrindParser's entry point.
+ *
+ * PHP version 5
+ *
+ * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
+ */
+
 namespace PhpCachegrindParser;
 
 require_once "Output/XMLFormatter.php";
 require_once "Output/DotFormatter.php";
 require_once "Input/Parser.php";
 
-define("VERSION", 0.1);
+define("VERSION", "development");
 
 // We need to do the following:
 // 1. Get the in-/output file and the desired formatting from the command line
@@ -32,7 +41,8 @@ file_put_contents($parameters["output"], $output, LOCK_EX);
  *                     output => output filename
  *                     formatter => output formatter
  */
-function parseOptions() {
+function parseOptions()
+{
     // Define available Options
     $shortopts  = "";
     $shortopts .= "h";
@@ -66,15 +76,15 @@ function parseOptions() {
 
     // Select the Formatter
     switch ($opts["format"]) {
-        case 'xml':
-            $ret["formatter"] = new Output\XMLFormatter();
-            break;
-        case 'dot':
-            $ret["formatter"] = new Output\DotFormatter();
-            break;
-        default:
-            usageFormatters();
-            exit(1);
+    case 'xml':
+        $ret["formatter"] = new Output\XMLFormatter();
+        break;
+    case 'dot':
+        $ret["formatter"] = new Output\DotFormatter();
+        break;
+    default:
+        usageFormatters();
+        exit(1);
     }
 
     $ret["input"] = file_get_contents($opts["in"]);
@@ -89,14 +99,16 @@ function parseOptions() {
 /**
  * Prints the version of this script to stdout.
  */
-function version() {
+function version()
+{
     echo "PhpCachegrindParser version " . VERSION . "\n";
 }
 
 /**
  * Prints information about the Formatters.
  */
-function usageFormatters() {
+function usageFormatters()
+{
     //TODO: write the usage output.
     echo "Write me.\n";
 }
@@ -104,7 +116,8 @@ function usageFormatters() {
 /**
  * Prints an explanation about a missing or empty input file.
  */
-function inputError() {
+function inputError()
+{
     echo <<<EOT
 Couldn't find valid input data. Check that the input file exists
 and contains usable data.
@@ -114,7 +127,8 @@ EOT;
 /**
  * Prints usage information to standard output.
  */
-function usage() {
+function usage()
+{
     //TODO: Write the usage output.
     echo "Write me.\n";
 }
