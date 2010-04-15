@@ -5,7 +5,6 @@ Must
 ------------
 * External documentation
 * Unit test
-* Check if function names in xml attributes create problems with (de)escaping  and fix it if they do.
 * Add real colors to graphviz output.
 * Remove filtering from  Parser and Formatters and write the corresponding filter plugins
 * Move CLI UI away from entry point.
