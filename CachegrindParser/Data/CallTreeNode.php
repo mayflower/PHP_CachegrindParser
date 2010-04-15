@@ -244,7 +244,7 @@ class CallTreeNode
             'time'    => $a1['time']   + $a2['time'],
             'cycles'  => $a1['cycles'] + $a2['cycles'],
             'mem'     => max($a1['mem'], $a2['mem']),
-            'peakmem' => max($a1['mem'], $a2['peakmem']),
+            'peakmem' => max($a1['peakmem'], $a2['peakmem']),
         );
     }
 }
