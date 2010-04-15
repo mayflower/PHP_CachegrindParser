@@ -19,6 +19,10 @@ class CostsRating
      * This function traverses a tree and annotates all nodes with their cost's
      * severity.
      *
+     * This function has no real meaning at this point, it's just a way to
+     * get colored dots.
+     * TODO: Change this.
+     *
      * @param CachegrindParser\Data\CallTree $tree The tree to work on.
      */
     public function rateCosts(\CachegrindParser\Data\CallTree &$tree)

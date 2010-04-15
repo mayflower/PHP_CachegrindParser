@@ -5,8 +5,8 @@ Must
 ------------
 * External documentation
 * Unit test
-* Add real colors to graphviz output.
 * Remove filtering from  Parser and Formatters and write the corresponding filter plugins
+* Write meaningful Rating classes and modify the rating->color transformation method so it makes sense.
 * Move CLI UI away from entry point.
 * Move test data out of the way, ideally use it as an example.
 

@@ -18,15 +18,29 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
         $n1 = new CallTreeNode('file1', 'func1', toCostArray( 2,  3,  5,  7));
         $n2 = new CallTreeNode('file2', 'func2', toCostArray(11, 14, 17, 19));
         $n3 = new CallTreeNode('file3', 'func3', toCostArray( 1,  3,  7, 29));
+
+        $n1->addChild($n2);
+        $n1->addChild($n3);
+        $c = $n1->getInclusiveCosts();
+        $this->assertEquals(14, $c['time']);
+        $this->assertEquals(14, $c['mem']);
+        $this->assertEquals(29, $c['cycles']);
+        $this->assertEquals(29, $c['peakmem']);
+    }
+
+    /**
+     * Tests that inclusive costs are still calculated correctly after
+     * adding another child.
+     */
+    public function testInclusiveCostsWithNewChildren()
+    {
+        $n1 = new CallTreeNode('file1', 'func1', toCostArray( 2,  3,  5,  7));
+        $n2 = new CallTreeNode('file2', 'func2', toCostArray(11, 14, 17, 19));
+        $n3 = new CallTreeNode('file3', 'func3', toCostArray( 1,  3,  7, 29));
         $n4 = new CallTreeNode('file4', 'func4', toCostArray( 2, 97,  2,  3));
 
         $n1->addChild($n2);
         $c = $n1->getInclusiveCosts();
-        $this->assertEquals(13, $c['time']);
-        $this->assertEquals(14, $c['mem']);
-        $this->assertEquals(22, $c['cycles']);
-        $this->assertEquals(19, $c['peakmem']);
-
         $n2->addChild($n3);
         $n2->addChild($n4);
         $c = $n1->getInclusiveCosts();
@@ -53,5 +67,28 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(14, $c['mem']);
         $this->assertEquals(22, $c['cycles']);
         $this->assertEquals(19, $c['peakmem']);
+    }
+
+    /**
+     * Tests combineSimilarChildren method.
+     */
+    public function testSimilarChildren()
+    {
+        $n1 = new CallTreeNode('parent', 'pfunc', toCostArray( 2,  3,  5,  7));
+        $n2 = new CallTreeNode('somefile', 'func', toCostArray(11, 14, 17, 19));
+        $n3 = new CallTreeNode('somefile', 'func', toCostArray( 1,  3,  7, 29));
+
+        $n1->addChild($n2);
+        $n1->addChild($n3);
+
+        $n1->combineSimilarChildren();
+        $children = $n1->getChildren();
+        $this->assertEquals(1, count($children));
+        $c = $children[0]->getCosts();
+
+        $this->assertEquals(12, $c['time']);
+        $this->assertEquals(14, $c['mem']);
+        $this->assertEquals(24, $c['cycles']);
+        $this->assertEquals(29, $c['peakmem']);
     }
 }
