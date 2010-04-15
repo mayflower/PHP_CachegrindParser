@@ -157,3 +157,11 @@ function usage()
     echo "Write me.\n";
 }
 
+/**
+ * Prints information about Filters.
+ */
+function usageFilters()
+{
+    //TODO: write the filters usage output.
+    echo "Write me.\n";
+}
