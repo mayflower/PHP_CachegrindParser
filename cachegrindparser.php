@@ -14,6 +14,7 @@ require_once "CachegrindParser/Output/XMLFormatter.php";
 require_once "CachegrindParser/Output/DotFormatter.php";
 require_once "CachegrindParser/Input/Parser.php";
 require_once "CachegrindParser/Input/NoPhpFilter.php";
+require_once "CachegrindParser/Input/IncludeFilter.php";
 
 define("VERSION", "development");
 
@@ -104,6 +105,9 @@ function parseOptions()
             switch ($name) {
             case 'nophp':
                 $ret['filters'][] = new CachegrindParser\Input\NoPhpFilter();
+                break;
+            case 'include':
+                $ret['filters'][] = new CachegrindParser\Input\IncludeFilter();
                 break;
             default:
                 usageFilters();

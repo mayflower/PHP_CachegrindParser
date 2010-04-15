@@ -43,15 +43,6 @@ class XMLFormatter implements Formatter
         // 3. Add the costs.
         // 4. Get or create the subcall elements including costs.
 
-        // But we don't want these
-        if (strcmp($entry->getFilename(), 'php:internal') == 0 ||
-                strncmp($entry->getFuncname(), 'include::', 9) == 0 || 
-                strncmp($entry->getFuncname(), 'require::', 9) == 0 || 
-                strncmp($entry->getFuncname(), 'include_once::', 14) == 0 || 
-                strncmp($entry->getFuncname(), 'require_once::', 14) == 0) {
-            return;
-        }
-
         // 1. Get or create the file element
         $file = $entry->getFilename();
         $fileElement = $root->xpath("./file[@name=\"$file\"]");
