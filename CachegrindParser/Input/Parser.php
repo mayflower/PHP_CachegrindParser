@@ -84,7 +84,6 @@ class Parser
                 $fl = substr($lines[$curLine], 3);
                 $fn = substr($lines[$curLine + 1], 3);
                 if (strcmp($fn, '{main}') == 0) {
-                    //NOTE: Extract summary here when neccessary
                     $costs = self::parseCostLine($lines[$curLine + 5]);
                     $curLine += 6;
                 } else {
@@ -166,8 +165,19 @@ class Parser
             $filter->$filter($root);
         }
 
-        print_r($root->getInclusiveCosts());
-        return $root;
+        // Find the summary.
+        $summary = array();
+        foreach (explode("\n", $this->inputData) as $line) {
+            if (strncmp($line, 'summary:', 8) == 0) {
+                $summaryTokens = explode(' ', $line);
+                $summary['time']    = $summaryTokens[1];
+                $summary['mem']     = $summaryTokens[2];
+                $summary['cycles']  = $summaryTokens[3];
+                $summary['peakmem'] = $summaryTokens[4];
+                break;
+            }
+        }
+        return new Data\CallTree($root, $summary);
     }
 
     /*

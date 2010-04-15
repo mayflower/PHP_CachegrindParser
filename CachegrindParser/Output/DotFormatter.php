@@ -21,7 +21,7 @@ class DotFormatter implements Formatter
      */
     public function format($parser)
     {
-        $root = $parser->getCallTree();
+        $root = $parser->getCallTree()->getRoot();
 
         $output  =<<<NOW
 digraph {
