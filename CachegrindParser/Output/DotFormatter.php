@@ -57,6 +57,13 @@ class DotFormatter implements Formatter
         return $output;
     }
 
+    /**
+     * Generates a label for the given node.
+     *
+     * @param CachegrindParser\Data\CallTreeNode $node The node to generate
+     *                                                 a label for.
+     * @return string A label for the given node.
+     */
     private static function label(\CachegrindParser\Data\CallTreeNode $node) {
         $nodeName = htmlentities($node->getFuncname());
         $nodeFile = htmlentities($node->getFilename());
@@ -78,6 +85,12 @@ class DotFormatter implements Formatter
         return $label;
     }
 
+    /**
+     * Generates a color from a Rating between 0 and 1 inclusive.
+     *
+     * @param float $rating The rating.
+     * @return string A colorstring to be used in the dot file.
+     */
     private static function colorFromRating($rating)
     {
         if ($rating < 0.8) {
