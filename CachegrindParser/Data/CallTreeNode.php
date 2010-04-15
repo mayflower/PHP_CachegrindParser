@@ -7,7 +7,6 @@
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
-
 namespace CachegrindParser\Data;
 
 /**
@@ -65,6 +64,20 @@ class CallTreeNode
         assert(!isset($child->parent));
         $this->children[] = $child;
         $child->parent = $this;
+
+        $this->resetInclusiveCostsCache();
+    }
+
+    /*
+     * Resets the inclusive Costs cache.
+     */
+    private function resetInclusiveCostsCache() {
+        if (isset($this->inclusiveCostsCache)) {
+            unset($this->inclusiveCostsCache);
+            if ($this->parent) {
+                $this->parent->resetInclusiveCostsCache();
+            }
+        }
     }
 
     /**
@@ -88,7 +101,7 @@ class CallTreeNode
      */
     public function getInclusiveCosts()
     {
-        if (!$this->inclusiveCostsCache) {
+        if (!isset($this->inclusiveCostsCache)) {
             $inclCosts = $this->costs;
 
             foreach ($this->children as $child) {
@@ -102,6 +115,7 @@ class CallTreeNode
             }
             $this->inclusiveCostsCache = $inclCosts;
         }
+        print_r($this->inclusiveCostsCache);
         return $this->inclusiveCostsCache;
     }
 
