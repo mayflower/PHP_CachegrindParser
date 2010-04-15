@@ -11,7 +11,8 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
     /**
      * Tests if inclusive costs are calculated correctly.
      */
-    public function testInclusiveCosts() {
+    public function testInclusiveCosts()
+    {
         $n1 = new CallTreeNode('file1', 'func1', array(
             'time'    => 2,
             'mem'     => 3,
@@ -52,5 +53,32 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(31, $c['cycles']);
         $this->assertEquals(29, $c['peakmem']);
     }
-}
 
+    /**
+     * Tests if nodes are correctly merged into their parent
+     * if they don't have any children.
+     */
+    public function testMergeIntoParent()
+    {
+        $n1 = new CallTreeNode('file1', 'func1', array(
+            'time'    => 2,
+            'mem'     => 3,
+            'cycles'  => 5,
+            'peakmem' => 7,
+        ));
+        $n2 = new CallTreeNode('file2', 'func2', array(
+            'time'    => 11,
+            'mem'     => 14,
+            'cycles'  => 17,
+            'peakmem' => 19,
+        ));
+        $n1->addChild($n2);
+        $n2->mergeIntoParent();
+
+        $c = $n1->getCosts();
+        $this->assertEquals(13, $c['time']);
+        $this->assertEquals(14, $c['mem']);
+        $this->assertEquals(22, $c['cycles']);
+        $this->assertEquals(19, $c['peakmem']);
+    }
+}

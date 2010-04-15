@@ -115,7 +115,6 @@ class CallTreeNode
             }
             $this->inclusiveCostsCache = $inclCosts;
         }
-        print_r($this->inclusiveCostsCache);
         return $this->inclusiveCostsCache;
     }
 
@@ -159,16 +158,19 @@ class CallTreeNode
     public function mergeIntoParent()
     {
         assert($this->parent); // Make sure we're not the root node.
+        // Confirm that we're our parent's child.
+        assert(in_array($this, $this->parent->children));
 
         $pc = $this->parent->costs;
         $ic = $this->getInclusiveCosts();
-        $pc['time']    = $ic['time'];
-        $pc['cycles']  = $ic['cycles'];
+        $pc['time']   += $ic['time'];
+        $pc['cycles'] += $ic['cycles'];
         $pc['mem']     = max($pc['mem'], $ic['mem']);
         $pc['peakmem'] = max($pc['mem'], $ic['peakmem']);
+        $this->parent->costs = $pc;
 
-        $idx = array_search($parent->children, $this);
-        assert($idx); // Confirm that we're our parent's child.
-        unset($parent->children[$idx]);
+        $idx = array_search($this, $this->parent->children);
+        unset($this->parent->children[$idx]);
+        unset($this->parent);
     }
 }
