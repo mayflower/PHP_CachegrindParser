@@ -27,6 +27,8 @@ class CallTreeNode
     private $children = array();
     private $parent;
 
+    private $costRatings;
+
     /**
      * Creates a new CallTreeNode object with the given values
      *
@@ -116,6 +118,33 @@ class CallTreeNode
             $this->inclusiveCostsCache = $inclCosts;
         }
         return $this->inclusiveCostsCache;
+    }
+
+    /**
+     * Set the cost ratings
+     *
+     * @param array $ratings Array with numbers between 0 and 1 inclusive that
+     *                       indicate how bad the values in the costs array are.
+     *                       1 is the worst, 0 the best possible value.
+     *                       Must contain the same keys as costs.
+     */
+    public function setCostRatings($ratings)
+    {
+        $this->costRatings = $ratings;
+    }
+
+    /**
+     * Retrieves an array containing the ratings for each cost.
+     * Should only be called after the ratings have been set.
+     *
+     * @return array Array with numbers between 0 and 1 inclusive indicating
+     *               how bad the single costs of this node are, with 1 being the
+     *               most worst.
+     */
+    public function getCostRatings()
+    {
+        assert(isset($this->costRatings));
+        return $this->costRatings;
     }
 
     /**

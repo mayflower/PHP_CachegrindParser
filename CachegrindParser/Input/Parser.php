@@ -15,7 +15,7 @@ require_once "CachegrindParser/Data/RawCall.php";
 require_once "CachegrindParser/Data/CallTree.php";
 require_once "CachegrindParser/Data/CallTreeNode.php";
 use \CachegrindParser\Data as Data;
-require_once 'CachegrindParser/Input/NoPhpFilter.php';
+require_once 'CachegrindParser/Input/CostsRating.php';
 
 /**
  * This class converts input to an object representation.

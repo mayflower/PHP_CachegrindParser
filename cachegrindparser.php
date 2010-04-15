@@ -13,6 +13,7 @@ set_include_path(__DIR__ . PATH_SEPARATOR . get_include_path());
 require_once "CachegrindParser/Output/XMLFormatter.php";
 require_once "CachegrindParser/Output/DotFormatter.php";
 require_once "CachegrindParser/Input/Parser.php";
+require_once "CachegrindParser/Input/NoPhpFilter.php";
 
 define("VERSION", "development");
 
