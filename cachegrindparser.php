@@ -23,10 +23,15 @@ $parameters = parseOptions();
 // 2. Create a Parser object
 $parser = new CachegrindParser\Input\Parser($parameters["input"]);
 
-// 3. Format it according to (1)
+// 3. Add the filters
+foreach ($parameters['filters'] as $filter) {
+    $parser->addFilter($filter);
+}
+
+// 4. Format it according to (1)
 $output = $parameters["formatter"]->format($parser);
 
-// 4. Print it to the file given in (1)
+// 5. Print it to the file given in (1)
 //NOTE: Locking might not be neccessary here
 file_put_contents($parameters["output"], $output, LOCK_EX);
 
@@ -50,6 +55,7 @@ function parseOptions()
     $longopts = array(
         "in:",
         "out:",
+        "filter:",
         "format:",
         "help",
         "version"
@@ -84,7 +90,25 @@ function parseOptions()
         break;
     default:
         usageFormatters();
-        exit(1);
+        exit(2);
+    }
+
+    // Check for filters
+    $ret['filters'] = array();
+    if (isset($opts['filter'])) {
+        if (!(gettype($opts['filter']) === 'array')) {
+            $opts['filter'] = array($opts['filter']);
+        }
+        foreach ($opts['filter'] as $name) {
+            switch ($name) {
+            case 'nophp':
+                $ret['filters'][] = new CachegrindParser\Input\NoPhpFilter();
+                break;
+            default:
+                usageFilters();
+                exit(3);
+            }
+        }
     }
 
     $ret["input"] = file_get_contents($opts["in"]);
