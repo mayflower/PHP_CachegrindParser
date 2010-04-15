@@ -1,9 +1,11 @@
 <?php
 
 require_once 'CachegrindParser/Data/CallTreeNode.php';
-require_once 'PHPUnit/Framework.php';
-
 use CachegrindParser\Data\CallTreeNode;
+
+require_once 'Test/TestUtils.php';
+
+require_once 'PHPUnit/Framework.php';
 
 class CallTreeNodeTest extends PHPUnit_Framework_TestCase
 {
@@ -13,30 +15,10 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
      */
     public function testInclusiveCosts()
     {
-        $n1 = new CallTreeNode('file1', 'func1', array(
-            'time'    => 2,
-            'mem'     => 3,
-            'cycles'  => 5,
-            'peakmem' => 7,
-        ));
-        $n2 = new CallTreeNode('file2', 'func2', array(
-            'time'    => 11,
-            'mem'     => 14,
-            'cycles'  => 17,
-            'peakmem' => 19,
-        ));
-        $n3 = new CallTreeNode('file3', 'func3', array(
-            'time'    => 1,
-            'mem'     => 3,
-            'cycles'  => 7,
-            'peakmem' => 29,
-        ));
-        $n4 = new CallTreeNode('file4', 'func4', array(
-            'time'    => 2,
-            'mem'     => 97,
-            'cycles'  => 2,
-            'peakmem' => 3,
-        ));
+        $n1 = new CallTreeNode('file1', 'func1', toCostArray( 2,  3,  5,  7));
+        $n2 = new CallTreeNode('file2', 'func2', toCostArray(11, 14, 17, 19));
+        $n3 = new CallTreeNode('file3', 'func3', toCostArray( 1,  3,  7, 29));
+        $n4 = new CallTreeNode('file4', 'func4', toCostArray( 2, 97,  2,  3));
 
         $n1->addChild($n2);
         $c = $n1->getInclusiveCosts();
@@ -60,18 +42,9 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
      */
     public function testMergeIntoParent()
     {
-        $n1 = new CallTreeNode('file1', 'func1', array(
-            'time'    => 2,
-            'mem'     => 3,
-            'cycles'  => 5,
-            'peakmem' => 7,
-        ));
-        $n2 = new CallTreeNode('file2', 'func2', array(
-            'time'    => 11,
-            'mem'     => 14,
-            'cycles'  => 17,
-            'peakmem' => 19,
-        ));
+        $n1 = new CallTreeNode('file1', 'func1', toCostArray( 2,  3,  5,  7));
+        $n2 = new CallTreeNode('file2', 'func2', toCostArray(11, 14, 17, 19));
+
         $n1->addChild($n2);
         $n2->mergeIntoParent();
 
