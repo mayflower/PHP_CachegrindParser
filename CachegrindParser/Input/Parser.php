@@ -15,6 +15,7 @@ require_once "CachegrindParser/Data/RawCall.php";
 require_once "CachegrindParser/Data/CallTree.php";
 require_once "CachegrindParser/Data/CallTreeNode.php";
 use \CachegrindParser\Data as Data;
+require_once 'CachegrindParser/Input/NoPhpFilter.php';
 
 /**
  * This class converts input to an object representation.
@@ -52,7 +53,7 @@ class Parser
      */
     public function addFilter(Filter $filter)
     {
-        $this->filter[] = $filter;
+        $this->filters[] = $filter;
     }
 
     /**
@@ -160,11 +161,6 @@ class Parser
             }
         }
 
-        // Filter the tree
-        foreach ($this->filters as $filter) {
-            $filter->$filter($root);
-        }
-
         // Find the summary.
         $summary = array();
         foreach (explode("\n", $this->inputData) as $line) {
@@ -177,7 +173,14 @@ class Parser
                 break;
             }
         }
-        return new Data\CallTree($root, $summary);
+
+        $tree = new Data\CallTree($root, $summary);
+
+        foreach ($this->filters as $filter) {
+            $filter->filter($tree);
+        }
+
+        return $tree;
     }
 
     /*

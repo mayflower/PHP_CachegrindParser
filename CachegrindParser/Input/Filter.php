@@ -10,7 +10,7 @@
 
 namespace CachegrindParser\Input;
 
-require_once "Data/CallTree.php";
+require_once "CachegrindParser/Data/CallTree.php";
 
 /**
  * Interface for filters that the parser can use to trim the call tree.
@@ -28,5 +28,5 @@ interface Filter
      *
      * @param CachegrindParser\Data\CallTree The tree to filter.
      */
-    abstract public function filter(\PhpCacheGrindParser\Data\CallTree $param);
+    public function filter(\CacheGrindParser\Data\CallTree &$param);
 }

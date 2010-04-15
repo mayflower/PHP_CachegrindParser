@@ -41,9 +41,6 @@ NOW;
             $parentID = '"' . spl_object_hash($parent) . '"';
 
             foreach ($parent->getChildren() as $child) {
-                if (strcmp($child->getFilename(), 'php:internal') == 0) {
-                    continue;
-                }
                 $childID = '"' . spl_object_hash($child) . '"';
                 array_push($nodeQueue, $child);
                 $childName = htmlentities($child->getFuncname());
