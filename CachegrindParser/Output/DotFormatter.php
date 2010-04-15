@@ -59,7 +59,9 @@ class DotFormatter implements Formatter
 
     private static function label(\CachegrindParser\Data\CallTreeNode $node) {
         $nodeName = htmlentities($node->getFuncname());
+        $nodeFile = htmlentities($node->getFilename());
         $label  = "<<table border='0'>\n";
+        $label .= "<tr><td colspan='2'>$nodeFile</td></tr>";
         $label .= "<tr><td colspan='2'>$nodeName</td></tr>";
         $ratings = $node->getCostRatings();
 

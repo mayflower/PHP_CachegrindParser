@@ -160,6 +160,16 @@ class Parser
             }
         }
 
+        // Combine subtrees
+        $queue = array($root);
+        while ($queue) {
+            $node = array_shift($queue);
+            $node->combineSimilarChildren();
+            foreach ($node->getChildren() as $child) {
+                array_push($queue, $child);
+            }
+        }
+
         // Find the summary.
         $summary = array();
         foreach (explode("\n", $this->inputData) as $line) {

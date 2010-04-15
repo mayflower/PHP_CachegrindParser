@@ -107,13 +107,8 @@ class CallTreeNode
             $inclCosts = $this->costs;
 
             foreach ($this->children as $child) {
-                $childInclCosts = $child->getInclusiveCosts();
-                $inclCosts['time']   += $childInclCosts['time'];
-                $inclCosts['cycles'] += $childInclCosts['cycles'];
-                $inclCosts['mem']     = max($inclCosts['mem'],
-                                            $childInclCosts['mem']);
-                $inclCosts['peakmem'] = max($inclCosts['peakmem'],
-                                            $childInclCosts['peakmem']);
+                $inclCosts = self::combineCostArrays($inclCosts,
+                                    $child->getInclusiveCosts());
             }
             $this->inclusiveCostsCache = $inclCosts;
         }
@@ -190,16 +185,66 @@ class CallTreeNode
         // Confirm that we're our parent's child.
         assert(in_array($this, $this->parent->children));
 
-        $pc = $this->parent->costs;
-        $ic = $this->getInclusiveCosts();
-        $pc['time']   += $ic['time'];
-        $pc['cycles'] += $ic['cycles'];
-        $pc['mem']     = max($pc['mem'], $ic['mem']);
-        $pc['peakmem'] = max($pc['mem'], $ic['peakmem']);
-        $this->parent->costs = $pc;
+        $this->parent->costs = self::combineCostArrays($this->parent->costs,
+                                                   $this->getInclusiveCosts());
 
         $idx = array_search($this, $this->parent->children);
         unset($this->parent->children[$idx]);
         unset($this->parent);
+    }
+
+    /**
+     * Combines similar children.
+     *
+     * Here, similar means that they have the same file and function name.
+     */
+    public function combineSimilarChildren()
+    {
+        for ($i = count($this->children) - 1; $i >= 0; $i--) {
+            $merged = false;
+            $child = $this->children[$i];
+            for ($j = $i - 1; $j >= 0 && $merged == false; $j--) {
+                $candidate = $this->children[$j];
+                if ($candidate->fn === $child->fn &&
+                        $candidate->fl === $child->fl) {
+                    // Merge child into candidate
+                    // Combine:
+                    // -The children
+                    $candidate->children = array_merge($candidate->children,
+                                                       $child->children);
+                    // -The costs
+                    $candidate->costs = self::combineCostArrays($child->costs,
+                                                            $candidate->costs);
+                    // Reset references
+                    unset($this->children[$i]);
+                    unset($child->parent);
+
+                    // and candidate's cache
+                    $candidate->resetInclusiveCostsCache();
+
+                    // Go to the next child
+                    $merged = true;
+                }
+            }
+        }
+        $this->children = array_values($this->children);
+    }
+
+    /*
+     * Combines two costs arrays. Time and cycles will be added, mem
+     * and peakmem will be the max of the two values.
+     *
+     * @param array $a1 The first cost array.
+     * @param array $a2 The second cost array.
+     * @return array A combined cost array.
+     */
+    private static function combineCostArrays($a1, $a2)
+    {
+        return array(
+            'time'    => $a1['time']   + $a2['time'],
+            'cycles'  => $a1['cycles'] + $a2['cycles'],
+            'mem'     => max($a1['mem'], $a2['mem']),
+            'peakmem' => max($a1['mem'], $a2['peakmem']),
+        );
     }
 }
