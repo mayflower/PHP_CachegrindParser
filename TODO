@@ -1,0 +1,18 @@
+Priority
+------------
+* publish on github
+* getCallTree doesn't return a call tree, it returns a calltreenode. fix this and make it work.
+
+Must
+------------
+* External documentation
+* Unit test
+* Check if function names in xml attributes create problems with (de)escaping  and fix it if they do.
+* Add real colors to graphviz output.
+* Remove filtering done Parser or Formatters and write the corresponding filter plugins
+* Move CLI UI away from entry point.
+* Move test data out of the way, ideally use it as an example.
+
+Later/Maybe
+-----------
+* Add and document API interface
