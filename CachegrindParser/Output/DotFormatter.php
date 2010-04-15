@@ -10,6 +10,9 @@
 
 namespace CachegrindParser\Output;
 
+require_once 'CachegrindParser/Input/CostsRating.php';
+use CachegrindParser\Input\CostsRating;
+
 /**
  * This class formats the call tree to the dot format.
  * (Mainly supposed to be used by graphviz' dot program)
@@ -21,7 +24,11 @@ class DotFormatter implements Formatter
      */
     public function format($parser)
     {
-        $root = $parser->getCallTree()->getRoot();
+        $tree = $parser->getCallTree();
+        $rating = new CostsRating();
+        $rating->rateCosts($tree);
+
+        $root = $tree->getRoot();
 
         $output  = "digraph {\nnode [shape=box];\n";
         $output .= "rankfir=LR;\n";
