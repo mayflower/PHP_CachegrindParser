@@ -1,6 +1,5 @@
 Priority
 ------------
-* publish on github
 * getCallTree doesn't return a call tree, it returns a calltreenode. fix this and make it work.
 
 Must
