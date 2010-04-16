@@ -81,8 +81,9 @@ class DotFormatter implements Formatter
     {
         $nodeName = htmlentities($node->getFuncname());
         $nodeFile = htmlentities($node->getFilename());
-        $label  = "<<table border='1'>\n";
-        $label .= "<tr><td>$nodeFile<br/>$nodeName</td></tr>";
+        $label  = "<<table border='0'>\n";
+        $label .= "<tr><td border='1' align='center'>$nodeFile<br/>";
+        $label .= "$nodeName</td></tr>";
 
         $ratings = $node->getCostRatings();
         $costs = $node->getCosts();
@@ -90,13 +91,13 @@ class DotFormatter implements Formatter
         $inclusiveCosts = $node->getInclusiveCosts();
         ksort($inclusiveCosts);
 
-        $label .= '<tr><td><table border=\'2\'>';
-        $label .= '<tr><td colspan="2">Inclusive Costs</td>';
-        $label .= '<td colspan="2">Own Costs</td></tr>\n';
+        $label .= '<tr><td><table border=\'0\'>';
+        $label .= '<tr><td align="right">Inclusive Costs</td><td></td>';
+        $label .= '<td align="left">Own Costs</td></tr>\n';
         foreach ($costs as $n => $v) {
             $label .= '<tr>';
             $label .= "<td align='right'>{$inclusiveCosts[$n]}</td>\n";
-            $label .= "<td colspan='2'>$n</td>\n";
+            $label .= "<td align='center'>$n</td>\n";
             $label .= "<td align='left'>$v</td>\n";
             $label .= "<td fixedsize='true' width='10' height='10' ";
             $label .= "bgcolor='";
