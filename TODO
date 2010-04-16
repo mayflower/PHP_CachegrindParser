@@ -1,8 +1,5 @@
 Priority
 ------------
-- Add call count to xml formatter.
-  It should 1. Use the call tree instead of the Entry list
-            2. Record how often a function was called in the <function>/<method> tags
 
 Must
 ------------
