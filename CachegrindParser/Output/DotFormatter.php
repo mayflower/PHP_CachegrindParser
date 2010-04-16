@@ -25,6 +25,7 @@ class DotFormatter implements Formatter
     public function format($parser)
     {
         $tree = $parser->getCallTree();
+        $tree->combineSimilarSubtrees();
         $rating = new CostsRating();
         $rating->rateCosts($tree);
 

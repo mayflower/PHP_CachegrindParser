@@ -118,7 +118,8 @@ class Parser
     }
 
     /**
-     * Returns the call tree.
+     * Returns the call tree. Subtrees are not automatically combined,
+     * it can be done by calling combineSimilarSubtrees() on the returned tree.
      *
      * Note: If you need both the entry list and the call tree, add caching
      * to the Parser class.
@@ -157,16 +158,6 @@ class Parser
             if ($subcalls != 0) {
                 array_push($parent, $node);
                 array_push($childrenLeft, $subcalls);
-            }
-        }
-
-        // Combine subtrees
-        $queue = array($root);
-        while ($queue) {
-            $node = array_shift($queue);
-            $node->combineSimilarChildren();
-            foreach ($node->getChildren() as $child) {
-                array_push($queue, $child);
             }
         }
 

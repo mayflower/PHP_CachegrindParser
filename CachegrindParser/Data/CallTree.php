@@ -58,4 +58,19 @@ class CallTree
     {
         return $this->summary;
     }
+
+    /**
+     * Compresses all subtrees. Note that you shouldn't add more children
+     * to the tree after calling this.
+     */
+    public function combineSimilarSubtrees() {
+        $queue = array($this->root);
+        while ($queue) {
+            $node = array_shift($queue);
+            $node->combineSimilarChildren();
+            foreach ($node->getChildren() as $child) {
+                array_push($queue, $child);
+            }
+        }
+    }
 }
