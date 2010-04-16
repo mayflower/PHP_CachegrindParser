@@ -18,7 +18,7 @@ namespace CachegrindParser\Data;
  */
 class CallTree
 {
-    private $rootNode;
+    private $root;
     private $summary;
 
     /**
@@ -30,9 +30,9 @@ class CallTree
      *                                            'mem'     => integer 
      *                                            'peakmem' => integer
      */
-    function __construct(CallTreeNode $rootNode, $summary)
+    function __construct(CallTreeNode $root, $summary)
     {
-        $this->rootNode = $rootNode;
+        $this->root     = $root;
         $this->summary  = $summary;
     }
 
@@ -43,7 +43,7 @@ class CallTree
      */
     public function getRoot()
     {
-        return $this->rootNode;
+        return $this->root;
     }
 
     /**
