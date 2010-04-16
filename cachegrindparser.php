@@ -15,6 +15,8 @@ require_once "CachegrindParser/Output/DotFormatter.php";
 require_once "CachegrindParser/Input/Parser.php";
 require_once "CachegrindParser/Input/NoPhpFilter.php";
 require_once "CachegrindParser/Input/IncludeFilter.php";
+require_once "CachegrindParser/Input/DepthFilter.php";
+use CachegrindParser\Input;
 
 define("VERSION", "development");
 
@@ -23,7 +25,7 @@ define("VERSION", "development");
 $parameters = parseOptions();
 
 // 2. Create a Parser object
-$parser = new CachegrindParser\Input\Parser($parameters["input"]);
+$parser = new Input\Parser($parameters["input"]);
 
 // 3. Add the filters
 foreach ($parameters['filters'] as $filter) {
@@ -104,14 +106,22 @@ function parseOptions()
         foreach ($opts['filter'] as $name) {
             switch ($name) {
             case 'nophp':
-                $ret['filters'][] = new CachegrindParser\Input\NoPhpFilter();
+                $ret['filters'][] = new Input\NoPhpFilter();
                 break;
             case 'include':
-                $ret['filters'][] = new CachegrindParser\Input\IncludeFilter();
+                $ret['filters'][] = new Input\IncludeFilter();
+                break;
+            case (strncmp($name, 'depth', 5) == 0):
+                $depth = (integer) substr($name, 5);
+                if ($depth <= 0) {
+                    usageFilters();
+                    exit(3);
+                }
+                $ret['filters'][] = new Input\DepthFilter($depth);
                 break;
             default:
                 usageFilters();
-                exit(3);
+                exit(4);
             }
         }
     }
