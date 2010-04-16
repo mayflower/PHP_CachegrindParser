@@ -32,7 +32,6 @@ class DotFormatter implements Formatter
         $root = $tree->getRoot();
 
         $output  = "digraph {\nnode [shape=box];\n";
-        $output .= "rankfir=LR;\n";
         $output .= '"' . spl_object_hash($root) . '" [label="{root}"];' . "\n";
 
         $nodeQueue = array();
@@ -49,7 +48,8 @@ class DotFormatter implements Formatter
                 // Add the child's node
                 $output .= $childID . ' [label=' . self::label($child) . "];\n";
                 // And the edge
-                $output .= $parentID . '->' . $childID . ";\n";
+                $output .= $parentID . '->' . $childID;
+                $output .= ' [label=' . self::edgeLabel($child) . "];\n";
 
                 array_push($nodeQueue, $child);
             }
@@ -59,28 +59,50 @@ class DotFormatter implements Formatter
     }
 
     /**
+     * Generates a label to put on the edge to the given node.
+     *
+     * @param CachegrindParser\Data\CallTreeNode $node The node.
+     *
+     * @return string The label to put on the edge to $node.
+     */
+    private static function edgeLabel(\CachegrindParser\Data\CallTreeNode $node)
+    {
+        return '"' . $node->getCallCount() . 'x"';
+    }
+
+    /**
      * Generates a label for the given node.
      *
      * @param CachegrindParser\Data\CallTreeNode $node The node to generate
      *                                                 a label for.
      * @return string A label for the given node.
      */
-    private static function label(\CachegrindParser\Data\CallTreeNode $node) {
+    private static function label(\CachegrindParser\Data\CallTreeNode $node)
+    {
         $nodeName = htmlentities($node->getFuncname());
         $nodeFile = htmlentities($node->getFilename());
-        $label  = "<<table border='0'>\n";
-        $label .= "<tr><td colspan='2'>$nodeFile</td></tr>";
-        $label .= "<tr><td colspan='2'>$nodeName</td></tr>";
-        $ratings = $node->getCostRatings();
+        $label  = "<<table border='1'>\n";
+        $label .= "<tr><td>$nodeFile<br/>$nodeName</td></tr>";
 
-        foreach ($node->getCosts() as $n => $v) {
+        $ratings = $node->getCostRatings();
+        $costs = $node->getCosts();
+        ksort($costs);
+        $inclusiveCosts = $node->getInclusiveCosts();
+        ksort($inclusiveCosts);
+
+        $label .= '<tr><td><table border=\'2\'>';
+        $label .= '<tr><td colspan="2">Inclusive Costs</td>';
+        $label .= '<td colspan="2">Own Costs</td></tr>\n';
+        foreach ($costs as $n => $v) {
             $label .= '<tr>';
-            $label .= "<td align='right'>$n:</td>\n";
+            $label .= "<td align='right'>{$inclusiveCosts[$n]}</td>\n";
+            $label .= "<td colspan='2'>$n</td>\n";
             $label .= "<td align='left'>$v</td>\n";
             $label .= "<td fixedsize='true' width='10' height='10' ";
             $label .= "bgcolor='";
             $label .= self::colorFromRating($ratings[$n]) . "'></td>\n</tr>\n";
         }
+        $label .= '</table></td></tr>';
         $label .= '</table>>';
 
         return $label;

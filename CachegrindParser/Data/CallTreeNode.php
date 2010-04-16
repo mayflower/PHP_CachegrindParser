@@ -27,6 +27,9 @@ class CallTreeNode
     private $children = array();
     private $parent;
 
+    /** Tracks with how many siblings this node was combined. */
+    private $count;
+
     private $costRatings;
 
     /**
@@ -44,6 +47,7 @@ class CallTreeNode
         $this->fl = $filename;
         $this->fn = $funcname;
         $this->costs = $costs;
+        $this->count = 1;
     }
 
     /**
@@ -170,7 +174,18 @@ class CallTreeNode
      */
     public function getChildren()
     {
-        return $this->children;
+        // We might have holes in our array
+        return array_values($this->children);
+    }
+
+    /**
+     * Returns the number of subtrees this node represents.
+     *
+     * @return integer The call count of this node.
+     */
+    public function getCallCount()
+    {
+        return $this->count;
     }
 
     /**
@@ -183,7 +198,7 @@ class CallTreeNode
     {
         assert($this->parent); // Make sure we're not the root node.
         // Confirm that we're our parent's child.
-        assert(in_array($this, $this->parent->children));
+        //assert(in_array($this, $this->parent->children));
 
         $this->parent->costs = self::combineCostArrays($this->parent->costs,
                                                    $this->getInclusiveCosts());
@@ -200,6 +215,9 @@ class CallTreeNode
      */
     public function combineSimilarChildren()
     {
+        // re-key our children.
+        $this->children = array_values($this->children);
+
         for ($i = count($this->children) - 1; $i >= 0; $i--) {
             $merged = false;
             $child = $this->children[$i];
@@ -208,13 +226,14 @@ class CallTreeNode
                 if ($candidate->fn === $child->fn &&
                         $candidate->fl === $child->fl) {
                     // Merge child into candidate
-                    // Combine:
-                    // -The children
+                    // Combine the children and the costs.
                     $candidate->children = array_merge($candidate->children,
                                                        $child->children);
-                    // -The costs
                     $candidate->costs = self::combineCostArrays($child->costs,
                                                             $candidate->costs);
+
+                    $candidate->count += $child->count;
+
                     // Reset references
                     unset($this->children[$i]);
                     unset($child->parent);
