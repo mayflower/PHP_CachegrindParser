@@ -16,6 +16,7 @@ require_once "CachegrindParser/Input/Parser.php";
 require_once "CachegrindParser/Input/NoPhpFilter.php";
 require_once "CachegrindParser/Input/IncludeFilter.php";
 require_once "CachegrindParser/Input/DepthFilter.php";
+require_once "CachegrindParser/Input/TimeThresholdFilter.php";
 use CachegrindParser\Input;
 
 define("VERSION", "development");
@@ -119,9 +120,17 @@ function parseOptions()
                 }
                 $ret['filters'][] = new Input\DepthFilter($depth);
                 break;
+            case (strncmp($name, 'timethreshold', 13) == 0):
+               $percentage = (float) substr($name, 13);
+               if ($percentage < 0 || $percentage > 1) {
+                   usageFilters();
+                   exit(3);
+               }
+               $ret['filters'][] = new Input\TimeThresholdFilter($percentage);
+               break;
             default:
                 usageFilters();
-                exit(4);
+                exit(3);
             }
         }
     }
