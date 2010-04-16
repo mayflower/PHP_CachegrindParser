@@ -11,8 +11,8 @@
 namespace CachegrindParser\Output;
 
 require_once "CachegrindParser/Output/Formatter.php";
-require_once "CachegrindParser/Data/RawEntry.php";
-use \CachegrindParser\Data as Data;
+require_once "CachegrindParser/Data/CallTreeNode.php";
+use CachegrindParser\Data\CallTreeNode;
 
 /**
  * Creates an hierarchical xml formatting.
@@ -25,26 +25,40 @@ class XMLFormatter implements Formatter
      */
     public function format($parser)
     {
-        $entrylist = $parser->getEntryList();
+        $tree = $parser->getCallTree();
 
         $root = new \SimpleXMLElement('<costList/>');
-        foreach ($entrylist as $entry) {
-            self::addEntry($root, $entry);
+        // Add the summary
+        foreach ($tree->getSummary() as $name => $value) {
+            $root[$name] = $value;
         }
+
+        // We don't want the root of the tree here.
+        $nodeQueue = $tree->getRoot()->getChildren();
+
+        while($nodeQueue) {
+            $node = array_pop($nodeQueue);
+            self::addCall($root, $node);
+            foreach ($node->getChildren() as $child) {
+                array_push($nodeQueue, $child);
+            }
+        }
+
         return $root->asXML();
     }
 
-    private static function addEntry(\SimpleXMLElement $root,
-                                     Data\RawEntry $entry)
+    /*
+     * Adds the call specified by $node to the costList tree starting with $root
+     *
+     * @param SimpleXMLElement                   $root The root of the xml tree.
+     * @param CachegrindParser\Data\CallTreeNode $node The node to add to $root.
+     */
+    private static function addCall(\SimpleXMLElement $root,
+                                     CallTreeNode $node)
     {
         // Four things to do here:
         // 1. Get or create the file element
-        // 2. Get or create the function/method element
-        // 3. Add the costs.
-        // 4. Get or create the subcall elements including costs.
-
-        // 1. Get or create the file element
-        $file = $entry->getFilename();
+        $file = $node->getFilename();
         $fileElement = $root->xpath("./file[@name=\"$file\"]");
         if ($fileElement) {
             $fileElement = $fileElement[0];
@@ -55,29 +69,39 @@ class XMLFormatter implements Formatter
         
         // 2. Get or create the function/method element
         // Note that $funcElement can be either a <method> or a <function> tag.
-        $func = $entry->getFuncname();
+        $func = $node->getFuncname();
         if (strpos($func, '->')) {
             $funcElement = self::insertMethod($fileElement, $func);
         } else {
             $funcElement = self::insertFunction($fileElement, $func);
         }
 
-        // 3. Add the costs.
-        self::insertCosts($funcElement, $entry->getCosts());
+        // 3. Add a new Call element
+        $callElement = $funcElement->addChild('call');
+        $callElement['id'] = \spl_object_hash($node);
 
-        // 4. Get or create the subcall elements
-        $calledFunctionsElement = $funcElement->calledFunctions;
-        if (!$calledFunctionsElement && $entry->getSubcalls()) {
-            $calledFunctionsElement = $funcElement->addChild('calledFunctions');
+        // 4. Add the costs.
+        $costsElement = $callElement->addChild('ownCosts');
+        foreach ($node->getCosts() as $name => $value) {
+            $costsElement[$name] = $value;
         }
 
-        foreach($entry->getSubcalls() as $call) {
-            $subcallElement = self::insertFunction($calledFunctionsElement,
-                                                   $call->getFuncname());
-            $subcallElement['calls'] += $call->getCalls();
-            // Add the costs.
-            self::insertCosts($subcallElement, $call->getCosts());
+        $inclusiveCostsElement = $callElement->addChild('inclusiveCosts');
+        foreach ($node->getInclusiveCosts() as $name => $value) {
+            $inclusiveCostsElement[$name] = $value;
         }
+
+        // 4. Get or create the called functions elements
+        if ($node->getChildren()) {
+            $calledFunctionsElement = $callElement->addChild('calledFunctions');
+            foreach($node->getChildren() as $child) {
+                $e = $calledFunctionsElement->addChild('function');
+                $e['file'] = $child->getFilename();
+                $e['name'] = $child->getFuncname();
+                $e['id']   = \spl_object_hash($child);
+            }
+        }
+
     }
 
     /*
@@ -121,7 +145,7 @@ class XMLFormatter implements Formatter
      *
      * @param  SimpleXMLElement $parentElement The element to insert the
      *                                         <function> element into.
-     * @param  string           $funcString   String with ClassName->methodName
+     * @param  string           $funcString   Function name
      * @return The <function> element.
      */
     private static function insertFunction(\SimpleXMLElement $parentElement,
@@ -136,16 +160,5 @@ class XMLFormatter implements Formatter
             $funcElement['name'] = $funcName;
         }
         return $funcElement;
-    }
-
-    /*
-     * Inserts the costs into the given element.
-     */
-    private static function insertCosts(\SimpleXMLElement $element, $costs)
-    {
-        $costsElement = $element->costs;
-        foreach ($costs as $name => $value) {
-            $costsElement[$name] += $value;
-        }
     }
 }
