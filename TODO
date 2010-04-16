@@ -8,8 +8,22 @@ Must
 ------------
 * External documentation
 * Unit test
-* Remove filtering from  Parser and Formatters and write the corresponding filter plugins
-* Write meaningful Rating classes and modify the rating->color transformation method so it makes sense.
+* Track minimal and maximal (inclusive) costs and somehow print them.
+    There's a problem with tracking inclusive costs after merging subtrees.
+    If we truly merge the subtrees, there is no way to recalculate minimal and/or
+    maximal inclusive costs after a new child was added to this tree because we don't know what
+    to do with it.
+    Possible Solutions:
+        - Just add the child's inclusive costs to direct and indirect parent's min and
+            max inclusive costs.
+            This might not be true, so it's not really an option.
+        - When merging siblings, keep data about the subtrees.
+            This might complicate all tree operations a lot.
+        - Forbid adding children after compression.
+            This could be done by giving the CallTree a 'finalize' method, which compresses
+            and finalizes the nodes.
+* Write meaningful Rating classes and modify the rating->color transformation method so it
+    makes sense.
 * Move CLI UI away from entry point.
 * Move test data out of the way, ideally use it as an example.
 
