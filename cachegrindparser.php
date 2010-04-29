@@ -37,9 +37,26 @@ foreach ($parameters['filters'] as $filter) {
 // 4. Format it according to (1)
 $output = $parameters["formatter"]->format($parser);
 
-// 5. Print it to the file given in (1)
-//NOTE: Locking might not be neccessary here
-file_put_contents($parameters["output"], $output, LOCK_EX);
+// convert dot to svg
+if ( $parameters["format"] == "svg" ) {
+	$dotFile = tempnam( "/tmp", "cachegrind_" ) . ".dot";
+	file_put_contents( $dotFile, $output, LOCK_EX);
+
+	// call dot (graphviz package)
+	$cmd = "dot -Tsvg -o" . escapeshellarg( $parameters["output"] ) . " " . 
+							escapeshellarg( $dotFile ) . " 2>&1";
+	exec( $cmd, $output );
+	if ( !empty( $output ) )
+		throw new Exception( "Failed executing dot:\n" .
+							 implode( "\n", $output ) );
+
+	@unlink( $dotFile );
+}
+else {
+	// 5. Print it to the file given in (1)
+	//NOTE: Locking might not be neccessary here
+	file_put_contents($parameters["output"], $output, LOCK_EX);
+}
 
 // We're done.
 
@@ -92,12 +109,14 @@ function parseOptions()
         $ret["formatter"] = new CachegrindParser\Output\XMLFormatter();
         break;
     case 'dot':
+    case 'svg':
         $ret["formatter"] = new CachegrindParser\Output\DotFormatter();
         break;
     default:
         usageFormatters();
         exit(2);
     }
+    $ret["format"] = $opts["format"];
     
     // Check for filters
     $ret['filters'] = array();
@@ -136,7 +155,7 @@ function parseOptions()
             }
         }
     }
-
+    
     $ret["input"] = file_get_contents($opts["in"]);
     if (!$ret["input"]) {
         inputError();
@@ -180,10 +199,11 @@ EOT;
 function usage()
 {
 	echo "Error: missing parameters\n";
-	echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> --filter=nophp|include|depth=#|timethreshold=0.## --filter ... --format xml|dot\n\n";
+	echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> --filter=nophp|include|depth=#|timethreshold=0.## --filter ... --format xml|dot|svg\n\n";
 	echo "Optional: --filter\n";
 	echo "Dot to SVG with letter page size: dot -Gsize=11,7 -Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
 	echo "Dot to SVG with screen size: dot -Tsvg -o<file_out> <file_in>\n";
+	echo "Note: SVG export needs the package 'graphviz'\n";
 }
 
 /**
