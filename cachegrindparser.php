@@ -6,6 +6,7 @@
  * PHP version 5
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
+ * @author Thomas Bley <thomas.bley@mayflower.de>
  */
 
 set_include_path(__DIR__ . PATH_SEPARATOR . get_include_path());
@@ -58,9 +59,9 @@ function parseOptions()
     $shortopts .= "h";
     $shortopts .= "v";
     $longopts = array(
-        "in:",
-        "out:",
-        "filter:",
+        "in:",		// required
+        "out:",		// required
+        "filter::", // optional
         "format:",
         "help",
         "version"
@@ -97,7 +98,7 @@ function parseOptions()
         usageFormatters();
         exit(2);
     }
-
+    
     // Check for filters
     $ret['filters'] = array();
     if (isset($opts['filter'])) {
@@ -112,16 +113,16 @@ function parseOptions()
             case 'include':
                 $ret['filters'][] = new Input\IncludeFilter();
                 break;
-            case (strncmp($name, 'depth', 5) == 0):
-                $depth = (integer) substr($name, 5);
+            case (strncmp($name, 'depth=', 6) == 0):
+                $depth = (integer) substr($name, 6);
                 if ($depth <= 0) {
                     usageFilters();
                     exit(3);
                 }
                 $ret['filters'][] = new Input\DepthFilter($depth);
                 break;
-            case (strncmp($name, 'timethreshold', 13) == 0):
-               $percentage = (float) substr($name, 13);
+            case (strncmp($name, 'timethreshold=', 14) == 0):
+               $percentage = (float) substr($name, 14);
                if ($percentage < 0 || $percentage > 1) {
                    usageFilters();
                    exit(3);
@@ -129,6 +130,7 @@ function parseOptions()
                $ret['filters'][] = new Input\TimeThresholdFilter($percentage);
                break;
             default:
+            	echo "Invalid filter: {$name}\n";
                 usageFilters();
                 exit(3);
             }
@@ -157,8 +159,8 @@ function version()
  */
 function usageFormatters()
 {
-    //TODO: write the usage output.
-    echo "Write me.\n";
+	echo "Error: invalid formatter\n";
+	usage();
 }
 
 /**
@@ -177,8 +179,11 @@ EOT;
  */
 function usage()
 {
-    //TODO: Write the usage output.
-    echo "Write me.\n";
+	echo "Error: missing parameters\n";
+	echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> --filter=nophp|include|depth=#|timethreshold=0.## --filter ... --format xml|dot\n\n";
+	echo "Optional: --filter\n";
+	echo "Dot to SVG with letter page size: dot -Gsize=11,7 -Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
+	echo "Dot to SVG with screen size: dot -Tsvg -o<file_out> <file_in>\n";
 }
 
 /**
@@ -186,6 +191,6 @@ function usage()
  */
 function usageFilters()
 {
-    //TODO: write the filters usage output.
-    echo "Write me.\n";
+	echo "Error: invalid filters\n";
+	usage();
 }
