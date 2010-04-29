@@ -21,7 +21,7 @@ Filters:
 - nophp: removes calls to internal PHP functions
 - include: removes calls to include, require, include_once and require_once functions
 - depth=#: removes calls that are more than a few steps away from the root node
-- timethreshold=0.#: removes calls that make up for less than a given percentage of the
+- timethreshold=0.##: removes calls that make up for less than a given percentage of the
                      total time of the tree
 
 Convert Dot to SVG (see http://graphviz.org):
