@@ -203,7 +203,8 @@ class CallTreeNode
         $this->parent->costs = self::combineCostArrays($this->parent->costs,
                                                    $this->getInclusiveCosts());
 
-        $idx = array_search($this, $this->parent->children);
+        // strict: exact match, avoid nested loop error
+        $idx = array_search($this, $this->parent->children, true);
         unset($this->parent->children[$idx]);
         unset($this->parent);
     }
