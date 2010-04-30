@@ -34,3 +34,4 @@ Convert Dot to SVG (see http://graphviz.org):
 
 Requirements:
 - PHP 5.3+
+- Graphviz (SVG export only)
