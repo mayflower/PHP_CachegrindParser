@@ -73,4 +73,38 @@ class CallTree
             }
         }
     }
+    
+    /**
+     * Merge a tree into the current tree
+     * 
+     * @param CallTree $tree
+     */
+    public function combineTrees(CallTree $tree) {
+    	
+    	foreach ( $tree->getRoot()->getChildren() as $key=>$child ) {
+    		$this->getRoot()->mergeChild( $child );
+    	}
+    		
+    	$this->summary = self::combineSummaryArrays( $this->getSummary(), $tree->getSummary() );
+    }
+    
+    
+    /*
+     * Combines two summary arrays. Time and cycles will be added, mem
+     * and peakmem will be the max of the two values.
+     *
+     * @param array $a1 The first cost array.
+     * @param array $a2 The second cost array.
+     * @return array A combined cost array.
+     */
+    public static function combineSummaryArrays($a1, $a2)
+    {
+        return array(
+            'time'    => $a1['time']   + $a2['time'],
+            'cycles'  => $a1['cycles'] + $a2['cycles'],
+            'mem'     => max($a1['mem'], $a2['mem']),
+            'peakmem' => max($a1['peakmem'], $a2['peakmem']),
+        );
+    }
+    
 }
