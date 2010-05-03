@@ -7,6 +7,7 @@
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
+use CachegrindParser\Data;
 namespace CachegrindParser\Data;
 
 /**
@@ -20,6 +21,7 @@ class CallTreeNode
 
     private $fl;
     private $fn;
+    private $path;
 
     private $costs;
     private $inclusiveCostsCache;
@@ -46,6 +48,7 @@ class CallTreeNode
     {
         $this->fl = $filename;
         $this->fn = $funcname;
+        $this->path = $filename .$funcname;  
         $this->costs = $costs;
         $this->count = 1;
     }
@@ -70,8 +73,42 @@ class CallTreeNode
         assert(!isset($child->parent));
         $this->children[] = $child;
         $child->parent = $this;
-
+        if ( strpos( $child->path, $this->path . '//' ) !== 0 )
+        	$child->path = $this->path . '//' . $child->path;
+        
         $this->resetInclusiveCostsCache();
+    }
+    
+    /**
+     * Merges a new child node into the tree.
+     * 
+     * @param PhpCachegrind\Data\CallTreeNode $child The child node to be merged.
+     */
+    public function mergeChild(CallTreeNode $child)
+    {
+    	$candidate = $this->getChildByPath( $child->path );
+    	
+    	if ( $candidate != null ) {
+    		
+    		foreach ($child->children as $subChild) {
+    			$candidate->mergeChild( $subChild );
+    		} 
+            $candidate->costs = self::combineCostArrays($child->costs, $candidate->costs);
+        	$candidate->count += $child->count;
+
+            // Reset references
+            unset($child->parent);
+            unset($child->children);
+
+            // and candidate's cache
+			$candidate->resetInclusiveCostsCache();
+    	}
+  		else {
+  			// Reset references
+  			unset($child->parent);
+
+  			$this->addChild( $child );
+  		}
     }
 
     /*
@@ -165,7 +202,18 @@ class CallTreeNode
     {
         return $this->fn;
     }
+    
+    /**
+     * Returns the name of the node path.
+     *
+     * @return string File name.
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
 
+    
     /**
      * Returns the children of this node.
      *
@@ -176,6 +224,20 @@ class CallTreeNode
     {
         // We might have holes in our array
         return array_values($this->children);
+    }
+
+    /**
+     * Returns the first child that matches the path
+     *
+     * @return Data\CallTreeNode CallTreeNore or null if not found
+     */
+    public function getChildByPath( $path )
+    {
+        foreach ($this->children as $child) {
+        	if ( $child->path == $path )
+        		return $child;
+        }
+        return null;
     }
 
     /**
