@@ -28,6 +28,9 @@ Filters:
 Convert Dot to SVG (see http://graphviz.org):
 - output letter page size:
   dot -Gsize=11,7 -Gratio=compress -Gcenter=true -Tsvg -o<file_out_svg> <file_in_dot>
+
+- output a0 page size:
+  dot -Gsize=66,42 -Gratio=compress -Gcenter=true -Tsvg -o<file_out_svg> <file_in_dot>
   
 - output screen size:
   dot -Tsvg -o<file_out_svg> <file_in_dot>
