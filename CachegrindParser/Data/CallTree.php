@@ -10,17 +10,24 @@
 
 namespace CachegrindParser\Data;
 
+use \CachegrindParser\Input as Input;
+
 /**
  * This class represents a call tree.
  *
  * It stores the tree itself and the information given in the
  * cg file's summary line
+ * Additionally, Filter objects can be added that can be used
+ * to filter the call tree.
  */
 class CallTree
 {
     private $root;
     private $summary;
 
+    /** Stores the filters we will use when parsing. */
+    private $filters = array();
+    
     /**
      * Creates a new CallTreeNode object with the given data.
      *
@@ -87,7 +94,24 @@ class CallTree
     		
     	$this->summary = self::combineSummaryArrays( $this->getSummary(), $tree->getSummary() );
     }
-    
+
+    /**
+     * Filter the tree
+     */
+    public function filterTree() {
+        foreach ($this->filters as $filter)
+            $filter->filter( $this );
+    }
+
+    /**
+     * Adds a filter to the parser.
+     *
+     * @param CachegrindParser\Input\Filter The filter.
+     */
+    public function addFilter(Input\Filter $filter)
+    {
+        $this->filters[] = $filter;
+    }
     
     /*
      * Combines two summary arrays. Time and cycles will be added, mem
