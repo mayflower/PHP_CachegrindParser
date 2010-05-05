@@ -7,7 +7,7 @@
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
  */
-use CachegrindParser\Data;
+
 namespace CachegrindParser\Data;
 
 /**
@@ -26,13 +26,13 @@ class CallTreeNode
     private $costs;
     private $inclusiveCostsCache;
 
-    private $children = array();
-    private $parent;
-
     /** Tracks with how many siblings this node was combined. */
     private $count;
 
     private $costRatings;
+
+    private $children = array();
+    private $parent;
 
     /**
      * Creates a new CallTreeNode object with the given values
@@ -48,7 +48,7 @@ class CallTreeNode
     {
         $this->fl = $filename;
         $this->fn = $funcname;
-        $this->path = $filename .$funcname;  
+        $this->path = $funcname; // without filename, less memory usage
         $this->costs = $costs;
         $this->count = 1;
     }
@@ -95,10 +95,6 @@ class CallTreeNode
     		} 
             $candidate->costs = self::combineCostArrays($child->costs, $candidate->costs);
         	$candidate->count += $child->count;
-
-            // Reset references
-            unset($child->parent);
-            unset($child->children);
 
             // and candidate's cache
 			$candidate->resetInclusiveCostsCache();
