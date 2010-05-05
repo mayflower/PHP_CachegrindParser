@@ -5,8 +5,9 @@ Usage:
 php cachegrindparser.php --in <file_in> --out <file_out>
                          --filter=nophp|include|depth=#|timethreshold=0.#
                          --format xml|dot|svg|png
+                         --quiet
 
-Optional parameters: --filter
+Optional parameters: --filter, --quiet
 
 Multiple filters: --filter=nophp --filter=include ...
 
@@ -24,6 +25,9 @@ Filters:
 - depth=#: removes calls that are more than a few steps away from the root node
 - timethreshold=0.##: removes calls that make up for less than a given percentage of the
                      total time of the tree
+
+Quiet:
+- Don't print out progress information
 
 Convert Dot to SVG (see http://graphviz.org):
 - output letter page size:
