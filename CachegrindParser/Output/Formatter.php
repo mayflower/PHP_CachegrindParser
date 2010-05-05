@@ -18,9 +18,8 @@ interface Formatter
     /**
      * Formats the Data provided by the given parser.
      *
-     * @param CachegrindParser\Input\Parser parser The parser that
-     *                                                will provide the data.
+     * @param CachegrindParser\Data\CallTree CallTree The Tree that will provide the data.
      * @return string The formatted data.
      */
-    public function format($parser);
+    public function format($tree);
 }
