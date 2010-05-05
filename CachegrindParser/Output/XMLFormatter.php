@@ -10,6 +10,8 @@
 
 namespace CachegrindParser\Output;
 
+use CachegrindParser\Data;
+
 require_once "CachegrindParser/Output/Formatter.php";
 require_once "CachegrindParser/Data/CallTreeNode.php";
 use CachegrindParser\Data\CallTreeNode;
@@ -21,12 +23,10 @@ class XMLFormatter implements Formatter
 {
 
     /**
-     * Implements format($parser) declared in interface Formatter.
+     * Implements format($tree) declared in interface Formatter.
      */
-    public function format($parser)
+    public function format($tree)
     {
-        $tree = $parser->getCallTree();
-
         $root = new \SimpleXMLElement('<costList/>');
         // Add the summary
         foreach ($tree->getSummary() as $name => $value) {
@@ -78,8 +78,9 @@ class XMLFormatter implements Formatter
 
         // 3. Add a new Call element
         $callElement = $funcElement->addChild('call');
-        $callElement['id'] = \spl_object_hash($node);
-
+        $callElement['id'] = md5($node->getPath());
+        $callElement['count'] = $node->getCallCount();
+        
         // 4. Add the costs.
         $costsElement = $callElement->addChild('ownCosts');
         foreach ($node->getCosts() as $name => $value) {
@@ -98,7 +99,8 @@ class XMLFormatter implements Formatter
                 $e = $calledFunctionsElement->addChild('function');
                 $e['file'] = $child->getFilename();
                 $e['name'] = $child->getFuncname();
-                $e['id']   = \spl_object_hash($child);
+                $e['id']   = md5($child->getPath());
+                $e['count']   = $child->getCallCount();
             }
         }
 
