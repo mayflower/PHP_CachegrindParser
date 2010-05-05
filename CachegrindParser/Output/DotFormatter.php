@@ -1,6 +1,6 @@
 <?php
 
-/**
+/**lightg
  * This file contains the class CachegrindParser\Output\DotFormatter.
  *
  * PHP version 5
@@ -21,12 +21,10 @@ use CachegrindParser\Input\CostsRating;
 class DotFormatter implements Formatter
 {
     /**
-     * Implements format($parser) as declared in Formatter.
+     * Implements format($tree) as declared in Formatter.
      */
-    public function format($parser)
+    public function format($tree)
     {
-        $tree = $parser->getCallTree();
-        $tree->combineSimilarSubtrees();
         $rating = new CostsRating();
         $rating->rateCosts($tree);
 
@@ -34,8 +32,8 @@ class DotFormatter implements Formatter
     	$rootInclCosts = $root->getInclusiveCosts();
     	$rootTotalTime = $rootInclCosts['time'];
 
-        $output  = "digraph {\nnode [shape=box,style=rounded];\nedge [color=orange];\n";
-        $output .= '"' . spl_object_hash($root) . '" [label="{root}"];' . "\n";
+        $output  = "digraph {\nnode [shape=box,style=rounded,fontname=arial,fontsize=17];\nedge [color=lightgrey];\n";
+        $output .= '"' . md5($root->getPath()) . '" [label="{root}"];' . "\n";
 
         $nodeQueue = array();
         array_push($nodeQueue, $root);
@@ -43,15 +41,15 @@ class DotFormatter implements Formatter
             $parent = array_shift($nodeQueue);
 
             $parentName = '"' . $parent->getFuncname() . '"';
-            $parentID = '"' . spl_object_hash($parent) . '"';
+            $parentID = '"' . md5($parent->getPath()) . '"';
 
             foreach ($parent->getChildren() as $child) {
-                $childID = '"' . spl_object_hash($child) . '"';
+                $childID = '"' . md5($child->getPath()) . '"';
 
     			$childInclCosts = $child->getInclusiveCosts();
     			$childTotalTime = $childInclCosts['time'];
                 
-    			$penWidth = max( 1, ceil(($childTotalTime / $rootTotalTime) * 10)); // thickness of edge
+    			$penWidth = max( 1, ceil(($childTotalTime / $rootTotalTime) * 30)); // thickness of edge
                 
                 // Add the child's node
                 $output .= $childID . ' [label=' . self::label($child) . "];\n";
@@ -93,21 +91,26 @@ class DotFormatter implements Formatter
      */
     private static function label(\CachegrindParser\Data\CallTreeNode $node)
     {
-        $nodeName = htmlentities($node->getFuncname());
-        $nodeFile = htmlentities($node->getFilename());
+    	$nodeName = $node->getFuncname();
+    	$nodeFile = $node->getFilename();
 
-        // Format nodeName #{20}...#{12}
-        if ( strlen( $nodeName ) > 35 )
-        	$nodeName = substr( $nodeName, 0, 20 ) . '...' . substr( $nodeName, -12 );
+        $limit = 40;
         
-        // Format nodeFile ...#{32}
-        if ( strlen( $nodeFile ) > 35 )
-        	$nodeFile = '...' . substr( $nodeFile, -32 );
+        // Format nodeName #{60%}...#{limit - 60% - 3}
+        if ( strlen( $nodeName ) > $limit ) {
+        	$first_length = round($limit * 0.6);
+        	$second_length = $limit - $first_length - 3;
+        	$nodeName = substr( $nodeName, 0, $first_length ) . '...' . substr( $nodeName, -$second_length );
+        }
+        
+        // Format nodeFile ...#{limit - 3}
+        if ( strlen( $nodeFile ) > $limit )
+        	$nodeFile = '...' . substr( $nodeFile, ($limit - 3) * (-1) );
 
         $label  = "<<table border='0'>\n";
-        $label .= "<tr><td border='0' align='center' bgcolor='lightblue'>{$nodeFile}<br/>";
-        $label .= "{$nodeName}</td></tr>";
-
+        $label .= "<tr><td border='0' align='center' bgcolor='#ED7404'>";
+        $label .= "<font color='white'> " . htmlentities( $nodeFile ) . " <br/>" . htmlentities( $nodeName ) . "</font></td></tr>";
+        
         $ratings = $node->getCostRatings();
         $costs = $node->getCosts();
         ksort($costs);
@@ -116,13 +119,13 @@ class DotFormatter implements Formatter
 
         $label .= '<tr><td><table border="0">';
         $label .= '<tr><td align="right">Incl. Costs</td><td></td>';
-        $label .= '<td align="left">Own Costs</td></tr>\n';
+        $label .= '<td align="right">Own Costs</td></tr>\n';
         foreach ($costs as $n => $v) {
         	$bgcolor = self::colorFromRating($ratings[$n]);
         	
             $label .= "<tr>";
             $label .= "<td align='right' bgcolor='{$bgcolor}'>{$inclusiveCosts[$n]}</td>\n";
-            $label .= "<td align='center' bgcolor='{$bgcolor}'>{$n}</td>\n";
+            $label .= "<td align='center' bgcolor='{$bgcolor}'> &nbsp;{$n}&nbsp; </td>\n";
             $label .= "<td align='right' bgcolor='{$bgcolor}'>{$v}</td>\n";
             // $label .= "<td fixedsize='true' width='10' height='10' bgcolor='{$bgcolor}'></td>\n
             $label .= "</tr>\n";
@@ -142,7 +145,7 @@ class DotFormatter implements Formatter
     private static function colorFromRating($rating)
     {
         if ($rating < 0.8) {
-            return 'lightgreen';
+            return 'white';
         } else if ($rating < 0.9) {
             return 'yellow';
         } else {
