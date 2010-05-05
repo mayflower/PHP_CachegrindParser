@@ -22,29 +22,36 @@ use CachegrindParser\Input;
 
 define("VERSION", "development");
 
+ini_set( 'memory_limit', '1024M' );
+
 // We need to do the following:
 // 1. Get the in-/output file and the desired formatting from the command line
 $parameters = parseOptions();
 
-// 2. Create a Parser object
-$parser = new Input\Parser($parameters["input"]);
+// 2. Create a Tree object
+$tree = createTree( $parameters["input"], $parameters["quiet"] );
+
+if ( !$parameters["quiet"] )
+	echo " apply filters";
 
 // 3. Add the filters
 foreach ($parameters['filters'] as $filter) {
-    $parser->addFilter($filter);
+    $tree->addFilter($filter);
 }
+$tree->filterTree();
 
 // 4. Format it according to (1)
-$output = $parameters["formatter"]->format($parser);
+$output = $parameters["formatter"]->format($tree);
 
-// convert dot to svg
-if ( $parameters["format"] == "svg" ) {
+// convert dot to svg or png
+if ( $parameters["format"] == "svg" || $parameters["format"] == "png" ) {
 	$dotFile = tempnam( "/tmp", "cachegrind_" ) . ".dot";
 	file_put_contents( $dotFile, $output, LOCK_EX);
 
 	// call dot (graphviz package)
-	$cmd = "dot -Tsvg -o" . escapeshellarg( $parameters["output"] ) . " " . 
+	$cmd = "dot -T{$parameters["format"]} -o" . escapeshellarg( $parameters["output"] ) . " " . 
 							escapeshellarg( $dotFile ) . " 2>&1";
+	
 	exec( $cmd, $output );
 	if ( !empty( $output ) )
 		throw new Exception( "Failed executing dot:\n" .
@@ -59,6 +66,77 @@ else {
 }
 
 // We're done.
+
+
+/**
+ * Create a tree from a file
+ * 
+ * @param string $file Filename to parse (can be multi part)
+ * @param boolean $quiet true: Don't print out progress information
+ */
+function createTree( $file, $quiet )
+{
+	// maximum limit to parse a part
+	$limit = 10*1024*1024;
+	
+	$numParts = 0;
+	$numLines = 0;
+	$numData = 0;
+	$inputData = '';
+
+	// create empty tree
+	$tree = Input\Parser::getRootTree();
+	
+	if (!($fp = fopen( $file, 'r' )))
+		throw new Exception( 'Unable to read ' . $file );
+
+	$fpFilesize = filesize( $file );
+
+	while ( !feof( $fp ) ) {
+	
+		$line = fgets($fp);
+		$numLines++;
+		$numData += strlen( $numData );
+		$progress = number_format( ( ( $numData / $fpFilesize ) * 100), 2) . '%';
+
+		// check for a new part (boundary match or end of file)
+		if ( strpos($line, '==== NEW PROFILING FILE') === 0 || feof( $fp ) ) {
+			if ( trim($inputData) != '' && strlen($inputData) < $limit ) {
+	
+				if ( !$quiet )
+					echo "## part {$numParts} length ".strlen($inputData)." line {$numLines} progress {$progress}";
+				
+				$parser = new Input\Parser( $inputData );
+				$currTree = $parser->getCallTree();
+				
+				if ( !$quiet )
+					echo " combine similar";
+				$currTree->combineSimilarSubtrees();
+				
+				if ( !$quiet )
+					echo " combine trees";
+				$tree->combineTrees( $currTree );
+
+				if ( !$quiet ) {
+					echo " memory ".memory_get_usage(true);
+					echo " memory peak ".memory_get_peak_usage(true);
+					echo "\n";
+				}
+			}
+			if ( strlen($inputData) > $limit && !$quiet )
+				echo " skip part {$numParts}, too large: length ".strlen($inputData)." line {$numLines} progress {$progress}\n";
+				
+			$inputData = '';
+			$numParts++;
+
+		} else {
+			$inputData .= $line;
+		}
+	}
+	fclose($fp);
+	
+	return $tree;
+}
 
 /**
  * Parses the options.
@@ -79,6 +157,7 @@ function parseOptions()
         "in:",		// required
         "out:",		// required
         "filter::", // optional
+    	"quiet::",  // optional
         "format:",
         "help",
         "version"
@@ -110,7 +189,8 @@ function parseOptions()
         break;
     case 'dot':
     case 'svg':
-        $ret["formatter"] = new CachegrindParser\Output\DotFormatter();
+    case 'png':
+    	$ret["formatter"] = new CachegrindParser\Output\DotFormatter();
         break;
     default:
         usageFormatters();
@@ -156,12 +236,15 @@ function parseOptions()
         }
     }
     
-    $ret["input"] = file_get_contents($opts["in"]);
-    if (!$ret["input"]) {
+    $ret["input"] = $opts["in"];
+    if (!file_exists($ret["input"])) {
         inputError();
+        exit(3);
     }
     $ret["output"] = $opts["out"];
 
+    $ret["quiet"] = isset( $opts["quiet"] ) ? true : false;
+    
     return $ret;
 }
 
@@ -199,8 +282,8 @@ EOT;
 function usage()
 {
 	echo "Error: missing parameters\n";
-	echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> --filter=nophp|include|depth=#|timethreshold=0.## --filter ... --format xml|dot|svg\n\n";
-	echo "Optional: --filter\n";
+	echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> --filter=nophp|include|depth=#|timethreshold=0.## --filter ... --format xml|dot|svg|png --quiet\n\n";
+	echo "Optional: --filter, --quiet\n";
 	echo "Dot to SVG with letter page size: dot -Gsize=11,7 -Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
 	echo "Dot to SVG with screen size: dot -Tsvg -o<file_out> <file_in>\n";
 	echo "Note: SVG export needs the package 'graphviz'\n";
