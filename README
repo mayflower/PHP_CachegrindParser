@@ -4,7 +4,7 @@ PHP_CachegrindParser
 Usage:
 php cachegrindparser.php --in <file_in> --out <file_out>
                          --filter=nophp|include|depth=#|timethreshold=0.#
-                         --format xml|dot|svg
+                         --format xml|dot|svg|png
 
 Optional parameters: --filter
 
@@ -16,7 +16,7 @@ Input file:
 Output file:
 - xml: XML content
 - dot: Graphviz graph, see http://graphviz.org
-- svg: Graphviz graph, saved as SVG (screen size)
+- svg/png: Graphviz graph, saved as SVG / PNG (screen size)
 
 Filters:
 - nophp: removes calls to internal PHP functions
@@ -37,4 +37,4 @@ Convert Dot to SVG (see http://graphviz.org):
 
 Requirements:
 - PHP 5.3+
-- Graphviz (SVG export only)
+- Graphviz (SVG/PNG export only)
