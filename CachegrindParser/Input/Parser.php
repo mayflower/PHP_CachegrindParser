@@ -14,6 +14,7 @@ require_once "CachegrindParser/Data/RawEntry.php";
 require_once "CachegrindParser/Data/RawCall.php";
 require_once "CachegrindParser/Data/CallTree.php";
 require_once "CachegrindParser/Data/CallTreeNode.php";
+
 use \CachegrindParser\Data as Data;
 
 /**
@@ -22,8 +23,6 @@ use \CachegrindParser\Data as Data;
  * For each input, a instance of parser has to be created.
  * It then parses the input when an object representation is
  * requested.
- * Additionally, Filter objects can be added that can be used
- * to filter the call tree.
  *
  * At the moment, it does not do any caching.
  */
@@ -31,9 +30,6 @@ class Parser
 {
     /** Stores the input for later use. */
     private $inputData;
-
-    /** Stores the filters we will use when parsing. */
-    private $filters = array();
 
     /**
      * Creates a new Parser instance.
@@ -46,15 +42,34 @@ class Parser
     }
 
     /**
-     * Adds a filter to the parser.
-     *
-     * @param CachegrindParser\Input\Filter The filter.
+     * Create a root node
      */
-    public function addFilter(Filter $filter)
+    public static function getRoot()
     {
-        $this->filters[] = $filter;
+        $rootCosts = array(
+            'time' => 0,
+            'mem'  => 0,
+            'cycles' => 0,
+            'peakmem' => 0,
+        );
+        $rootEntry = new Data\RawEntry("", "{root}", $rootCosts);
+        return Data\CallTreeNode::fromRawEntry($rootEntry);
     }
-
+    
+    /**
+     * Create a root tree
+     */
+    public static function getRootTree()
+    {
+        $summary = array(
+            'time' => 0,
+            'mem'  => 0,
+            'cycles' => 0,
+            'peakmem' => 0,
+        );
+        return new Data\CallTree(self::getRoot(), $summary);
+    }
+    
     /**
      * Returns the call tree. Subtrees are not automatically combined,
      * it can be done by calling combineSimilarSubtrees() on the returned tree.
@@ -63,24 +78,14 @@ class Parser
      */
     public function getCallTree()
     {
-
         $entries = array_reverse($this->getEntryList());
 
         $parent = array();
         $childrenLeft = array();
-
-        // Add root to the parents stack
-        $rootCosts = array(
-            'time' => 0,
-            'mem'  => 0,
-            'cycles' => 0,
-            'peakmem' => 0,
-        );
-        $rootEntry = new Data\RawEntry("", "{root}", $rootCosts);
-        $root = Data\CallTreeNode::fromRawEntry($rootEntry);
+        $root = self::getRoot();
         array_push($parent, $root);
 
-        foreach($entries as $entry) {
+        foreach($entries as $key=>$entry) {
             $node = Data\CallTreeNode::fromRawEntry($entry);
             end($parent)->addChild($node);
             array_push($childrenLeft, array_pop($childrenLeft) -1);
@@ -94,10 +99,17 @@ class Parser
                 array_push($parent, $node);
                 array_push($childrenLeft, $subcalls);
             }
+            unset($entries[$key]);
         }
-
-        // Find the summary.
-        $summary = array();
+        
+        // Find the summary, default is non empty summary to avoid
+        // division by zero errors in filters
+        $summary = array(
+        	'time' => 1,
+        	'mem' => 1,
+        	'cycles' => 1,
+        	'peakmem' => 1
+        );
         foreach (explode("\n", $this->inputData) as $line) {
             if (strncmp($line, 'summary:', 8) == 0) {
                 $summaryTokens = explode(' ', $line);
@@ -109,15 +121,10 @@ class Parser
             }
         }
 
-        $tree = new Data\CallTree($root, $summary);
-
-        foreach ($this->filters as $filter) {
-            $filter->filter($tree);
-        }
-
-        return $tree;
+        return new Data\CallTree($root, $summary);
     }
 
+    
     /*
      * Generates an array of entries.
      *
@@ -128,7 +135,7 @@ class Parser
      */
     private function getEntryList()
     {
-        $lines = explode("\n", $this->inputData);
+        $lines = explode("\n", trim($this->inputData));
         // This makes our array indices the same as the file's line numbers
         array_unshift($lines, '');
         $curLine = 7; // The first 6 lines are metadata
@@ -139,8 +146,8 @@ class Parser
         while($curLine + 1 < count($lines)) {
             if (strncmp($lines[$curLine], 'fl=', 3) != 0) {
                 // Don't know what to do, panic
-                die("parse error on line $curLine. (Script line: "
-                    . __LINE__ . ")\n");
+                die("parse error on line {$curLine}. (Script line: "
+                    . __LINE__ . ", line: {$lines[$curLine]})\n");
             } else {
                 // Regular block
                 // Strip fl= from file name and fn from funcname.
@@ -159,7 +166,7 @@ class Parser
                 while(strcmp('',$lines[$curLine]) != 0) {
                     if (strncmp('cfn=', $lines[$curLine], 4) != 0) {
                         // This doesn't look like a call, panik
-                        die("parse error on line $curLine. (Script line: "
+                        die("parse error on line {$curLine}. (Current line: {$lines[$curLine]}) (Script line: "
                             . __LINE__ . ")\n");
                     }
 
