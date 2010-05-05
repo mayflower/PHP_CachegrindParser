@@ -1,5 +1,6 @@
 <?php
 
+use CachegrindParser\Data;
 require_once 'CachegrindParser/Data/CallTreeNode.php';
 use CachegrindParser\Data\CallTreeNode;
 
@@ -49,6 +50,29 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(31, $c['cycles']);
         $this->assertEquals(29, $c['peakmem']);
     }
+    
+    /**
+     * Tests if nodes are correctly merged into the parent's children
+     */
+    public function testMergeChild()
+    {
+        $n1 = new CallTreeNode('file1', 'func1', toCostArray( 2,  3,  5,  7));
+        $n2 = new CallTreeNode('file2', 'func2', toCostArray(11, 14, 17, 19));
+        $n1->addChild($n2);
+        
+        $n1b = new CallTreeNode('file1', 'func1', toCostArray( 22,  23,  25,  27));
+        $n2b = new CallTreeNode('file2', 'func2', toCostArray(12, 15, 18, 20));
+        $n1b->addChild($n2b);
+        
+        $n1->mergeChild($n2b);
+
+        $c = $n2->getCosts();
+        $this->assertEquals(23, $c['time']);
+        $this->assertEquals(15, $c['mem']);
+        $this->assertEquals(35, $c['cycles']);
+        $this->assertEquals(20, $c['peakmem']);
+    }
+    
 
     /**
      * Tests if nodes are correctly merged into their parent
