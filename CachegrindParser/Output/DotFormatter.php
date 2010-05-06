@@ -44,7 +44,12 @@ class DotFormatter implements Formatter
             $parentID = '"' . md5($parent->getPath()) . '"';
 
             foreach ($parent->getChildren() as $child) {
-                $childID = '"' . md5($child->getPath()) . '"';
+            	
+            	// Workaround: deleted nodes marked as dropped
+	            if ( $child->getFuncname() == 'dropped' )
+	            	continue;
+	            
+            	$childID = '"' . md5($child->getPath()) . '"';
 
     			$childInclCosts = $child->getInclusiveCosts();
     			$childTotalTime = $childInclCosts['time'];
