@@ -29,18 +29,21 @@ ini_set( 'memory_limit', '1024M' );
 $parameters = parseOptions();
 
 // 2. Create a Tree object
-$tree = createTree( $parameters["input"], $parameters["quiet"] );
+$tree = createTree( $parameters["input"], $parameters["quiet"], $parameters['parts'] );
 
+// 3. Filter the tree
 if ( !$parameters["quiet"] )
 	echo " apply filters";
 
-// 3. Add the filters
 foreach ($parameters['filters'] as $filter) {
-    $tree->addFilter($filter);
+	$tree->addFilter($filter);
 }
 $tree->filterTree();
 
 // 4. Format it according to (1)
+if ( !$parameters["quiet"] )
+	echo " render output";
+
 $output = $parameters["formatter"]->format($tree);
 
 // convert dot to svg or png
@@ -73,8 +76,9 @@ else {
  * 
  * @param string $file Filename to parse (can be multi part)
  * @param boolean $quiet true: Don't print out progress information
+ * @param array $parts 
  */
-function createTree( $file, $quiet )
+function createTree( $file, $quiet, $parts )
 {
 	// maximum limit to parse a part
 	$limit = 10*1024*1024;
@@ -101,7 +105,9 @@ function createTree( $file, $quiet )
 
 		// check for a new part (boundary match or end of file)
 		if ( strpos($line, '==== NEW PROFILING FILE') === 0 || feof( $fp ) ) {
-			if ( trim($inputData) != '' && strlen($inputData) < $limit ) {
+			
+			if ( ( empty( $parts[0] ) || $parts[0] <= $numParts ) &&
+				 trim($inputData) != '' && strlen($inputData) < $limit ) {
 	
 				if ( !$quiet )
 					echo "## part {$numParts} length ".strlen($inputData)." line {$numLines} progress {$progress}";
@@ -111,10 +117,12 @@ function createTree( $file, $quiet )
 				
 				if ( !$quiet )
 					echo " combine similar";
+					
 				$currTree->combineSimilarSubtrees();
 				
 				if ( !$quiet )
 					echo " combine trees";
+					
 				$tree->combineTrees( $currTree );
 
 				if ( !$quiet ) {
@@ -124,11 +132,14 @@ function createTree( $file, $quiet )
 				}
 			}
 			if ( strlen($inputData) > $limit && !$quiet )
-				echo " skip part {$numParts}, too large: length ".strlen($inputData)." line {$numLines} progress {$progress}\n";
-				
+				echo "-- skip part {$numParts}, too large: length ".strlen($inputData)." line {$numLines} progress {$progress}\n";
+
+			if ( !empty( $parts[1] ) && $parts[1] <= $numParts )
+				break;
+
 			$inputData = '';
 			$numParts++;
-
+			
 		} else {
 			$inputData .= $line;
 		}
@@ -154,12 +165,13 @@ function parseOptions()
     $shortopts .= "h";
     $shortopts .= "v";
     $longopts = array(
-        "in:",		// required
-        "out:",		// required
-        "filter::", // optional
-    	"quiet::",  // optional
-        "format:",
-        "help",
+        "in:",		// required, input file
+        "out:",		// required, output file
+        "format:",  // required, output format
+        "filter::", // optional, input tree filter
+	    "parts::",  // optional, extract only some parts
+	    "quiet",	// optional, don't output additional information
+    	"help",
         "version"
     );
     // get them
@@ -242,7 +254,11 @@ function parseOptions()
         exit(3);
     }
     $ret["output"] = $opts["out"];
+    
+    // only extract some parts of the file
+    $ret["parts"] = isset( $opts["parts"] ) ? explode( ',', $opts["parts"] ) : array();
 
+    // don't display additional information
     $ret["quiet"] = isset( $opts["quiet"] ) ? true : false;
     
     return $ret;
@@ -282,8 +298,8 @@ EOT;
 function usage()
 {
 	echo "Error: missing parameters\n";
-	echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> --filter=nophp|include|depth=#|timethreshold=0.## --filter ... --format xml|dot|svg|png --quiet\n\n";
-	echo "Optional: --filter, --quiet\n";
+	echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> --filter=nophp|include|depth=#|timethreshold=0.## --filter ... --format xml|dot|svg|png --parts=#,# --quiet\n\n";
+	echo "Optional: --filter, --parts, --quiet\n";
 	echo "Dot to SVG with letter page size: dot -Gsize=11,7 -Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
 	echo "Dot to SVG with screen size: dot -Tsvg -o<file_out> <file_in>\n";
 	echo "Note: SVG export needs the package 'graphviz'\n";
