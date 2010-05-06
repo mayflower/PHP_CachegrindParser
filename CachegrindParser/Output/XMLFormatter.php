@@ -38,6 +38,9 @@ class XMLFormatter implements Formatter
 
         while($nodeQueue) {
             $node = array_pop($nodeQueue);
+	        if ( $node->getFuncname() == 'dropped' )
+	            continue;
+
             self::addCall($root, $node);
             foreach ($node->getChildren() as $child) {
                 array_push($nodeQueue, $child);
@@ -96,7 +99,11 @@ class XMLFormatter implements Formatter
         if ($node->getChildren()) {
             $calledFunctionsElement = $callElement->addChild('calledFunctions');
             foreach($node->getChildren() as $child) {
-                $e = $calledFunctionsElement->addChild('function');
+            	
+		        if ( $child->getFuncname() == 'dropped' )
+		            continue;
+            	
+	            $e = $calledFunctionsElement->addChild('function');
                 $e['file'] = $child->getFilename();
                 $e['name'] = $child->getFuncname();
                 $e['id']   = md5($child->getPath());
