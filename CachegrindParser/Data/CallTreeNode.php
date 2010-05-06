@@ -48,7 +48,7 @@ class CallTreeNode
     {
         $this->fl = $filename;
         $this->fn = $funcname;
-        $this->path = $funcname; // without filename, less memory usage
+        $this->path = basename($filename) . $funcname; // without filename, less memory usage
         $this->costs = $costs;
         $this->count = 1;
     }
@@ -261,8 +261,12 @@ class CallTreeNode
         $this->parent->costs = self::combineCostArrays($this->parent->costs,
                                                    $this->getInclusiveCosts());
 
+        // mark deleted node as dropped (unset does not always work ...)
+        $this->fn = 'dropped';
+
         // strict: exact match, avoid nested loop error
         $idx = array_search($this, $this->parent->children, true);
+        
         unset($this->parent->children[$idx]);
         unset($this->parent);
     }
