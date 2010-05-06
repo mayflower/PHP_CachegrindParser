@@ -5,9 +5,10 @@ Usage:
 php cachegrindparser.php --in <file_in> --out <file_out>
                          --filter=nophp|include|depth=#|timethreshold=0.#
                          --format xml|dot|svg|png
+                         --parts=#,#
                          --quiet
 
-Optional parameters: --filter, --quiet
+Optional parameters: --filter, --parts, --quiet
 
 Multiple filters: --filter=nophp --filter=include ...
 
@@ -19,14 +20,19 @@ Output file:
 - dot: Graphviz graph, see http://graphviz.org
 - svg/png: Graphviz graph, saved as SVG / PNG (screen size)
 
-Filters:
+Filters (optional):
 - nophp: removes calls to internal PHP functions
 - include: removes calls to include, require, include_once and require_once functions
 - depth=#: removes calls that are more than a few steps away from the root node
 - timethreshold=0.##: removes calls that make up for less than a given percentage of the
                      total time of the tree
 
-Quiet:
+Parts (optional):
+- extract only a range of parts from a multipart input file
+- syntax: #first,#last
+- example: 1,10 or 5,15
+
+Quiet (optional):
 - Don't print out progress information
 
 Convert Dot to SVG (see http://graphviz.org):
