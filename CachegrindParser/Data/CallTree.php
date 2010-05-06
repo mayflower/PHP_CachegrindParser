@@ -22,8 +22,8 @@ use \CachegrindParser\Input as Input;
  */
 class CallTree
 {
-    private $root;
     private $summary;
+	private $root;
 
     /** Stores the filters we will use when parsing. */
     private $filters = array();
