@@ -6,9 +6,11 @@ php cachegrindparser.php --in <file_in> --out <file_out>
                          --filter=nophp|include|depth=#|timethreshold=0.#
                          --format xml|dot|svg|png
                          --parts=#,#
+                         --exclude=<strings>
+                         --include=<strings>
                          --quiet
 
-Optional parameters: --filter, --parts, --quiet
+Optional parameters: --filter, --parts, --exclude, --include, --quiet
 
 Multiple filters: --filter=nophp --filter=include ...
 
@@ -31,6 +33,16 @@ Parts (optional):
 - extract only a range of parts from a multipart input file
 - syntax: #first,#last
 - example: 1,10 or 5,15
+
+Exclude (optional):
+- skip a part of a multi-part input file by matching a substring inside the part (e.g. function or filename)
+- useful to exclude AJAX background requests (e.g. notifications)
+- example: --exclude=myAjaxBackgroundFunction,myAjaxNotifyFunction
+
+Include (optional):
+- include only parts of a multi-part input file by matching a substring inside the part (e.g. function or filename)
+- useful to analyze new functions and classes
+- example: --include=myNewFunction,myNewClass
 
 Quiet (optional):
 - Don't print out progress information
