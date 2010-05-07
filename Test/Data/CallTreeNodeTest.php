@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file tests the class CachegrindParser\Data\CallTreeNode.
+ *
+ * PHP version 5
+ *
+ * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
+ * @author Thomas Bley <thomas.bley@mayflower.de>
+ */
+
 use CachegrindParser\Data;
 require_once 'CachegrindParser/Data/CallTreeNode.php';
 use CachegrindParser\Data\CallTreeNode;

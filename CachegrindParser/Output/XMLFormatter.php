@@ -6,6 +6,7 @@
  * PHP version 5
  *
  * @author Kevin-Simon Kohlmeyer <simon.kohlmeyer@googlemail.com>
+ * @author Thomas Bley <thomas.bley@mayflower.de>
  */
 
 namespace CachegrindParser\Output;
