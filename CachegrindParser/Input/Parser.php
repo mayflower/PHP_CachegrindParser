@@ -11,12 +11,12 @@
 
 namespace CachegrindParser\Input;
 
+use CachegrindParser\Data;
+
 require_once "CachegrindParser/Data/RawEntry.php";
 require_once "CachegrindParser/Data/RawCall.php";
 require_once "CachegrindParser/Data/CallTree.php";
 require_once "CachegrindParser/Data/CallTreeNode.php";
-
-use \CachegrindParser\Data as Data;
 
 /**
  * This class converts input to an object representation.
@@ -31,7 +31,7 @@ class Parser
 {
     /** Stores the input for later use. */
     private $inputData;
-
+    
     /**
      * Creates a new Parser instance.
      *
@@ -95,7 +95,7 @@ class Parser
                 array_pop($parent);
                 array_pop($childrenLeft);
             }
-            $subcalls = count($entry->getSubcalls());
+            $subcalls = $entry->getSubcalls();
             if ($subcalls != 0) {
                 array_push($parent, $node);
                 array_push($childrenLeft, $subcalls);
@@ -137,10 +137,10 @@ class Parser
     private function getEntryList()
     {
         $lines = explode("\n", trim($this->inputData));
-        // This makes our array indices the same as the file's line numbers
+        
+    	// This makes our array indices the same as the file's line numbers
         array_unshift($lines, '');
         $curLine = 7; // The first 6 lines are metadata
-
         $entries = array(); // Here we'll store the generated entries.
 
         //TODO: More input validation here
@@ -154,7 +154,7 @@ class Parser
                 // Strip fl= from file name and fn from funcname.
                 $fl = substr($lines[$curLine], 3);
                 $fn = substr($lines[$curLine + 1], 3);
-                if (strcmp($fn, '{main}') == 0) {
+                if (strncmp($fn, '{main}', 6) == 0) {
                     $costs = self::parseCostLine($lines[$curLine + 5]);
                     $curLine += 6;
                 } else {
@@ -162,25 +162,23 @@ class Parser
                     $curLine += 3;
                 }
                 $entry = new Data\RawEntry($fl, $fn, $costs);
+                $subCalls = 0;
 
                 // Now check for subcalls
-                while(strcmp('',$lines[$curLine]) != 0) {
+                while($lines[$curLine] != '') {
                     if (strncmp('cfn=', $lines[$curLine], 4) != 0) {
                         // This doesn't look like a call, panik
                         die("parse error on line {$curLine}. (Current line: {$lines[$curLine]}) (Script line: "
                             . __LINE__ . ")\n");
                     }
-
-                    $calleeName = substr($lines[$curLine], 4);
-                    $callData = self::parseCallLine($lines[$curLine + 1]);
-                    $costs = self::parseCostLine($lines[$curLine + 2]);
-                    $call = new Data\RawCall($calleeName, $callData, $costs);
-
-                    $entry->addCall($call);
+                    // $calleeName = substr($lines[$curLine], 4);
+                	$entry->addCall( self::parseCallLine($lines[$curLine + 1]) );
                     $curLine += 3;
+                    $subCalls++;
                 }
+
                 // Add this entry to the list.
-                $entries[] = $entry;
+               	$entries[] = $entry;
             }
             // Skip empty line between blocks
             $curLine += 1;
@@ -196,9 +194,7 @@ class Parser
     private static function parseCallLine($line)
     {
         $words = explode(' ', $line);
-        return array(
-            'calls' => (int) substr($words[0], 6),
-        );
+        return (int)substr($words[0], 6);
     }
 
     /*
