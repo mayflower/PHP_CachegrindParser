@@ -21,7 +21,7 @@ class RawEntry
 
     private $costs;
 
-    private $subcalls = array();
+    private $subcalls = 0;
 
     /**
      * Creates a new RawEntry object with the given values.
@@ -43,14 +43,15 @@ class RawEntry
 
     /**
      * Add a subcall to this entry.
-     *
-     * @param PhpCacheGrindParser\Data\RawCall $call The call to add.
+     * 
+     * @param int $count Number of subCalls
      */
-    public function addCall(RawCall $call)
+    public function addCall( $count )
     {
-        $this->subcalls[] = $call;
+       	$this->subcalls += $count;
     }
 
+    
     /**
      * Returns the filename of this function.
      *
@@ -87,7 +88,7 @@ class RawEntry
     /**
      * Returns all calls made by this entry.
      *
-     * @return array Array with RawCall objects.
+     * @return int Int with number of subCalls.
      */
     public function getSubcalls()
     {
