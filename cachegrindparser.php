@@ -22,7 +22,7 @@ use CachegrindParser\Input;
 
 define("VERSION", "development");
 
-ini_set( 'memory_limit', '1024M' );
+ini_set( 'memory_limit', '1524M' );
 
 // We need to do the following:
 // 1. Get the in-/output file and the desired formatting from the command line
@@ -82,8 +82,8 @@ else {
  */
 function createTree( $file, $quiet, $parts, $excludes, $includes )
 {
-	// maximum limit to parse a part
-	$limit = 10*1024*1024;
+	// maximum limit to parse a part, 64M
+	$limit = 64*1048576;
 	
 	$numParts = 0;
 	$numLines = 0;
@@ -102,18 +102,23 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
 	
 		$line = fgets($fp);
 		$numLines++;
-		$numData += strlen( $numData );
+		$numData += strlen( $line );
 		$progress = number_format( ( ( $numData / $fpFilesize ) * 100), 2) . '%';
 
 		// check for a new part (boundary match or end of file)
 		if ( strpos($line, '==== NEW PROFILING FILE') === 0 || feof( $fp ) ) {
-			
+
+			// empty part
+			if ( strlen($inputData) < 100 ) {
+				$inputData = '';
+				continue;
+			}
 			$numParts++;
 			
 			// min. / max. parts
 			if ( !empty( $parts[0] ) && $parts[0] > $numParts ) {
 				if ( !$quiet )
-					echo "-- skip part {$numParts}, parts range, progress {$progress}\n";
+					echo "-- skip part {$numParts}, parts range, read progress {$progress}\n";
 
 				$inputData = '';
 				continue;
@@ -123,7 +128,7 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
 			
 			if ( strlen($inputData) > $limit ) {
 				if ( !$quiet )
-					echo "-- skip part {$numParts}, too large: length ".strlen($inputData)." line {$numLines} progress {$progress}\n";
+					echo "-- skip part {$numParts}, too large: length ".strlen($inputData)." line {$numLines} read progress {$progress}\n";
 
 				$inputData = '';
 				continue;
@@ -135,7 +140,7 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
 			$regexp = implode( '|', $excludes );
 			if ( !empty( $regexp ) && preg_match( "!{$regexp}!", $inputData ) ) {
 				if ( !$quiet )
-					echo "-- skip part {$numParts}, match exclusion, progress {$progress}\n";
+					echo "-- skip part {$numParts}, match exclusion, read progress {$progress}\n";
 				
 				$inputData = '';
 				continue;
@@ -147,7 +152,7 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
 			$regexp = implode( '|', $includes );
 			if ( !empty( $regexp ) && preg_match( "!{$regexp}!", $inputData ) ) {
 				if ( !$quiet )
-					echo "-- skip part {$numParts}, match exclusion, progress {$progress}\n";
+					echo "-- skip part {$numParts}, match exclusion, read progress {$progress}\n";
 				
 				$inputData = '';
 				continue;
@@ -157,15 +162,17 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
 			if ( trim($inputData) != '' ) {
 	
 				if ( !$quiet )
-					echo "## part {$numParts} length ".strlen($inputData)." line {$numLines} progress {$progress}";
+					echo "## part {$numParts} length ".strlen($inputData)." line {$numLines} read progress {$progress}";
 				
 				$parser = new Input\Parser( $inputData );
 				$currTree = $parser->getCallTree();
 				
-				if ( !$quiet )
-					echo " combine similar";
-					
-				$currTree->combineSimilarSubtrees();
+				if ( strlen($inputData) < 10 * 1048576 ) {
+					if ( !$quiet )
+						echo " combine similar";
+
+					$currTree->combineSimilarSubtrees();
+				}
 				
 				if ( !$quiet )
 					echo " combine trees";
