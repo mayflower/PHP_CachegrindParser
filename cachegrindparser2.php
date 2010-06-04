@@ -10,13 +10,14 @@
  * PHP version 5
  *
  * @author Thomas Bley <thomas.bley@mayflower.de>
+ * @version 2.0
  */
 
 error_reporting(E_ALL);
 
 set_include_path(basename(__FILE__) . PATH_SEPARATOR . get_include_path());
 
-define("VERSION", "development");
+define('VERSION', '2.0');
 
 ini_set( 'memory_limit', '32M' );
 
