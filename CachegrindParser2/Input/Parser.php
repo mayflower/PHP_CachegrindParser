@@ -9,6 +9,9 @@
 
 /**
  * This class creates a tree in the database from a cachegrind file
+ *
+ * For an easy example of a cachegrind profile output and the corresponding
+ * php file, see ./Examples/example.*
  */
 class CachegrindParser2_Input_Parser
 {
@@ -70,6 +73,7 @@ class CachegrindParser2_Input_Parser
 		if (!$this->_quiet)
 			echo 'get summaries';
 
+		// get "summary: *" aggregated
 		$rootCosts = $this->_getSummaries();
 
 		if (!($fp = fopen($this->_file, 'r')))
@@ -83,10 +87,11 @@ class CachegrindParser2_Input_Parser
 
 		$pos = 0;
 		$part = 0;
+		$request = '';
 
 		$dataAmount = filesize($this->_file);
 
-		// read file backwards
+		// read file backwards (!)
 		while ($pos < $dataAmount) {
 			$pos += $bufferLength;
 
@@ -102,7 +107,8 @@ class CachegrindParser2_Input_Parser
 
 			// split into blocks, append uncomplete block
 			$buffer = explode("\n\n", $data . $bufferFirstLine);
-			$bufferFirstLine = array_shift($buffer);
+			if ($pos < $dataAmount)
+				$bufferFirstLine = array_shift($buffer);
 
 			if (!$this->_quiet)
 				echo ' '.round($pos/1048576,2);
@@ -112,31 +118,34 @@ class CachegrindParser2_Input_Parser
 				if ($block == '')
 					continue;
 
-				if (strncmp('fl=', $block, 3) != 0 && !is_numeric($block[0])) { // Syntax: fl=<filename> or # # # #
+				// Syntax: fl=<filename> or # # # # or ==== NEW PROFILING FILE
+				if (strncmp('fl=', $block, 3) != 0 && !is_numeric($block[0])) {
 
-					if (strncmp('====', $block, 4) == 0) // Syntax: ==== NEW PROFILING FILE
+					if (strncmp('====', $block, 4) == 0) {
+						$this->_db->exec("UPDATE node SET request='{$request}' WHERE part='{$part}' AND request IS NULL");
 						$part++;
-
+					}
 					continue;
 				}
 
 				$recordNode = array();
 
-				$pattern = '/^fl=(.*?)\nfn=(.*?)\n(\d+) /';
+				// root node: has no id or subcount-data in current block
+				$pattern = '/^fl=(.*?)\nfn=(.*?)\n(\d+) |^fl=(.*?)\n/';
 				preg_match($pattern, $block, $func);
 
-				if (empty($func[1])) { // root
+				if (empty($func[2])) { // root
 					$recordNode['id'] 				= 0;
 					$recordNode['function_name'] 	= '{main}';
-					$recordNode['filename'] 		= ''; // TODO add filename
+					$recordNode['filename'] 		= '';
 					$recordNode['path'] 			= '{main}';
 					$recordNode['part'] 			= $part;
 					$recordNode['count'] 			= 1;
 
-					// TODO check again
-					if (strpos($block, '{main}'))
+					if (!empty($func[4]) && strpos($block,'{main}')) { // set the request filename
+						$request = basename($func[4]);
 						continue;
-
+					}
 				} else {
 					$recordNode['filename'] 		= $func[1];
 					$recordNode['function_name'] 	= $func[2];
@@ -148,17 +157,21 @@ class CachegrindParser2_Input_Parser
 					$id = $recordNode['id'];
 					$funcName = $recordNode['function_name'];
 
+					// parent node from stack by id+name or by name (ID can be 0 in some cases!)
 					if (isset($subCallRefs[$id . $funcName]))
 						$recordNode['path'] = $subCallRefs[$id . $funcName];
+
 					elseif (isset($subCallRefs[$funcName]))
 						$recordNode['path'] = $subCallRefs[$funcName];
 
+					// add call count
 					if (isset($subCallCounts[$funcName])) {
 						$recordNode['count'] = $subCallCounts[$funcName];
 						unset($subCallCounts[$funcName]);
 					}
 				}
 
+				// sum up costs: self + sub-calls
 				$pattern = '/^\d+ (\d+) -?(\d+) (\d+) (\d+)$/m';
 				preg_match_all($pattern, $block, $costs, PREG_SET_ORDER);
 
@@ -181,13 +194,11 @@ class CachegrindParser2_Input_Parser
 					}
 				}
 
-				/* TODO fix
-				if (empty($recordNode['cost_time'])) {
-					print_r($block);
-					exit;
-				}
-				*/
+				// Workaround: corrupt file format
+				if (empty($recordNode['cost_time']))
+					$recordNode['cost_time'] = 0;
 
+				// Drop out unneeded nodes
 				if ($this->_filter($recordNode['function_name'], $rootCosts, $recordNode, $recordNode['path']))
 					continue;
 
@@ -199,6 +210,7 @@ class CachegrindParser2_Input_Parser
 				$this->_db->exec("INSERT INTO node ({$fields}) VALUES({$values})");
 
 
+				// process subcalls
 				$pattern = "/cfn=(.+?)\n"
 						 . "calls=(\d+) \d+ \d+\n"
 						 . "(\d+) /";
@@ -216,6 +228,7 @@ class CachegrindParser2_Input_Parser
 						if ($this->_filter($funcName, $rootCosts, array(), $path))
 							continue;
 
+						// add subcalls to stack by id+name or name (ID can be 0 in some cases!)
 						$subCallRefs[$id . $funcName] = $path;
 						$subCallRefs[$funcName] = $path;
 
@@ -243,7 +256,7 @@ class CachegrindParser2_Input_Parser
 	 */
 	private function _filter($functionName, $rootCosts, $recordNode, $path) {
 
-		$depth = substr_count($path, '##');
+		// $depth = substr_count($path, '##');
 
 		if (strncmp('php::', $functionName, 5) == 0
 			&& $functionName != 'php::call_user_func'
@@ -270,7 +283,6 @@ class CachegrindParser2_Input_Parser
 	 */
 	private function _getSummaries()
 	{
-		// grep all summaries first
 		$rootCosts = array(
 			'cost_time' => 0,
 			'cost_cycles' => 0,
