@@ -31,7 +31,7 @@ $parameters = $parameters->getParameters();
 
 
 // 2. Initialize database
-$db = new PDO('sqlite:c:/temp/database.sqlite');
+$db = new PDO('sqlite:database.sqlite');
 initDatabase($db);
 
 
@@ -68,6 +68,7 @@ function initDatabase($db)
 
 	$db->exec("CREATE TABLE node (
 		part int,
+		request varchar,
 		filename varchar,
 		function_name varchar,
 		count int,
