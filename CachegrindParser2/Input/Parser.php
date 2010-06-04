@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This file contains the class CachegrindParser\Input\Parser.
  *
@@ -9,29 +8,45 @@
  */
 
 /**
- * This class converts input to an object representation.
- *
- * For each input, a instance of parser has to be created.
- * It then parses the input when an object representation is
- * requested.
+ * This class creates a tree in the database from a cachegrind file
  */
 class CachegrindParser2_Input_Parser
 {
+	/**
+	 * input file
+	 * @var string
+	 */
 	private $_file = '';
 
 
+	/**
+	 * dont output debug/progress information
+	 * @var boolean
+	 */
 	private $_quiet = false;
 
 
+	/**
+	 * Percentage of total cost_time to drop a node
+	 * @var float
+	 */
 	private $_timethreshold = 0;
 
 
+	/**
+	 * database handle (PDO)
+	 * @var object
+	 */
 	private $_db = null;
 
 
 	/**
+	 * Constructor for CachegrindParser2_Input_Parser
 	 *
 	 * @param string $file Filename to parse
+	 * @param object $db Database handle (PDO)
+	 * @param float $timethreshold Percentage of total cost_time to drop a node
+	 * @param boolean $quiet dont output debug/progress information
 	 */
 	public function __construct($file, $db, $timethreshold = 0, $quiet = false)
 	{
@@ -42,23 +57,15 @@ class CachegrindParser2_Input_Parser
 		$this->_db 				= $db;
 		$this->_quiet 			= $quiet;
 		$this->_timethreshold 	= $timethreshold;
-
-		$this->_db->beginTransaction();
-	}
-
-
-	public function __destruct()
-	{
-		$this->_db->commit();
 	}
 
 
 	/**
-	 * Create a tree from a file in the database
+	 * Create a tree in the database from a cachegrind file
 	 */
 	public function createTree()
 	{
-		// TODO split function
+		$this->_db->beginTransaction();
 
 		if (!$this->_quiet)
 			echo 'get summaries';
@@ -221,12 +228,17 @@ class CachegrindParser2_Input_Parser
 			}
 		}
 		fclose($fp);
+		$this->_db->commit();
 	}
 
 
 	/**
-	 * Checks if a node can be filtered
+	 * Checks if a node can be filtered (removed from the tree)
 	 *
+	 * @param string $functionName Function name
+	 * @param array $rootCosts Array(Keys: cost_time)
+	 * @param array $recordNode Array(Keys: cost_time)
+	 * @param string $path Node path
 	 * @return boolean $functionName true = exclude, false = include
 	 */
 	private function _filter($functionName, $rootCosts, $recordNode, $path) {
