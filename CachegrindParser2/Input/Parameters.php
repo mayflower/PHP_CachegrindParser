@@ -125,8 +125,8 @@ class CachegrindParser2_Input_Parameters
 	 */
 	private function _usage()
 	{
-		echo "Usage: php cachegrindparser2.php --in <file_in> --out <file_out> --timethreshold=0.## --format xml|dot|svg|png --quiet\n\n";
-		echo "Optional: --timethreshold --quiet\n";
+		echo "Usage: php cachegrindparser2.php --in <file_in> --out <file_out> --format xml|dot|svg|png\n\n";
+		echo "Optional: --timethreshold=0.## --quiet\n";
 		echo "Dot to SVG with letter page size: dot -Gsize=11,7 -Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
 		echo "Dot to SVG with screen size: dot -Tsvg -o<file_out> <file_in>\n";
 		echo "Note: SVG export needs the package 'graphviz'\n";
