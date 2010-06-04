@@ -5,6 +5,7 @@
  * PHP version 5
  *
  * @author Thomas Bley <thomas.bley@mayflower.de>
+ * @version 2.0
  */
 
 /**
