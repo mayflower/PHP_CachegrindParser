@@ -113,10 +113,9 @@ class CachegrindParser2_Input_Format
 		";
 		$rootCosts = $this->_db->query($sql)->fetch();
 
-		// TODO add root node with summary?
-		// TODO group by filename?
 		$sql = "
 			SELECT path, sum(count) as count, function_name, filename,
+				group_concat(DISTINCT request)||' ('||max(part)||'x)' as request,
 				sum(cost_time) as cost_time,
 				sum(cost_cycles) as cost_cycles,
 				max(cost_memory) as cost_memory,
@@ -163,6 +162,9 @@ class CachegrindParser2_Input_Format
 	{
 		$nodeName = $row['function_name'];
 		$nodeFile = $row['filename'];
+
+		if ($nodeFile == '') // root node
+			$nodeFile = $row['request'];
 
 		$limit = 40;
 
