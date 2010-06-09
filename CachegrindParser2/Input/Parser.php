@@ -45,6 +45,23 @@ class CachegrindParser2_Input_Parser
 
 
 	/**
+	 * Array containing subcall-references, key=function or id+function, value=path
+	 *
+	 * @var $_subCallRefs array
+	 */
+	private $_subCallRefs = array();
+
+
+	/**
+	 * Atray containing subcall-counts, key=function-name, value=count
+	 *
+	 * @var array
+	 */
+	private $_subCallCounts = array();
+
+
+
+	/**
 	 * Constructor for CachegrindParser2_Input_Parser
 	 *
 	 * @param string $file Filename to parse
@@ -75,7 +92,7 @@ class CachegrindParser2_Input_Parser
 			echo 'get summaries';
 
 		// get "summary: *" aggregated
-		$rootCosts = $this->_getSummaries();
+		$rootCosts = self::_getSummaries($this->_file);
 
 		if (!($fp = fopen($this->_file, 'r')))
 			throw new Exception('Unable to read: ' . $this->_file);
@@ -83,8 +100,8 @@ class CachegrindParser2_Input_Parser
 		$bufferFirstLine = '';
 		$bufferLength = 65536;
 
-		$subCallRefs = array();
-		$subCallCounts = array();
+		$this->_subCallRefs = array();
+		$this->_subCallCounts = array();
 
 		$pos = 0;
 		$part = 0;
@@ -129,120 +146,168 @@ class CachegrindParser2_Input_Parser
 					continue;
 				}
 
-				$recordNode = array();
-
 				// root node: has no id or subcount-data in current block
-				$pattern = '/^fl=(.*?)\nfn=(.*?)\n(\d+) |^fl=(.*?)\n/';
-				preg_match($pattern, $block, $func);
+				$recordNode = $this->_parseRecordNode($block, $part);
 
-				if (empty($func[2])) { // root
-					$recordNode['id'] 				= 0;
-					$recordNode['function_name'] 	= '{main}';
-					$recordNode['filename'] 		= '';
-					$recordNode['path'] 			= '{main}';
-					$recordNode['part'] 			= $part;
-					$recordNode['count'] 			= 1;
+				// parse all cost lines
+				$recordNode = array_merge($recordNode, self::_parseCosts($block));
 
-					if (!empty($func[4]) && strpos($block,'{main}')) { // set the request filename
-						$request = basename($func[4]);
-						continue;
-					}
-				} else {
-					$recordNode['filename'] 		= $func[1];
-					$recordNode['function_name'] 	= $func[2];
-					$recordNode['id'] 				= $func[3];
-					$recordNode['path'] 			= 'undef';
-					$recordNode['part'] 			= $part;
-					$recordNode['count'] 			= 1;
-
-					$id = $recordNode['id'];
-					$funcName = $recordNode['function_name'];
-
-					// parent node from stack by id+name or by name (ID can be 0 in some cases!)
-					if (isset($subCallRefs[$id . $funcName]))
-						$recordNode['path'] = $subCallRefs[$id . $funcName];
-
-					elseif (isset($subCallRefs[$funcName]))
-						$recordNode['path'] = $subCallRefs[$funcName];
-
-					// add call count
-					if (isset($subCallCounts[$funcName])) {
-						$recordNode['count'] = $subCallCounts[$funcName];
-						unset($subCallCounts[$funcName]);
-					}
+				// block that contains only the request, don't process, store request filename
+				if (!empty($recordNode['request'])) {
+					$request = $recordNode['request'];
+					continue;
 				}
-
-				// sum up costs: self + sub-calls
-				$pattern = '/^\d+ (\d+) -?(\d+) (\d+) (\d+)$/m';
-				preg_match_all($pattern, $block, $costs, PREG_SET_ORDER);
-
-				foreach ($costs as $cost) {
-					if (!isset($recordNode['cost_time'])) {
-						$recordNode['cost_time'] 		= $cost[1];
-						$recordNode['cost_cycles'] 		= $cost[3];
-						$recordNode['cost_memory'] 		= $cost[2];
-						$recordNode['cost_memory_peak'] = $cost[4];
-
-						$recordNode['cost_time_self'] 			= $cost[1];
-						$recordNode['cost_cycles_self'] 		= $cost[3];
-						$recordNode['cost_memory_self'] 		= $cost[2];
-						$recordNode['cost_memory_peak_self'] 	= $cost[4];
-					} else {
-						$recordNode['cost_time'] 		+= $cost[1];
-						$recordNode['cost_cycles'] 		+= $cost[3];
-						$recordNode['cost_memory'] 		= max($cost[2],$recordNode['cost_memory']);
-						$recordNode['cost_memory_peak'] = max($cost[4],$recordNode['cost_memory_peak']);
-					}
-				}
-
-				// Workaround: corrupt file format
-				if (empty($recordNode['cost_time']))
-					$recordNode['cost_time'] = 0;
 
 				// Drop out unneeded nodes
 				if ($this->_filter($recordNode['function_name'], $rootCosts, $recordNode, $recordNode['path']))
 					continue;
 
-				if ($recordNode['function_name']=='{main}')
-					$rootArray = $recordNode;
-
 				$fields = implode(',', array_keys($recordNode));
 				$values = "'" . implode("','", $recordNode) . "'";
 				$this->_db->exec("INSERT INTO node ({$fields}) VALUES({$values})");
 
-
-				// process subcalls
-				$pattern = "/cfn=(.+?)\n"
-						 . "calls=(\d+) \d+ \d+\n"
-						 . "(\d+) /";
-
-				preg_match_all($pattern, $block, $subCalls, PREG_SET_ORDER);
-
-				if (!empty($subCalls)) {
-					foreach ($subCalls as $subCall) {
-
-						$id = $subCall[3];
-						$path = $recordNode['path'] . '##' . $subCall[1];
-						$funcName = $subCall[1];
-						$count = $subCall[2];
-
-						if ($this->_filter($funcName, $rootCosts, array(), $path))
-							continue;
-
-						// add subcalls to stack by id+name or name (ID can be 0 in some cases!)
-						$subCallRefs[$id . $funcName] = $path;
-						$subCallRefs[$funcName] = $path;
-
-						if (isset($subCallCounts[$funcName]))
-							$subCallCounts[$funcName] += $count;
-						else
-							$subCallCounts[$funcName] = $count;
-					}
-				}
+				// parse subcalls, set subCallRefs (function => path), set SubCallCounts (function => count)
+				$this->_parseSubCalls($recordNode['path'], $block, $rootCosts);
 			}
 		}
 		fclose($fp);
 		$this->_db->commit();
+	}
+
+
+	/**
+	 * parse the current block and create the record-node
+	 *
+	 * @param string $block Current block
+	 * @param int $part Current part number
+	 */
+	private function _parseRecordNode($block, $part)
+	{
+		$recordNode = array();
+
+		$func = array();
+		$pattern = '/^fl=(.*?)\nfn=(.*?)\n(\d+) |^fl=(.*?)\n/';
+		preg_match($pattern, $block, $func);
+
+		if (empty($func[2])) { // root
+			$recordNode['id'] 				= 0;
+			$recordNode['function_name'] 	= '{main}';
+			$recordNode['filename'] 		= '';
+			$recordNode['path'] 			= '{main}';
+			$recordNode['part'] 			= $part;
+			$recordNode['count'] 			= 1;
+
+			// set the request filename
+			if (!empty($func[4]) && strpos($block,'{main}'))
+				$recordNode['request'] = basename($func[4]);
+
+		} else {
+			$recordNode['filename'] 		= $func[1];
+			$recordNode['function_name'] 	= $func[2];
+			$recordNode['id'] 				= $func[3];
+			$recordNode['path'] 			= 'undef';
+			$recordNode['part'] 			= $part;
+			$recordNode['count'] 			= 1;
+
+			$id = $recordNode['id'];
+			$funcName = $recordNode['function_name'];
+
+			// parent node from stack by id+name or by name (ID can be 0 in some cases!)
+			if (isset($this->_subCallRefs[$id . $funcName]))
+				$recordNode['path'] = $this->_subCallRefs[$id . $funcName];
+
+			elseif (isset($this->_subCallRefs[$funcName]))
+				$recordNode['path'] = $this->_subCallRefs[$funcName];
+
+			// add call count
+			if (isset($this->_subCallCounts[$funcName])) {
+				$recordNode['count'] = $this->_subCallCounts[$funcName];
+				unset($this->_subCallCounts[$funcName]);
+			}
+		}
+		return $recordNode;
+	}
+
+
+	/**
+	 * parse subcalls, set subCallRefs (function => path), set SubCallCounts (function => count)
+	 *
+	 * @param string $nodePath 		path of current node
+	 * @param string $block 	Current call block
+	 * @param array $rootCosts 	Array with keys: cost_time, cost_cycles, cost_memory, cost_memory_peak
+	 */
+	private function _parseSubCalls($nodePath, $block, $rootCosts)
+	{
+		// process subcalls
+		$pattern = "/cfn=(.+?)\n"
+				 . "calls=(\\d+) \\d+ \\d+\n"
+				 . "(\\d+) /";
+
+		$subCalls = array();
+		 preg_match_all($pattern, $block, $subCalls, PREG_SET_ORDER);
+
+		if (!empty($subCalls)) {
+			foreach ($subCalls as $subCall) {
+
+				$funcName 	= $subCall[1];
+				$count 		= $subCall[2];
+				$id 		= $subCall[3];
+				$path 		= $nodePath . '##' . $subCall[1];
+
+				if ($this->_filter($funcName, $rootCosts, array(), $path))
+					continue;
+
+				// add subcalls to stack by id+name or name (ID can be 0 in some cases!)
+				$this->_subCallRefs[$id . $funcName] = $path;
+				$this->_subCallRefs[$funcName] = $path;
+
+				if (isset($this->_subCallCounts[$funcName]))
+					$this->_subCallCounts[$funcName] += $count;
+				else
+					$this->_subCallCounts[$funcName] = $count;
+			}
+		}
+	}
+
+
+	/**
+	 * Parses the Cost lines
+	 *
+	 * @param string $block current block
+	 */
+	private static function _parseCosts($block)
+	{
+		$costs = array();
+		$recordNode = array();
+
+		// sum up costs: self + sub-calls
+		$pattern = '/^\d+ (\d+) -?(\d+) (\d+) (\d+)$/m';
+		preg_match_all($pattern, $block, $costs, PREG_SET_ORDER);
+
+		foreach ($costs as $cost) {
+			if (!isset($recordNode['cost_time'])) {
+				$recordNode['cost_time'] 		= $cost[1];
+				$recordNode['cost_cycles'] 		= $cost[3];
+				$recordNode['cost_memory'] 		= $cost[2];
+				$recordNode['cost_memory_peak'] = $cost[4];
+
+				$recordNode['cost_time_self'] 			= $cost[1];
+				$recordNode['cost_cycles_self'] 		= $cost[3];
+				$recordNode['cost_memory_self'] 		= $cost[2];
+				$recordNode['cost_memory_peak_self'] 	= $cost[4];
+			} else {
+				$recordNode['cost_time'] 		+= $cost[1];
+				$recordNode['cost_cycles'] 		+= $cost[3];
+				$recordNode['cost_memory'] 		= max($cost[2],$recordNode['cost_memory']);
+				$recordNode['cost_memory_peak'] = max($cost[4],$recordNode['cost_memory_peak']);
+			}
+		}
+
+		// Workaround: corrupt file format
+		if (empty($recordNode['cost_time']))
+			$recordNode['cost_time'] = 0;
+
+		return $recordNode;
 	}
 
 
@@ -280,9 +345,9 @@ class CachegrindParser2_Input_Parser
 
 
 	/**
-	 * returns the summaries from a cachegrind profile
+	 * returns the summaries from a cachegrind profile (keys: cost_time, cost_cycles, cost_memory, cost_memory_peak)
 	 */
-	private function _getSummaries()
+	private static function _getSummaries($file)
 	{
 		$rootCosts = array(
 			'cost_time' => 0,
@@ -291,13 +356,14 @@ class CachegrindParser2_Input_Parser
 			'cost_memory_peak' => 0,
 		);
 
-		if (!($fp = fopen($this->_file, 'r')))
-			throw new Exception('Unable to read ' . $this->_file);
+		if (!($fp = fopen($file, 'r')))
+			throw new Exception('Unable to read ' . $file);
 
 		$lastData = '';
 		while (!feof($fp)) {
 			$data = fread($fp, 65536);
 
+			$summaries = array();
 			preg_match_all("/summary: (.+?)\n/", $lastData.$data, $summaries);
 			if (!empty($summaries[0])) {
 				foreach ($summaries[1] as $summary) {
