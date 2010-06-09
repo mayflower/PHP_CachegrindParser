@@ -19,7 +19,7 @@ set_include_path(basename(__FILE__) . PATH_SEPARATOR . get_include_path());
 
 define('VERSION', '2.0');
 
-ini_set( 'memory_limit', '32M' );
+//ini_set( 'memory_limit', '32M' );
 
 require 'CachegrindParser2/Input/Parameters.php';
 require 'CachegrindParser2/Input/Parser.php';
@@ -63,8 +63,6 @@ $format->format();
 function initDatabase($db)
 {
 	$db->exec("DROP TABLE IF EXISTS node;");
-	$db->exec("DROP TABLE IF EXISTS subcall;");
-	$db->exec("DROP TABLE IF EXISTS path;");
 	//$db->exec("VACUUM;");
 
 	$db->exec("CREATE TABLE node (
