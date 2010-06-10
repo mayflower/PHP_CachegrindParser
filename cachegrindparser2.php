@@ -48,7 +48,7 @@ if (!isset($parameters['quiet']))
 
 
 // 4. create dot output
-$format = new CachegrindParser2_Input_Format($db, $parameters["out"], $parameters['format']);
+$format = new CachegrindParser2_Output_Format($db, $parameters["out"], $parameters['format']);
 $format->format();
 
 
