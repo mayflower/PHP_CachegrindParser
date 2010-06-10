@@ -260,11 +260,7 @@ class CachegrindParser2_Input_Parser
 				// add subcalls to stack by id+name or name (ID can be 0 in some cases!)
 				$this->_subCallRefs[$id . $funcName] = $path;
 				$this->_subCallRefs[$funcName] = $path;
-
-				if (isset($this->_subCallCounts[$funcName]))
-					$this->_subCallCounts[$funcName] += $count;
-				else
-					$this->_subCallCounts[$funcName] = $count;
+				$this->_subCallCounts[$funcName] = $count;
 			}
 		}
 	}
