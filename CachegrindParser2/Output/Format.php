@@ -11,7 +11,7 @@
 /**
  * This class converts input to an output representation
  */
-class CachegrindParser2_Input_Format
+class CachegrindParser2_Output_Format
 {
 	/**
 	 * database handle
@@ -116,7 +116,7 @@ class CachegrindParser2_Input_Format
 
 		$sql = "
 			SELECT path, sum(count) as count, function_name, filename,
-				group_concat(DISTINCT request)||' ('||max(part)||'x)' as request,
+				group_concat(DISTINCT request)||' ('||(max(part)+1)||'x)' as request,
 				sum(cost_time) as cost_time,
 				sum(cost_cycles) as cost_cycles,
 				max(cost_memory) as cost_memory,
@@ -132,6 +132,7 @@ class CachegrindParser2_Input_Format
 		";
 		$rows = $this->_db->query($sql);
 		foreach ($rows as $row) {
+
 			// output edges and nodes
 			$penWidth = max( 1, ceil(($row['cost_time'] / $rootCosts['cost_time']) * 30)); // thickness of edge
 
@@ -192,11 +193,11 @@ class CachegrindParser2_Input_Format
 			$rating = 0;
 			$keySelf = $key . '_self';
 
-			$part = $row[$keySelf] / $rootCosts[$key];
+			$part = $row[$keySelf] / max($rootCosts[$key], 1);
 			if ($part >= 0.05)
 				$rating = 1;
 			else
-				$rating = 20.0 * ($keySelf / $rootCosts[$key]);
+				$rating = 20.0 * ($keySelf / max($rootCosts[$key], 1));
 
 			$bgColor = 'red';
 			if ($rating < 0.8)
