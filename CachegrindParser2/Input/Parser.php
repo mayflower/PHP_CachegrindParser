@@ -60,7 +60,6 @@ class CachegrindParser2_Input_Parser
 	private $_subCallCounts = array();
 
 
-
 	/**
 	 * Constructor for CachegrindParser2_Input_Parser
 	 *
