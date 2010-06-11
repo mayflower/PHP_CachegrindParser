@@ -121,5 +121,6 @@ class CachegrindParser2_Output_Format_Test extends PHPUnit_Framework_TestCase
     	$this->assertContains("\"{$mainPath}\" -> \"{$test4Path}\"", $data);
 
     	// TODO test costs
+    	// TODO test private methods
     }
 }
