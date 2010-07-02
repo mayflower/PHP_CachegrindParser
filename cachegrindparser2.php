@@ -32,7 +32,11 @@ $parameters = $parameters->getParameters();
 
 
 // 2. Initialize database
-$db = new PDO('sqlite:database.sqlite');
+$sqliteFile = 'database.sqlite';
+if (!empty($parameters['db']))
+	$sqliteFile = $parameters['db'];
+
+$db = new PDO('sqlite:' . $sqliteFile);
 initDatabase($db);
 
 
