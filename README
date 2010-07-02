@@ -23,6 +23,7 @@ Usage: (version 2, better performance, less features)
 php cachegrindparser2.php --in <file_in> --out <file_out>
                           --timethreshold=0.0#
                           --format dot|svg|png
+                          --db filename
                           --quiet
 
 Input file:
@@ -57,6 +58,9 @@ Include (optional):
 
 Quiet (optional):
 - Don't print out progress information
+
+DB filename (optional):
+- use custom SQLite database filename (default: database.sqlite)
 
 Convert Dot to SVG (see http://graphviz.org):
 - output letter page size:
