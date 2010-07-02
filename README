@@ -23,7 +23,7 @@ Usage: (version 2, better performance, less features)
 php cachegrindparser2.php --in <file_in> --out <file_out>
                           --timethreshold=0.0#
                           --format dot|svg|png
-                          --db filename
+                          --db=<file_db>
                           --quiet
 
 Input file:
