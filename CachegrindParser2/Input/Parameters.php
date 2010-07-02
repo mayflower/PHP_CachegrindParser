@@ -42,7 +42,8 @@ class CachegrindParser2_Input_Parameters
 			'exclude::',	// optional, skip parts by matching one of the excludes
 			'include::',	// optional, include only parts by matching one of the includes
 			'depth::',		// optional, max. tree depth
-			'timethreshold::', // filter nodes by time
+			'timethreshold::', // optional, filter nodes by time
+			'db::',			// sqlite database file
 			'quiet',		// optional, don't output additional information
 			'help',
 			'version'
