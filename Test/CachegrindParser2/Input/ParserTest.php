@@ -323,7 +323,7 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
      * Helper methods to test private methods
      *
      * @param array $function Array(object class, function)
-     * @param mixed $args Method parameters
+     * @param array $args Method parameters
      * @param mixed $expected Expected result
      */
     public function assertMethodReturnEqual(array $function, $parameters, $expected)
