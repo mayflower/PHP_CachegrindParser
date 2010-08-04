@@ -33,39 +33,39 @@ $tree = createTree( $parameters["input"], $parameters["quiet"], $parameters['par
 
 // 3. Filter the tree
 if ( !$parameters["quiet"] )
-	echo " apply filters";
+    echo " apply filters";
 
 foreach ($parameters['filters'] as $filter) {
-	$tree->addFilter($filter);
+    $tree->addFilter($filter);
 }
 $tree->filterTree();
 
 // 4. Format it according to (1)
 if ( !$parameters["quiet"] )
-	echo " render output";
+    echo " render output";
 
 $output = $parameters["formatter"]->format($tree);
 
 // convert dot to svg or png
 if ( $parameters["format"] == "svg" || $parameters["format"] == "png" ) {
-	$dotFile = tempnam( "/tmp", "cachegrind_" ) . ".dot";
-	file_put_contents( $dotFile, $output, LOCK_EX);
+    $dotFile = tempnam( "/tmp", "cachegrind_" ) . ".dot";
+    file_put_contents( $dotFile, $output, LOCK_EX);
 
-	// call dot (graphviz package)
-	$cmd = "dot -T{$parameters["format"]} -o" . escapeshellarg( $parameters["output"] ) . " " . 
-							escapeshellarg( $dotFile ) . " 2>&1";
-	
-	exec( $cmd, $output );
-	if ( !empty( $output ) )
-		throw new Exception( "Failed executing dot:\n" .
-							 implode( "\n", $output ) );
+    // call dot (graphviz package)
+    $cmd = "dot -T{$parameters["format"]} -o" . escapeshellarg( $parameters["output"] ) . " " .
+                            escapeshellarg( $dotFile ) . " 2>&1";
 
-	@unlink( $dotFile );
+    exec( $cmd, $output );
+    if ( !empty( $output ) )
+        throw new Exception( "Failed executing dot:\n" .
+                             implode( "\n", $output ) );
+
+    @unlink( $dotFile );
 }
 else {
-	// 5. Print it to the file given in (1)
-	//NOTE: Locking might not be neccessary here
-	file_put_contents($parameters["output"], $output, LOCK_EX);
+    // 5. Print it to the file given in (1)
+    //NOTE: Locking might not be neccessary here
+    file_put_contents($parameters["output"], $output, LOCK_EX);
 }
 
 // We're done.
@@ -73,7 +73,7 @@ else {
 
 /**
  * Create a tree from a file
- * 
+ *
  * @param string $file Filename to parse (can be multi part)
  * @param boolean $quiet true: Don't print out progress information
  * @param array $parts Array( int min, int max )
@@ -82,118 +82,118 @@ else {
  */
 function createTree( $file, $quiet, $parts, $excludes, $includes )
 {
-	// maximum limit to parse a part, 64M
-	$limit = 64*1048576;
-	
-	$numParts = 0;
-	$numLines = 0;
-	$numData = 0;
-	$inputData = '';
+    // maximum limit to parse a part, 64M
+    $limit = 64*1048576;
 
-	// create empty tree
-	$tree = Input\Parser::getRootTree();
-	
-	if (!($fp = fopen( $file, 'r' )))
-		throw new Exception( 'Unable to read ' . $file );
+    $numParts = 0;
+    $numLines = 0;
+    $numData = 0;
+    $inputData = '';
 
-	$fpFilesize = filesize( $file );
+    // create empty tree
+    $tree = Input\Parser::getRootTree();
 
-	while ( !feof( $fp ) ) {
-	
-		$line = fgets($fp);
-		$numLines++;
-		$numData += strlen( $line );
-		$progress = number_format( ( ( $numData / $fpFilesize ) * 100), 2) . '%';
+    if (!($fp = fopen( $file, 'r' )))
+        throw new Exception( 'Unable to read ' . $file );
 
-		// check for a new part (boundary match or end of file)
-		if ( strpos($line, '==== NEW PROFILING FILE') === 0 || feof( $fp ) ) {
+    $fpFilesize = filesize( $file );
 
-			// empty part
-			if ( strlen($inputData) < 100 ) {
-				$inputData = '';
-				continue;
-			}
-			$numParts++;
-			
-			// min. / max. parts
-			if ( !empty( $parts[0] ) && $parts[0] > $numParts ) {
-				if ( !$quiet )
-					echo "-- skip part {$numParts}, parts range, read progress {$progress}\n";
+    while ( !feof( $fp ) ) {
 
-				$inputData = '';
-				continue;
-			}
-			if ( !empty( $parts[1] ) && $parts[1] < $numParts )
-				break;
-			
-			if ( strlen($inputData) > $limit ) {
-				if ( !$quiet )
-					echo "-- skip part {$numParts}, too large: length ".strlen($inputData)." line {$numLines} read progress {$progress}\n";
+        $line = fgets($fp);
+        $numLines++;
+        $numData += strlen( $line );
+        $progress = number_format( ( ( $numData / $fpFilesize ) * 100), 2) . '%';
 
-				$inputData = '';
-				continue;
-			}
-			
-			foreach ( $excludes as $key => $exclude ) {
-				$excludes[$key] = preg_quote( $exclude );
-			}
-			$regexp = implode( '|', $excludes );
-			if ( !empty( $regexp ) && preg_match( "!{$regexp}!", $inputData ) ) {
-				if ( !$quiet )
-					echo "-- skip part {$numParts}, match exclusion, read progress {$progress}\n";
-				
-				$inputData = '';
-				continue;
-			}
+        // check for a new part (boundary match or end of file)
+        if ( strpos($line, '==== NEW PROFILING FILE') === 0 || feof( $fp ) ) {
 
-			foreach ( $includes as $key => $include ) {
-				$includes[$key] = preg_quote( $include );
-			}
-			$regexp = implode( '|', $includes );
-			if ( !empty( $regexp ) && preg_match( "!{$regexp}!", $inputData ) ) {
-				if ( !$quiet )
-					echo "-- skip part {$numParts}, match exclusion, read progress {$progress}\n";
-				
-				$inputData = '';
-				continue;
-			}
+            // empty part
+            if ( strlen($inputData) < 100 ) {
+                $inputData = '';
+                continue;
+            }
+            $numParts++;
 
-			
-			if ( trim($inputData) != '' ) {
-	
-				if ( !$quiet )
-					echo "## part {$numParts} length ".strlen($inputData)." line {$numLines} read progress {$progress}";
-				
-				$parser = new Input\Parser( $inputData );
-				$currTree = $parser->getCallTree();
-				
-				if ( strlen($inputData) < 10 * 1048576 ) {
-					if ( !$quiet )
-						echo " combine similar";
+            // min. / max. parts
+            if ( !empty( $parts[0] ) && $parts[0] > $numParts ) {
+                if ( !$quiet )
+                    echo "-- skip part {$numParts}, parts range, read progress {$progress}\n";
 
-					$currTree->combineSimilarSubtrees();
-				}
-				
-				if ( !$quiet )
-					echo " combine trees";
-					
-				$tree->combineTrees( $currTree );
+                $inputData = '';
+                continue;
+            }
+            if ( !empty( $parts[1] ) && $parts[1] < $numParts )
+                break;
 
-				if ( !$quiet ) {
-					echo " memory ".memory_get_usage(true);
-					echo " memory peak ".memory_get_peak_usage(true);
-					echo "\n";
-				}
-			}
-			$inputData = '';
-			
-		} else {
-			$inputData .= $line;
-		}
-	}
-	fclose($fp);
-	
-	return $tree;
+            if ( strlen($inputData) > $limit ) {
+                if ( !$quiet )
+                    echo "-- skip part {$numParts}, too large: length ".strlen($inputData)." line {$numLines} read progress {$progress}\n";
+
+                $inputData = '';
+                continue;
+            }
+
+            foreach ( $excludes as $key => $exclude ) {
+                $excludes[$key] = preg_quote( $exclude );
+            }
+            $regexp = implode( '|', $excludes );
+            if ( !empty( $regexp ) && preg_match( "!{$regexp}!", $inputData ) ) {
+                if ( !$quiet )
+                    echo "-- skip part {$numParts}, match exclusion, read progress {$progress}\n";
+
+                $inputData = '';
+                continue;
+            }
+
+            foreach ( $includes as $key => $include ) {
+                $includes[$key] = preg_quote( $include );
+            }
+            $regexp = implode( '|', $includes );
+            if ( !empty( $regexp ) && preg_match( "!{$regexp}!", $inputData ) ) {
+                if ( !$quiet )
+                    echo "-- skip part {$numParts}, match exclusion, read progress {$progress}\n";
+
+                $inputData = '';
+                continue;
+            }
+
+
+            if ( trim($inputData) != '' ) {
+
+                if ( !$quiet )
+                    echo "## part {$numParts} length ".strlen($inputData)." line {$numLines} read progress {$progress}";
+
+                $parser = new Input\Parser( $inputData );
+                $currTree = $parser->getCallTree();
+
+                if ( strlen($inputData) < 10 * 1048576 ) {
+                    if ( !$quiet )
+                        echo " combine similar";
+
+                    $currTree->combineSimilarSubtrees();
+                }
+
+                if ( !$quiet )
+                    echo " combine trees";
+
+                $tree->combineTrees( $currTree );
+
+                if ( !$quiet ) {
+                    echo " memory ".memory_get_usage(true);
+                    echo " memory peak ".memory_get_peak_usage(true);
+                    echo "\n";
+                }
+            }
+            $inputData = '';
+
+        } else {
+            $inputData .= $line;
+        }
+    }
+    fclose($fp);
+
+    return $tree;
 }
 
 /**
@@ -212,15 +212,15 @@ function parseOptions()
     $shortopts .= "h";
     $shortopts .= "v";
     $longopts = array(
-        "in:",			// required, input file
-        "out:",			// required, output file
-        "format:",  	// required, output format
-        "filter::", 	// optional, input tree filter
-	    "parts::",  	// optional, extract only some parts
-    	"exclude::",	// optional, skip parts by matching one of the excludes
-    	"include::",	// optional, include only parts by matching one of the includes
-    	"quiet",		// optional, don't output additional information
-    	"help",
+        "in:",            // required, input file
+        "out:",            // required, output file
+        "format:",      // required, output format
+        "filter::",     // optional, input tree filter
+        "parts::",      // optional, extract only some parts
+        "exclude::",    // optional, skip parts by matching one of the excludes
+        "include::",    // optional, include only parts by matching one of the includes
+        "quiet",        // optional, don't output additional information
+        "help",
         "version"
     );
     // get them
@@ -251,14 +251,14 @@ function parseOptions()
     case 'dot':
     case 'svg':
     case 'png':
-    	$ret["formatter"] = new CachegrindParser\Output\DotFormatter();
+        $ret["formatter"] = new CachegrindParser\Output\DotFormatter();
         break;
     default:
         usageFormatters();
         exit(2);
     }
     $ret["format"] = $opts["format"];
-    
+
     // Check for filters
     $ret['filters'] = array();
     if (isset($opts['filter'])) {
@@ -290,20 +290,20 @@ function parseOptions()
                $ret['filters'][] = new Input\TimeThresholdFilter($percentage);
                break;
             default:
-            	echo "Invalid filter: {$name}\n";
+                echo "Invalid filter: {$name}\n";
                 usageFilters();
                 exit(3);
             }
         }
     }
-    
+
     $ret["input"] = $opts["in"];
     if (!file_exists($ret["input"])) {
         inputError();
         exit(3);
     }
     $ret["output"] = $opts["out"];
-    
+
     // only extract some parts of the file
     $ret["parts"] = isset( $opts["parts"] ) ? explode( ',', $opts["parts"] ) : array();
 
@@ -315,7 +315,7 @@ function parseOptions()
 
     // don't display additional information
     $ret["quiet"] = isset( $opts["quiet"] ) ? true : false;
-    
+
     return $ret;
 }
 
@@ -332,8 +332,8 @@ function version()
  */
 function usageFormatters()
 {
-	echo "Error: invalid formatter\n";
-	usage();
+    echo "Error: invalid formatter\n";
+    usage();
 }
 
 /**
@@ -352,12 +352,12 @@ EOT;
  */
 function usage()
 {
-	echo "Error: missing parameters\n";
-	echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> --filter=nophp|include|depth=#|timethreshold=0.## --filter ... --format xml|dot|svg|png --parts=#,# --exclude=<strings> --include=<strings> --quiet\n\n";
-	echo "Optional: --filter, --parts, --exclude, --include, --quiet\n";
-	echo "Dot to SVG with letter page size: dot -Gsize=11,7 -Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
-	echo "Dot to SVG with screen size: dot -Tsvg -o<file_out> <file_in>\n";
-	echo "Note: SVG export needs the package 'graphviz'\n";
+    echo "Error: missing parameters\n";
+    echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> --filter=nophp|include|depth=#|timethreshold=0.## --filter ... --format xml|dot|svg|png --parts=#,# --exclude=<strings> --include=<strings> --quiet\n\n";
+    echo "Optional: --filter, --parts, --exclude, --include, --quiet\n";
+    echo "Dot to SVG with letter page size: dot -Gsize=11,7 -Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
+    echo "Dot to SVG with screen size: dot -Tsvg -o<file_out> <file_in>\n";
+    echo "Note: SVG export needs the package 'graphviz'\n";
 }
 
 /**
@@ -365,6 +365,6 @@ function usage()
  */
 function usageFilters()
 {
-	echo "Error: invalid filters\n";
-	usage();
+    echo "Error: invalid filters\n";
+    usage();
 }
