@@ -115,6 +115,10 @@ class CachegrindParser2_Output_Format
 		";
 		$rootCosts = $this->_db->query($sql)->fetch();
 
+		if (empty($rootCosts)) {
+			trigger_error('Could not find a "summary:" section in the file.', E_USER_WARNING);
+		}
+
 		$sql = "
 			SELECT path, sum(count) as count, function_name, filename,
 				group_concat(DISTINCT request)||' ('||(max(part)+1)||'x)' as request,
@@ -135,7 +139,7 @@ class CachegrindParser2_Output_Format
 		foreach ($rows as $row) {
 
 			// output edges and nodes
-			$penWidth = max( 1, ceil(($row['cost_time'] / max($rootCosts['cost_time'], 1)) * 30)); // thickness of edge
+			$penWidth = min(75, max( 1, ceil(($row['cost_time'] / max($rootCosts['cost_time'], 1)) * 30))); // thickness of edge 1-75
 
 			$edgeLabel =  $row['count'] . 'x';
 			$edgeLabel .= ' [' . round($row['cost_time']/1000) . ' ms]';
