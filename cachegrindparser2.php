@@ -34,7 +34,7 @@ $parameters = $parameters->getParameters();
 // 2. Initialize database
 $sqliteFile = 'database.sqlite';
 if (!empty($parameters['db']))
-	$sqliteFile = $parameters['db'];
+    $sqliteFile = $parameters['db'];
 
 $db = new PDO('sqlite:' . $sqliteFile);
 initDatabase($db);
@@ -49,7 +49,7 @@ $parser = new CachegrindParser2_Input_Parser($parameters['in'], $db, $timethresh
 $parser->createTree();
 
 if (!isset($parameters['quiet']))
-	echo ' render output';
+    echo ' render output';
 
 
 // 4. create dot output
@@ -67,24 +67,24 @@ $format->format();
  */
 function initDatabase($db)
 {
-	$db->exec("DROP TABLE IF EXISTS node;");
-	//$db->exec("VACUUM;");
+    $db->exec("DROP TABLE IF EXISTS node;");
+    //$db->exec("VACUUM;");
 
-	$db->exec("CREATE TABLE node (
-		part int,
-		request varchar,
-		filename varchar,
-		function_name varchar,
-		count int,
-		id int,
-		cost_time int,
-		cost_cycles int,
-		cost_memory int,
-		cost_memory_peak int,
-		cost_time_self int,
-		cost_cycles_self int,
-		cost_memory_self int,
-		cost_memory_peak_self int,
-		path varchar
-	)");
+    $db->exec("CREATE TABLE node (
+        part int,
+        request varchar,
+        filename varchar,
+        function_name varchar,
+        count int,
+        id int,
+        cost_time int,
+        cost_cycles int,
+        cost_memory int,
+        cost_memory_peak int,
+        cost_time_self int,
+        cost_cycles_self int,
+        cost_memory_self int,
+        cost_memory_peak_self int,
+        path varchar
+    )");
 }
