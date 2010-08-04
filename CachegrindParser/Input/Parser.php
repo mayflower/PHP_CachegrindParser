@@ -31,7 +31,7 @@ class Parser
 {
     /** Stores the input for later use. */
     private $inputData;
-    
+
     /**
      * Creates a new Parser instance.
      *
@@ -56,7 +56,7 @@ class Parser
         $rootEntry = new Data\RawEntry("", "{root}", $rootCosts);
         return Data\CallTreeNode::fromRawEntry($rootEntry);
     }
-    
+
     /**
      * Create a root tree
      */
@@ -70,7 +70,7 @@ class Parser
         );
         return new Data\CallTree(self::getRoot(), $summary);
     }
-    
+
     /**
      * Returns the call tree. Subtrees are not automatically combined,
      * it can be done by calling combineSimilarSubtrees() on the returned tree.
@@ -102,7 +102,7 @@ class Parser
             }
             unset($entries[$key]);
         }
-        
+
         // Find the summary, default is non empty summary to avoid
         // division by zero errors in filters
         $summary = array(
@@ -125,7 +125,7 @@ class Parser
         return new Data\CallTree($root, $summary);
     }
 
-    
+
     /*
      * Generates an array of entries.
      *
@@ -137,7 +137,7 @@ class Parser
     private function getEntryList()
     {
         $lines = explode("\n", trim($this->inputData));
-        
+
     	// This makes our array indices the same as the file's line numbers
         array_unshift($lines, '');
         $curLine = 7; // The first 6 lines are metadata
@@ -165,7 +165,7 @@ class Parser
                 $subCalls = 0;
 
                 // Now check for subcalls
-                while($lines[$curLine] != '') {
+                while(isset($lines[$curLine]) && $lines[$curLine] != '') {
                     if (strncmp('cfn=', $lines[$curLine], 4) != 0) {
                         // This doesn't look like a call, panik
                         die("parse error on line {$curLine}. (Current line: {$lines[$curLine]}) (Script line: "
