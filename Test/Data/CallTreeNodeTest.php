@@ -59,7 +59,7 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(31, $c['cycles']);
         $this->assertEquals(29, $c['peakmem']);
     }
-    
+
     /**
      * Tests if nodes are correctly merged into the parent's children
      */
@@ -68,11 +68,11 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
         $n1 = new CallTreeNode('file1', 'func1', toCostArray( 2,  3,  5,  7));
         $n2 = new CallTreeNode('file2', 'func2', toCostArray(11, 14, 17, 19));
         $n1->addChild($n2);
-        
-        $n1b = new CallTreeNode('file1', 'func1', toCostArray( 22,  23,  25,  27));
+
+        $n1b = new CallTreeNode('file1', 'func1', toCostArray(22, 23, 25, 27));
         $n2b = new CallTreeNode('file2', 'func2', toCostArray(12, 15, 18, 20));
         $n1b->addChild($n2b);
-        
+
         $n1->mergeChild($n2b);
 
         $c = $n2->getCosts();
@@ -81,7 +81,7 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(35, $c['cycles']);
         $this->assertEquals(20, $c['peakmem']);
     }
-    
+
 
     /**
      * Tests if nodes are correctly merged into their parent
@@ -109,7 +109,7 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
     {
         $n1 = new CallTreeNode('parent', 'pfunc', toCostArray( 2,  3,  5,  7));
         $n2 = new CallTreeNode('somefile', 'func', toCostArray(11, 14, 17, 19));
-        $n3 = new CallTreeNode('somefile', 'func', toCostArray( 1,  3,  7, 29));
+        $n3 = new CallTreeNode('somefile', 'func', toCostArray(1,  3,  7, 29));
 
         $n1->addChild($n2);
         $n1->addChild($n3);

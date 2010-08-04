@@ -52,7 +52,8 @@ class CachegrindParser2_Input_Parser
 
 
     /**
-     * Array containing subcall-references, key=function or id+function, value=path
+     * Array containing subcall-references, key=function or id+function,
+     * value=path
      *
      * @var $_subCallRefs array
      */
@@ -78,7 +79,8 @@ class CachegrindParser2_Input_Parser
      */
     public function __construct($file, $db, $timethreshold = 0, $timeMin, $quiet = false)
     {
-        if (empty($file) || !file_exists($file) || filesize($file) == 0 || !is_readable($file))
+        if (empty($file) || !file_exists($file) ||
+            filesize($file) == 0 || !is_readable($file))
             throw new Exception('Cannot read ' . $file);
 
         $this->_file             = $file;
@@ -148,7 +150,11 @@ class CachegrindParser2_Input_Parser
                 if (strncmp('fl=', $block, 3) != 0 && !is_numeric($block[0])) {
 
                     if (strncmp('====', $block, 4) == 0) {
-                        $this->_db->exec("UPDATE node SET request='{$request}' WHERE part='{$part}' AND request IS NULL");
+                        $this->_db->exec(
+                            "UPDATE node SET request='{$request}' ".
+                            "WHERE part='{$part}' ".
+                            "  AND request IS NULL"
+                        );
                         $part++;
                     }
                     continue;
@@ -158,9 +164,10 @@ class CachegrindParser2_Input_Parser
                 $recordNode = $this->_parseRecordNode($block, $part);
 
                 // parse all cost lines
-                $recordNode = array_merge($recordNode, self::_parseCosts($block));
+                $recordNode = array_merge($recordNode,self::_parseCosts($block));
 
-                // block that contains only the request, don't process, store request filename
+                // block that contains only the request, don't process,
+                // store request filename
                 if (!empty($recordNode['request'])) {
                     $request = $recordNode['request'];
                     continue;
@@ -174,7 +181,8 @@ class CachegrindParser2_Input_Parser
                 $values = "'" . implode("','", $recordNode) . "'";
                 $this->_db->exec("INSERT INTO node ({$fields}) VALUES({$values})");
 
-                // parse subcalls, set subCallRefs (function => path), set SubCallCounts (function => count)
+                // parse subcalls, set subCallRefs (function => path),
+                // set SubCallCounts (function => count)
                 $this->_parseSubCalls($recordNode['path'], $block, $rootCosts);
             }
         }
@@ -220,7 +228,8 @@ class CachegrindParser2_Input_Parser
             $id = $recordNode['id'];
             $funcName = $recordNode['function_name'];
 
-            // parent node from stack by id+name or by name (ID can be 0 in some cases!)
+            // parent node from stack by id+name or by name
+            // (ID can be 0 in some cases!)
             if (isset($this->_subCallRefs[$id . $funcName]))
                 $recordNode['path'] = $this->_subCallRefs[$id . $funcName];
 
@@ -238,7 +247,8 @@ class CachegrindParser2_Input_Parser
 
 
     /**
-     * parse subcalls, set subCallRefs (function => path), set SubCallCounts (function => count)
+     * parse subcalls, set subCallRefs (function => path),
+     * set SubCallCounts (function => count)
      *
      * @param string $nodePath         path of current node
      * @param string $block     Current call block
@@ -265,7 +275,8 @@ class CachegrindParser2_Input_Parser
                 if ($this->_filter($funcName, $rootCosts, array(), $path))
                     continue;
 
-                // add subcalls to stack by id+name or name (ID can be 0 in some cases!)
+                // add subcalls to stack by id+name or name
+                // (ID can be 0 in some cases!)
                 $this->_subCallRefs[$id . $funcName] = $path;
                 $this->_subCallRefs[$funcName] = $path;
                 $this->_subCallCounts[$funcName] = $count;
@@ -291,19 +302,23 @@ class CachegrindParser2_Input_Parser
         foreach ($costs as $cost) {
             if (!isset($recordNode['cost_time'])) {
                 $recordNode['cost_time']         = $cost[1];
-                $recordNode['cost_cycles']         = $cost[3];
-                $recordNode['cost_memory']         = $cost[2];
-                $recordNode['cost_memory_peak'] = $cost[4];
+                $recordNode['cost_cycles']       = $cost[3];
+                $recordNode['cost_memory']       = $cost[2];
+                $recordNode['cost_memory_peak']  = $cost[4];
 
-                $recordNode['cost_time_self']             = $cost[1];
+                $recordNode['cost_time_self']           = $cost[1];
                 $recordNode['cost_cycles_self']         = $cost[3];
                 $recordNode['cost_memory_self']         = $cost[2];
-                $recordNode['cost_memory_peak_self']     = $cost[4];
+                $recordNode['cost_memory_peak_self']    = $cost[4];
             } else {
                 $recordNode['cost_time']         += $cost[1];
-                $recordNode['cost_cycles']         += $cost[3];
-                $recordNode['cost_memory']         = max($cost[2],$recordNode['cost_memory']);
-                $recordNode['cost_memory_peak'] = max($cost[4],$recordNode['cost_memory_peak']);
+                $recordNode['cost_cycles']       += $cost[3];
+
+                $recordNode['cost_memory']       =
+                    max($cost[2],$recordNode['cost_memory']);
+
+                $recordNode['cost_memory_peak']  =
+                    max($cost[4],$recordNode['cost_memory_peak']);
             }
         }
 
@@ -344,7 +359,8 @@ class CachegrindParser2_Input_Parser
                 return true;
         }
 
-        if ($recordNode && $this->_timeMin!=0 && $recordNode['cost_time'] < $this->_timeMin)
+        if ($recordNode && $this->_timeMin!=0 &&
+            $recordNode['cost_time'] < $this->_timeMin)
             return true;
 
         return false;
@@ -352,7 +368,8 @@ class CachegrindParser2_Input_Parser
 
 
     /**
-     * returns the summaries from a cachegrind profile (keys: cost_time, cost_cycles, cost_memory, cost_memory_peak)
+     * returns the summaries from a cachegrind profile (keys: cost_time,
+     * cost_cycles, cost_memory, cost_memory_peak)
      */
     private static function _getSummaries($file)
     {
@@ -376,9 +393,13 @@ class CachegrindParser2_Input_Parser
                 foreach ($summaries[1] as $summary) {
                     $summary = explode(' ', $summary);
                     $rootCosts['cost_time']         += $summary[0];
-                    $rootCosts['cost_cycles']         += $summary[2];
-                    $rootCosts['cost_memory']         = max($summary[1],$rootCosts['cost_memory']);
-                    $rootCosts['cost_memory_peak']     = max($summary[3],$rootCosts['cost_memory_peak']);
+                    $rootCosts['cost_cycles']       += $summary[2];
+
+                    $rootCosts['cost_memory']       =
+                        max($summary[1],$rootCosts['cost_memory']);
+
+                    $rootCosts['cost_memory_peak']  =
+                        max($summary[3],$rootCosts['cost_memory_peak']);
                 }
             }
             $lastData = substr($data, strrpos($data,"\n"));

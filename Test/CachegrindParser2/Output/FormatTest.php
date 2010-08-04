@@ -73,9 +73,11 @@ class CachegrindParser2_Output_Format_Test extends PHPUnit_Framework_TestCase
     public function testConstructor()
     {
         $outputFile = tempnam('/tmp', 'testFormatOutput_') . '.dot';
-        $format = new CachegrindParser2_Output_Format($this->_db, $outputFile, 'dot');
+        $format = new CachegrindParser2_Output_Format(
+                    $this->_db, $outputFile, 'dot');
 
-        $this->assertEquals('CachegrindParser2_Output_Format', get_class($format));
+        $this->assertEquals('CachegrindParser2_Output_Format',
+                            get_class($format));
     }
 
 
@@ -84,12 +86,16 @@ class CachegrindParser2_Output_Format_Test extends PHPUnit_Framework_TestCase
      */
     public function testFormat()
     {
-        $parser = new CachegrindParser2_Input_Parser( self::$_cachegrindTemplate, $this->_db, 0, true );
+        $parser = new CachegrindParser2_Input_Parser(
+            self::$_cachegrindTemplate, $this->_db, 0, true );
+
         $parser->createTree();
 
         $outputFile = tempnam('/tmp', 'testFormatOutput_') . '.dot';
 
-        $format = new CachegrindParser2_Output_Format($this->_db, $outputFile, 'dot');
+        $format = new CachegrindParser2_Output_Format(
+            $this->_db, $outputFile, 'dot');
+
         $format->format();
 
         $data = file_get_contents($outputFile);

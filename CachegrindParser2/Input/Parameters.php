@@ -35,16 +35,19 @@ class CachegrindParser2_Input_Parameters
         $shortopts .= 'h';
         $shortopts .= 'v';
         $longopts = array(
-            'in:',            // required, input file
-            'out:',            // required, output file
+            'in:',          // required, input file
+            'out:',         // required, output file
             'format:',      // required, output format
             'parts::',      // optional, extract only some parts
-            'exclude::',    // optional, skip parts by matching one of the excludes
-            'include::',    // optional, include only parts by matching one of the includes
-            'depth::',        // optional, max. tree depth
-            'timethreshold::', // optional, filter nodes by percentage of total time
-            'time_min::',     // optional filter nodes by time
-            'db::',            // sqlite database file
+            'exclude::',    // optional, skip parts by matching one of the
+                            // excludes
+            'include::',    // optional, include only parts by matching one of
+                            // the includes
+            'depth::',      // optional, max. tree depth
+            'timethreshold::', // optional, filter nodes by percentage of total
+                            // time
+            'time_min::',   // optional filter nodes by time
+            'db::',         // sqlite database file
             'quiet',        // optional, don't output additional information
             'help',
             'version'
@@ -119,7 +122,8 @@ class CachegrindParser2_Input_Parameters
      */
     private function _inputError()
     {
-        echo "Couldn't find valid input data. Check that the input file exists and contains usable data.\n";
+        echo "Couldn't find valid input data. Check that the input file exists".
+             " and contains usable data.\n";
     }
 
 
@@ -128,9 +132,13 @@ class CachegrindParser2_Input_Parameters
      */
     private function _usage()
     {
-        echo "Usage: php cachegrindparser2.php --in <file_in> --out <file_out> --format xml|dot|svg|png\n\n";
+        echo "Usage: php cachegrindparser2.php --in <file_in> --out <file_out>".
+             " --format xml|dot|svg|png\n\n";
+
         echo "Optional: --timethreshold=0.## --quiet\n";
-        echo "Dot to SVG with letter page size: dot -Gsize=11,7 -Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
+        echo "Dot to SVG with letter page size: dot -Gsize=11,7 ".
+             "-Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
+
         echo "Dot to SVG with screen size: dot -Tsvg -o<file_out> <file_in>\n";
         echo "Note: SVG export needs the package 'graphviz'\n";
     }

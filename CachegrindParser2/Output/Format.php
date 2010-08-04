@@ -83,13 +83,15 @@ class CachegrindParser2_Output_Format
         copy($this->_file, $dotFile);
 
         // convert dot file to image (uses GraphViz package)
-        $cmd = "dot -T" . $this->_format . " -o" . escapeshellarg($this->_file) . " " .
+        $cmd = "dot -T" . $this->_format . " -o" .
+            escapeshellarg($this->_file) . " " .
             escapeshellarg( $dotFile ) . " 2>&1";
 
         $output = array();
         exec($cmd, $output);
         if ( !empty( $output ) )
-            throw new Exception("Failed executing dot:\n" . implode("\n", $output));
+            throw new Exception("Failed executing dot:\n" .
+                implode("\n", $output));
 
         // remove temp-file
         @unlink( $dotFile );
@@ -101,7 +103,9 @@ class CachegrindParser2_Output_Format
      */
     private function _formatDot()
     {
-        $output  = "digraph {\nnode [shape=box,style=rounded,fontname=arial,fontsize=17];\nedge [color=lightgrey];\n";
+        $output = "digraph {\n".
+                  "node [shape=box,style=rounded,fontname=arial,fontsize=17];\n".
+                  "edge [color=lightgrey];\n";
 
         $sql = "
             SELECT
@@ -116,7 +120,8 @@ class CachegrindParser2_Output_Format
         $rootCosts = $this->_db->query($sql)->fetch();
 
         if (empty($rootCosts)) {
-            trigger_error('Could not find a "summary:" section in the file.', E_USER_WARNING);
+            trigger_error('Could not find a "summary:" section in the file.',
+                E_USER_WARNING);
         }
 
         $sql = "
@@ -146,11 +151,14 @@ class CachegrindParser2_Output_Format
 
             $parentPath = substr($row['path'], 0, strrpos($row['path'], '##'));
 
-            $output .= '"' . md5($row['path']) . '" [label=' . $this->_formatDotLabel($row, $rootCosts) . '];'."\n";
+            $output .= '"' . md5($row['path']) . '" [label=' .
+                       $this->_formatDotLabel($row, $rootCosts) . '];'."\n";
 
             if ($parentPath != '') { // not root node
-                $output .= '"' . md5($parentPath) . '" -> "' . md5($row['path']) . '"';
-                $output .= ' [label="' . $edgeLabel . '",penwidth='.$penWidth.'];'."\n";
+                $output .= '"'.md5($parentPath).'" -> "'.md5($row['path']).'"';
+
+                $output .= ' [label="'.$edgeLabel.'",penwidth='.
+                           $penWidth.'];'."\n";
             }
         }
         $output .= '}';
@@ -179,7 +187,8 @@ class CachegrindParser2_Output_Format
         if ( strlen( $nodeName ) > $limit ) {
             $first_length = round($limit * 0.6);
             $second_length = $limit - $first_length - 3;
-            $nodeName = substr( $nodeName, 0, $first_length ) . '...' . substr( $nodeName, -$second_length );
+            $nodeName = substr( $nodeName, 0, $first_length ) . '...' .
+                        substr( $nodeName, -$second_length );
         }
 
         // Format nodeFile ...#{limit - 3}
@@ -188,7 +197,8 @@ class CachegrindParser2_Output_Format
 
         $output  = "<<table border='0'>\n";
         $output .= "<tr><td border='0' align='center' bgcolor='#ED7404'>";
-        $output .= "<font color='white'> " . htmlentities( $nodeFile ) . " <br/>" . htmlentities( $nodeName ) . "</font></td></tr>";
+        $output .= "<font color='white'> " . htmlentities( $nodeFile ) .
+                   " <br/>" . htmlentities( $nodeName ) . "</font></td></tr>";
 
         $output .= '<tr><td><table border="0">';
         $output .= '<tr><td align="right">Incl. Costs</td><td></td>';
