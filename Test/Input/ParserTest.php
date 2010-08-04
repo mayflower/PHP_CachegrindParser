@@ -22,7 +22,7 @@ require_once 'PHPUnit/Framework.php';
 
 class ParserTest extends PHPUnit_Framework_Testcase
 {
-    const testinput =<<<EOT
+    const testinput = '
 version: 0.9.6
 cmd: /bin/blub/test
 part: 1
@@ -61,10 +61,10 @@ fl=php:internal
 fn=php::fclose
 116 10 500 0 0
 
-EOT;
+';
 
     public function testGetCallTree() {
-        $parser = new Parser(self::testinput);
+    	$parser = new Parser(self::testinput);
 
         // build what we expect.
         // root
