@@ -75,37 +75,37 @@ class CallTreeNode
         $this->children[] = $child;
         $child->parent = $this;
         if ( strpos( $child->path, $this->path . '//' ) !== 0 )
-        	$child->path = $this->path . '//' . $child->path;
-        
+            $child->path = $this->path . '//' . $child->path;
+
         $this->resetInclusiveCostsCache();
     }
-    
+
     /**
      * Merges a new child node into the tree.
-     * 
+     *
      * @param PhpCachegrind\Data\CallTreeNode $child The child node to be merged.
      */
     public function mergeChild(CallTreeNode $child)
     {
-    	$candidate = $this->getChildByPath( $child->path );
-    	
-    	if ( $candidate != null ) {
-    		
-    		foreach ($child->children as $subChild) {
-    			$candidate->mergeChild( $subChild );
-    		} 
+        $candidate = $this->getChildByPath( $child->path );
+
+        if ( $candidate != null ) {
+
+            foreach ($child->children as $subChild) {
+                $candidate->mergeChild( $subChild );
+            }
             $candidate->costs = self::combineCostArrays($child->costs, $candidate->costs);
-        	$candidate->count += $child->count;
+            $candidate->count += $child->count;
 
             // and candidate's cache
-			$candidate->resetInclusiveCostsCache();
-    	}
-  		else {
-  			// Reset references
-  			unset($child->parent);
+            $candidate->resetInclusiveCostsCache();
+        }
+          else {
+              // Reset references
+              unset($child->parent);
 
-  			$this->addChild( $child );
-  		}
+              $this->addChild( $child );
+          }
     }
 
     /*
@@ -199,7 +199,7 @@ class CallTreeNode
     {
         return $this->fn;
     }
-    
+
     /**
      * Returns the name of the node path.
      *
@@ -210,7 +210,7 @@ class CallTreeNode
         return $this->path;
     }
 
-    
+
     /**
      * Returns the children of this node.
      *
@@ -231,8 +231,8 @@ class CallTreeNode
     public function getChildByPath( $path )
     {
         foreach ($this->children as $child) {
-        	if ( $child->path == $path )
-        		return $child;
+            if ( $child->path == $path )
+                return $child;
         }
         return null;
     }
@@ -267,7 +267,7 @@ class CallTreeNode
 
         // strict: exact match, avoid nested loop error
         $idx = array_search($this, $this->parent->children, true);
-        
+
         unset($this->parent->children[$idx]);
         unset($this->parent);
     }

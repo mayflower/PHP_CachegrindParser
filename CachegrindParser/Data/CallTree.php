@@ -24,18 +24,18 @@ use \CachegrindParser\Input as Input;
 class CallTree
 {
     private $summary;
-	private $root;
+    private $root;
 
     /** Stores the filters we will use when parsing. */
     private $filters = array();
-    
+
     /**
      * Creates a new CallTreeNode object with the given data.
      *
      * @param CachegrindParser\Data\CallTreeNode $rootNode The root node
      * @param array $summary An array containing: 'time'    => integer
      *                                            'cycles'  => integer
-     *                                            'mem'     => integer 
+     *                                            'mem'     => integer
      *                                            'peakmem' => integer
      */
     function __construct(CallTreeNode $root, $summary)
@@ -59,7 +59,7 @@ class CallTree
      *
      * @return array An array containing: 'time'    => integer
      *                                    'cycles'  => integer
-     *                                    'mem'     => integer 
+     *                                    'mem'     => integer
      *                                    'peakmem' => integer
      */
     public function getSummary()
@@ -81,19 +81,19 @@ class CallTree
             }
         }
     }
-    
+
     /**
      * Merge a tree into the current tree
-     * 
+     *
      * @param CallTree $tree
      */
     public function combineTrees(CallTree $tree) {
-    	
-    	foreach ( $tree->getRoot()->getChildren() as $key=>$child ) {
-    		$this->getRoot()->mergeChild( $child );
-    	}
-    		
-    	$this->summary = self::combineSummaryArrays( $this->getSummary(), $tree->getSummary() );
+
+        foreach ( $tree->getRoot()->getChildren() as $key=>$child ) {
+            $this->getRoot()->mergeChild( $child );
+        }
+
+        $this->summary = self::combineSummaryArrays( $this->getSummary(), $tree->getSummary() );
     }
 
     /**
@@ -113,7 +113,7 @@ class CallTree
     {
         $this->filters[] = $filter;
     }
-    
+
     /*
      * Combines two summary arrays. Time and cycles will be added, mem
      * and peakmem will be the max of the two values.
@@ -131,5 +131,5 @@ class CallTree
             'peakmem' => max($a1['peakmem'], $a2['peakmem']),
         );
     }
-    
+
 }

@@ -43,15 +43,15 @@ class RawEntry
 
     /**
      * Add a subcall to this entry.
-     * 
+     *
      * @param int $count Number of subCalls
      */
     public function addCall( $count )
     {
-       	$this->subcalls += $count;
+        $this->subcalls += $count;
     }
 
-    
+
     /**
      * Returns the filename of this function.
      *

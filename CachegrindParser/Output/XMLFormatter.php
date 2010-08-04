@@ -39,8 +39,8 @@ class XMLFormatter implements Formatter
 
         while($nodeQueue) {
             $node = array_pop($nodeQueue);
-	        if ( $node->getFuncname() == 'dropped' )
-	            continue;
+            if ( $node->getFuncname() == 'dropped' )
+                continue;
 
             self::addCall($root, $node);
             foreach ($node->getChildren() as $child) {
@@ -70,7 +70,7 @@ class XMLFormatter implements Formatter
             $fileElement = $root->addChild('file');
             $fileElement['name'] = $file;
         }
-        
+
         // 2. Get or create the function/method element
         // Note that $funcElement can be either a <method> or a <function> tag.
         $func = $node->getFuncname();
@@ -84,7 +84,7 @@ class XMLFormatter implements Formatter
         $callElement = $funcElement->addChild('call');
         $callElement['id'] = md5($node->getPath());
         $callElement['count'] = $node->getCallCount();
-        
+
         // 4. Add the costs.
         $costsElement = $callElement->addChild('ownCosts');
         foreach ($node->getCosts() as $name => $value) {
@@ -100,11 +100,11 @@ class XMLFormatter implements Formatter
         if ($node->getChildren()) {
             $calledFunctionsElement = $callElement->addChild('calledFunctions');
             foreach($node->getChildren() as $child) {
-            	
-		        if ( $child->getFuncname() == 'dropped' )
-		            continue;
-            	
-	            $e = $calledFunctionsElement->addChild('function');
+
+                if ( $child->getFuncname() == 'dropped' )
+                    continue;
+
+                $e = $calledFunctionsElement->addChild('function');
                 $e['file'] = $child->getFilename();
                 $e['name'] = $child->getFuncname();
                 $e['id']   = md5($child->getPath());

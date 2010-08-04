@@ -106,10 +106,10 @@ class Parser
         // Find the summary, default is non empty summary to avoid
         // division by zero errors in filters
         $summary = array(
-        	'time' => 1,
-        	'mem' => 1,
-        	'cycles' => 1,
-        	'peakmem' => 1
+            'time' => 1,
+            'mem' => 1,
+            'cycles' => 1,
+            'peakmem' => 1
         );
         foreach (explode("\n", $this->inputData) as $line) {
             if (strncmp($line, 'summary:', 8) == 0) {
@@ -138,7 +138,7 @@ class Parser
     {
         $lines = explode("\n", trim($this->inputData));
 
-    	// This makes our array indices the same as the file's line numbers
+        // This makes our array indices the same as the file's line numbers
         array_unshift($lines, '');
         $curLine = 7; // The first 6 lines are metadata
         $entries = array(); // Here we'll store the generated entries.
@@ -172,13 +172,13 @@ class Parser
                             . __LINE__ . ")\n");
                     }
                     // $calleeName = substr($lines[$curLine], 4);
-                	$entry->addCall( self::parseCallLine($lines[$curLine + 1]) );
+                    $entry->addCall( self::parseCallLine($lines[$curLine + 1]) );
                     $curLine += 3;
                     $subCalls++;
                 }
 
                 // Add this entry to the list.
-               	$entries[] = $entry;
+                $entries[] = $entry;
             }
             // Skip empty line between blocks
             $curLine += 1;
