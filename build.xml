@@ -5,7 +5,7 @@
 
   <!-- Create build directories -->
   <mkdir dir="${basedir}/build/api"/>
-  <!--<mkdir dir="${basedir}/build/cachegrind-parser"/>-->
+  <mkdir dir="${basedir}/build/code-browser"/>
   <mkdir dir="${basedir}/build/coverage"/>
   <mkdir dir="${basedir}/build/logs"/>
   <mkdir dir="${basedir}/build/pdepend"/>
@@ -69,6 +69,14 @@
    <arg line="-d ./ -t build/api" />
   </exec>
  </target>
+ 
+ <target name="phpcb">
+  <exec executable="phpcb">
+   <arg line="--log ${basedir}/build/logs
+              --source ${basedir}
+              --output ${basedir}/build/code-browser" />
+  </exec>
+ </target>
 
- <target name="build" depends="clean,parallelTasks,phpunit"/>
+ <target name="build" depends="clean,parallelTasks,phpunit,phpcb"/>
 </project>
