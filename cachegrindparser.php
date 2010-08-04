@@ -29,7 +29,9 @@ ini_set( 'memory_limit', '1524M' );
 $parameters = parseOptions();
 
 // 2. Create a Tree object
-$tree = createTree( $parameters["input"], $parameters["quiet"], $parameters['parts'], $parameters['exclude'], $parameters['include'] );
+$tree = createTree(
+    $parameters["input"], $parameters["quiet"], $parameters['parts'],
+    $parameters['exclude'], $parameters['include'] );
 
 // 3. Filter the tree
 if ( !$parameters["quiet"] )
@@ -52,8 +54,9 @@ if ( $parameters["format"] == "svg" || $parameters["format"] == "png" ) {
     file_put_contents( $dotFile, $output, LOCK_EX);
 
     // call dot (graphviz package)
-    $cmd = "dot -T{$parameters["format"]} -o" . escapeshellarg( $parameters["output"] ) . " " .
-                            escapeshellarg( $dotFile ) . " 2>&1";
+    $cmd = "dot -T{$parameters["format"]} -o" .
+            escapeshellarg( $parameters["output"] ) . " " .
+            escapeshellarg( $dotFile ) . " 2>&1";
 
     exec( $cmd, $output );
     if ( !empty( $output ) )
@@ -103,7 +106,7 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
         $line = fgets($fp);
         $numLines++;
         $numData += strlen( $line );
-        $progress = number_format( ( ( $numData / $fpFilesize ) * 100), 2) . '%';
+        $progress = number_format((($numData / $fpFilesize) * 100), 2) . '%';
 
         // check for a new part (boundary match or end of file)
         if ( strpos($line, '==== NEW PROFILING FILE') === 0 || feof( $fp ) ) {
@@ -118,7 +121,8 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
             // min. / max. parts
             if ( !empty( $parts[0] ) && $parts[0] > $numParts ) {
                 if ( !$quiet )
-                    echo "-- skip part {$numParts}, parts range, read progress {$progress}\n";
+                    echo "-- skip part {$numParts}, parts range, read progress".
+                         " {$progress}\n";
 
                 $inputData = '';
                 continue;
@@ -128,7 +132,9 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
 
             if ( strlen($inputData) > $limit ) {
                 if ( !$quiet )
-                    echo "-- skip part {$numParts}, too large: length ".strlen($inputData)." line {$numLines} read progress {$progress}\n";
+                    echo "-- skip part {$numParts}, too large: length ".
+                        strlen($inputData)." line {$numLines} read progress ".
+                        "{$progress}\n";
 
                 $inputData = '';
                 continue;
@@ -140,7 +146,8 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
             $regexp = implode( '|', $excludes );
             if ( !empty( $regexp ) && preg_match( "!{$regexp}!", $inputData ) ) {
                 if ( !$quiet )
-                    echo "-- skip part {$numParts}, match exclusion, read progress {$progress}\n";
+                    echo "-- skip part {$numParts}, match exclusion, read ".
+                         "progress {$progress}\n";
 
                 $inputData = '';
                 continue;
@@ -150,9 +157,10 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
                 $includes[$key] = preg_quote( $include );
             }
             $regexp = implode( '|', $includes );
-            if ( !empty( $regexp ) && preg_match( "!{$regexp}!", $inputData ) ) {
+            if (!empty( $regexp ) && preg_match("!{$regexp}!", $inputData)) {
                 if ( !$quiet )
-                    echo "-- skip part {$numParts}, match exclusion, read progress {$progress}\n";
+                    echo "-- skip part {$numParts}, match exclusion, read ".
+                         "progress {$progress}\n";
 
                 $inputData = '';
                 continue;
@@ -162,7 +170,8 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
             if ( trim($inputData) != '' ) {
 
                 if ( !$quiet )
-                    echo "## part {$numParts} length ".strlen($inputData)." line {$numLines} read progress {$progress}";
+                    echo "## part {$numParts} length ".strlen($inputData).
+                         " line {$numLines} read progress {$progress}";
 
                 $parser = new Input\Parser( $inputData );
                 $currTree = $parser->getCallTree();
@@ -218,7 +227,7 @@ function parseOptions()
         "filter::",     // optional, input tree filter
         "parts::",      // optional, extract only some parts
         "exclude::",    // optional, skip parts by matching one of the excludes
-        "include::",    // optional, include only parts by matching one of the includes
+        "include::",    // optional, include only parts by matching one of them
         "quiet",        // optional, don't output additional information
         "help",
         "version"
@@ -305,13 +314,19 @@ function parseOptions()
     $ret["output"] = $opts["out"];
 
     // only extract some parts of the file
-    $ret["parts"] = isset( $opts["parts"] ) ? explode( ',', $opts["parts"] ) : array();
+    $ret["parts"] = isset( $opts["parts"] ) ?
+                    explode( ',', $opts["parts"] ) :
+                    array();
 
     // skip parts by matching one of the excludes
-    $ret["exclude"] = isset( $opts["exclude"] ) ? explode( ',', $opts["exclude"] ) : array();
+    $ret["exclude"] = isset( $opts["exclude"] ) ?
+                      explode( ',', $opts["exclude"] ) :
+                      array();
 
     // include only parts by matching one of the includes
-    $ret["include"] = isset( $opts["include"] ) ? explode( ',', $opts["include"] ) : array();
+    $ret["include"] = isset( $opts["include"] ) ?
+                      explode( ',', $opts["include"] ) :
+                      array();
 
     // don't display additional information
     $ret["quiet"] = isset( $opts["quiet"] ) ? true : false;
@@ -353,9 +368,13 @@ EOT;
 function usage()
 {
     echo "Error: missing parameters\n";
-    echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> --filter=nophp|include|depth=#|timethreshold=0.## --filter ... --format xml|dot|svg|png --parts=#,# --exclude=<strings> --include=<strings> --quiet\n\n";
+    echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> ".
+         "--filter=nophp|include|depth=#|timethreshold=0.## --filter ... ".
+         "--format xml|dot|svg|png --parts=#,# --exclude=<strings> ".
+         "--include=<strings> --quiet\n\n";
     echo "Optional: --filter, --parts, --exclude, --include, --quiet\n";
-    echo "Dot to SVG with letter page size: dot -Gsize=11,7 -Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
+    echo "Dot to SVG with letter page size: dot -Gsize=11,7 -Gratio=compress ".
+         "-Gcenter=true -Tsvg -o<file_out> <file_in>\n";
     echo "Dot to SVG with screen size: dot -Tsvg -o<file_out> <file_in>\n";
     echo "Note: SVG export needs the package 'graphviz'\n";
 }

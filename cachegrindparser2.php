@@ -41,11 +41,14 @@ initDatabase($db);
 
 
 // 3. Create a Tree
-$timethreshold = isset($parameters['timethreshold']) ? $parameters['timethreshold'] : 0;
+$timethreshold = isset($parameters['timethreshold']) ?
+                 $parameters['timethreshold'] :
+                 0;
 $timeMin = isset($parameters['time_min']) ? $parameters['time_min'] : 0;
 $quiet = isset($parameters['quiet']) ? true : false;
 
-$parser = new CachegrindParser2_Input_Parser($parameters['in'], $db, $timethreshold, $timeMin, $quiet);
+$parser = new CachegrindParser2_Input_Parser(
+    $parameters['in'], $db, $timethreshold, $timeMin, $quiet);
 $parser->createTree();
 
 if (!isset($parameters['quiet']))
@@ -53,7 +56,8 @@ if (!isset($parameters['quiet']))
 
 
 // 4. create dot output
-$format = new CachegrindParser2_Output_Format($db, $parameters["out"], $parameters['format']);
+$format = new CachegrindParser2_Output_Format(
+    $db, $parameters["out"], $parameters['format']);
 $format->format();
 
 
