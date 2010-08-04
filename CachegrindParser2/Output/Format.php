@@ -86,6 +86,7 @@ class CachegrindParser2_Output_Format
 		$cmd = "dot -T" . $this->_format . " -o" . escapeshellarg($this->_file) . " " .
 			escapeshellarg( $dotFile ) . " 2>&1";
 
+		$output = array();
 		exec($cmd, $output);
 		if ( !empty( $output ) )
 			throw new Exception("Failed executing dot:\n" . implode("\n", $output));
@@ -134,7 +135,7 @@ class CachegrindParser2_Output_Format
 		foreach ($rows as $row) {
 
 			// output edges and nodes
-			$penWidth = max( 1, ceil(($row['cost_time'] / $rootCosts['cost_time']) * 30)); // thickness of edge
+			$penWidth = max( 1, ceil(($row['cost_time'] / max($rootCosts['cost_time'], 1)) * 30)); // thickness of edge
 
 			$edgeLabel =  $row['count'] . 'x';
 			$edgeLabel .= ' [' . round($row['cost_time']/1000) . ' ms]';
