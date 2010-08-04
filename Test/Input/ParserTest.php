@@ -64,7 +64,7 @@ fn=php::fclose
 ';
 
     public function testGetCallTree() {
-    	$parser = new Parser(self::testinput);
+        $parser = new Parser(self::testinput);
 
         // build what we expect.
         // root
