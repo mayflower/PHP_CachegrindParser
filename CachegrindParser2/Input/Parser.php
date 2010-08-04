@@ -38,6 +38,13 @@ class CachegrindParser2_Input_Parser
 
 
 	/**
+	 * Minimum of cost_time to drop a node
+	 * @var float
+	 */
+	private $_timeMin = 0;
+
+
+	/**
 	 * database handle (PDO)
 	 * @var object
 	 */
@@ -66,9 +73,10 @@ class CachegrindParser2_Input_Parser
 	 * @param string $file Filename to parse
 	 * @param object $db Database handle (PDO)
 	 * @param float $timethreshold Percentage of total cost_time to drop a node
+	 * @param float $timeMin time of cost_time to drop a node
 	 * @param boolean $quiet dont output debug/progress information
 	 */
-	public function __construct($file, $db, $timethreshold = 0, $quiet = false)
+	public function __construct($file, $db, $timethreshold = 0, $timeMin, $quiet = false)
 	{
 		if (empty($file) || !file_exists($file) || filesize($file) == 0 || !is_readable($file))
 			throw new Exception('Cannot read ' . $file);
@@ -77,6 +85,7 @@ class CachegrindParser2_Input_Parser
 		$this->_db 				= $db;
 		$this->_quiet 			= $quiet;
 		$this->_timethreshold 	= $timethreshold;
+		$this->_timeMin	 		= $timeMin;
 	}
 
 
@@ -334,6 +343,9 @@ class CachegrindParser2_Input_Parser
 			if ($recordNode['cost_time'] < $minTime)
 				return true;
 		}
+
+		if ($recordNode && $this->_timeMin!=0 && $recordNode['cost_time'] < $this->_timeMin)
+			return true;
 
 		return false;
 	}
