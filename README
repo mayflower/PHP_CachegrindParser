@@ -22,6 +22,7 @@ Usage: (version 2, better performance, less features)
 
 php cachegrindparser2.php --in <file_in> --out <file_out>
                           --timethreshold=0.0#
+                          --time_min=###
                           --format dot|svg|png
                           --db=<file_db>
                           --quiet
@@ -40,6 +41,7 @@ Filters (optional):
 - depth=#: removes calls that are more than a few steps away from the root node
 - timethreshold=0.##: removes calls that make up for less than a given percentage of the
                      total time of the tree
+- time_min=##: removes calls that make up for less than a given amount of time [unit: ns]
 
 Parts (optional):
 - extract only a range of parts from a multipart input file
