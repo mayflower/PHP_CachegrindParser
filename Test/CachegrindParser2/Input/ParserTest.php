@@ -17,7 +17,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
      * Example cachegrind output profile
      * @var string
      */
-    private static $_cachegrindTemplate = 'Examples/example.cachegrind.out.dump';
+    private static $_cachegrindTemplate =
+        'Examples/example.cachegrind.out.dump';
 
 
     /**
@@ -36,7 +37,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
         $tmpFile = tempnam('/tmp', 'sqlite_') . '.sqlite';
         $this->_db = new PDO('sqlite:' . $tmpFile);
 
-        $this->_db->exec("CREATE TABLE node (
+        $this->_db->exec(
+        "CREATE TABLE node (
             part int,
             request varchar,
             filename varchar,
@@ -52,7 +54,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
             cost_memory_self int,
             cost_memory_peak_self int,
             path varchar
-        )");
+        )"
+        );
 
         $this->assertEquals('PDO', get_class($this->_db));
     }
@@ -73,10 +76,13 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     public function testConstructor()
     {
         $parser = new CachegrindParser2_Input_Parser(
-                    self::$_cachegrindTemplate, $this->_db, 0, true);
+                    self::$_cachegrindTemplate, $this->_db, 0, true
+                  );
 
-        $this->assertEquals('CachegrindParser2_Input_Parser',
-                            get_class($parser));
+        $this->assertEquals(
+            'CachegrindParser2_Input_Parser',
+            get_class($parser)
+        );
     }
 
 
@@ -86,7 +92,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     public function testCreateTree()
     {
         $parser = new CachegrindParser2_Input_Parser(
-            self::$_cachegrindTemplate, $this->_db, 0, true);
+            self::$_cachegrindTemplate, $this->_db, 0, true
+        );
 
         $parser->createTree();
 
@@ -135,8 +142,10 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
         $this->assertEquals('40', $rows[4]['cost_memory_self']);
         $this->assertEquals('0', $rows[4]['cost_memory_peak_self']);
 
-        $this->assertEquals('CachegrindParser2_Input_Parser',
-                            get_class($parser));
+        $this->assertEquals(
+            'CachegrindParser2_Input_Parser',
+            get_class($parser)
+        );
     }
 
 
@@ -146,7 +155,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     public function testParseRecordNode()
     {
         // cachegrind block example,
-        $block = preg_replace("/\n\\s+/", "\n", trim('
+        $block = preg_replace(
+        "/\n\\s+/", "\n", trim('
             fl=/home/data/www/htdocs/example.php
             fn=test2
             7 141 120 0 0
@@ -156,7 +166,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
             cfn=test3
             calls=1 0 0
             12 7 0 0 0
-        '));
+        ')
+        );
 
         $resultExpected = array (
             'filename' => '/home/data/www/htdocs/example.php',
@@ -168,10 +179,13 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
         );
 
         $parser = new CachegrindParser2_Input_Parser(
-            self::$_cachegrindTemplate, $this->_db, 0, true);
+            self::$_cachegrindTemplate, $this->_db, 0, true
+        );
 
-        $this->assertMethodReturnEqual(array($parser, '_parseRecordNode'),
-            array($block, 0), $resultExpected);
+        $this->assertMethodReturnEqual(
+            array($parser, '_parseRecordNode'),
+            array($block, 0), $resultExpected
+        );
     }
 
 
@@ -188,10 +202,13 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
         );
 
         $parser = new CachegrindParser2_Input_Parser(
-            self::$_cachegrindTemplate, $this->_db, 0, true);
+            self::$_cachegrindTemplate, $this->_db, 0, true
+        );
 
-        $this->assertMethodReturnEqual(array($parser, '_getSummaries'),
-            array(self::$_cachegrindTemplate), $resultExpected);
+        $this->assertMethodReturnEqual(
+            array($parser, '_getSummaries'),
+            array(self::$_cachegrindTemplate), $resultExpected
+        );
     }
 
 
@@ -201,7 +218,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     public function testParseSubCalls()
     {
         // cachegrind block example,
-        $block = preg_replace("/\n\\s+/", "\n", trim('
+        $block = preg_replace(
+        "/\n\\s+/", "\n", trim('
             fl=/home/data/www/htdocs/example.php
             fn=test2
             7 141 120 0 0
@@ -211,11 +229,12 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
             cfn=test3
             calls=1 0 0
             12 7 0 0 0
-        '));
+        ')
+        );
 
         $nodePath = '{main}##test1';
 
-        $rootCosts = array (
+        $rootCosts = array(
             'cost_time' => 1001,
             'cost_cycles' => 0,
             'cost_memory' => 344,
@@ -233,16 +252,21 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
         );
 
         $parser = new CachegrindParser2_Input_Parser(
-            self::$_cachegrindTemplate, $this->_db, 0, true);
+            self::$_cachegrindTemplate, $this->_db, 0, true
+        );
 
-        $this->assertMethodReturnEqual(array($parser, '_parseSubCalls'),
-            array($nodePath, $block, $rootCosts), null);
+        $this->assertMethodReturnEqual(
+            array($parser, '_parseSubCalls'),
+            array($nodePath, $block, $rootCosts), null
+        );
 
-         $this->assertAttributeEquals(
-            $expectedResultRefs, '_subCallRefs', $parser);
+        $this->assertAttributeEquals(
+            $expectedResultRefs, '_subCallRefs', $parser
+        );
 
-         $this->assertAttributeEquals(
-            $expectedResultCounts, '_subCallCounts', $parser);
+        $this->assertAttributeEquals(
+            $expectedResultCounts, '_subCallCounts', $parser
+        );
     }
 
 
@@ -252,7 +276,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     public function testParseCosts()
     {
         // cachegrind block example,
-        $block = preg_replace("/\n\\s+/", "\n", trim('
+        $block = preg_replace(
+        "/\n\\s+/", "\n", trim('
             fl=/home/data/www/htdocs/example.php
             fn=test2
             7 141 120 1 0
@@ -262,7 +287,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
             cfn=test3
             calls=1 4 5
             12 7 9 7 8
-        '));
+        ')
+        );
 
         $expectedResults = array(
             'cost_time' => 164,
@@ -276,10 +302,12 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
         );
 
         $parser = new CachegrindParser2_Input_Parser(
-            self::$_cachegrindTemplate, $this->_db, 0, true);
+            self::$_cachegrindTemplate, $this->_db, 0, true
+        );
 
         $this->assertMethodReturnEqual(
-            array($parser, '_parseCosts'), array($block), $expectedResults);
+            array($parser, '_parseCosts'), array($block), $expectedResults
+        );
     }
 
 
@@ -299,24 +327,33 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
             'cost_time' => 100
         );
 
-        $recordNode2 = array(
+        $recordNodeLow = array(
             'cost_time' => 10
         );
 
         $parser = new CachegrindParser2_Input_Parser(
-            self::$_cachegrindTemplate, $this->_db, 0.01, true);
+            self::$_cachegrindTemplate, $this->_db, 0.01, true
+        );
 
-        $this->assertMethodReturnEqual(array($parser, '_filter'),
-            array('php::str_replace', $rootCosts, $recordNode, ''), true);
+        $this->assertMethodReturnEqual(
+            array($parser, '_filter'),
+            array('php::str_replace', $rootCosts, $recordNode, ''), true
+        );
 
-        $this->assertMethodReturnEqual(array($parser, '_filter'),
-            array('php::call_user_func', $rootCosts, $recordNode, ''), false);
+        $this->assertMethodReturnEqual(
+            array($parser, '_filter'),
+            array('php::call_user_func', $rootCosts, $recordNode, ''), false
+        );
 
-        $this->assertMethodReturnEqual(array($parser, '_filter'),
-            array('blabla', $rootCosts, $recordNode, ''), false);
+        $this->assertMethodReturnEqual(
+            array($parser, '_filter'),
+            array('blabla', $rootCosts, $recordNode, ''), false
+        );
 
-        $this->assertMethodReturnEqual(array($parser, '_filter'),
-            array('blabla2', $rootCosts, $recordNode2, ''), true);
+        $this->assertMethodReturnEqual(
+            array($parser, '_filter'),
+            array('blabla2', $rootCosts, $recordNodeLow, ''), true
+        );
     }
 
 
@@ -327,7 +364,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     {
         // get all nodes with at least 1 percent of total cost_time
         $parser = new CachegrindParser2_Input_Parser(
-            self::$_cachegrindTemplate, $this->_db, 0.01, true);
+            self::$_cachegrindTemplate, $this->_db, 0.01, true
+        );
 
         $parser->createTree();
 
@@ -354,8 +392,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
         $method = new ReflectionMethod($function[0], $function[1]);
         $method->setAccessible(TRUE);
 
-         $actual = $method->invokeArgs($function[0], $parameters);
+        $actual = $method->invokeArgs($function[0], $parameters);
 
-         $this->assertEquals($expected, $actual);
+        $this->assertEquals($expected, $actual);
     }
 }

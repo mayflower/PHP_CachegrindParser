@@ -18,7 +18,8 @@ class CachegrindParser2_Output_Format_Test extends PHPUnit_Framework_TestCase
      * Example cachegrind output profile
      * @var string
      */
-    private static $_cachegrindTemplate = 'Examples/example.cachegrind.out.dump';
+    private static $_cachegrindTemplate =
+        'Examples/example.cachegrind.out.dump';
 
 
     /**
@@ -37,7 +38,8 @@ class CachegrindParser2_Output_Format_Test extends PHPUnit_Framework_TestCase
         $tmpFile = tempnam('/tmp', 'sqlite_') . '.sqlite';
         $this->_db = new PDO('sqlite:' . $tmpFile);
 
-        $this->_db->exec("CREATE TABLE node (
+        $this->_db->exec(
+        "CREATE TABLE node (
             part int,
             request varchar,
             filename varchar,
@@ -53,7 +55,8 @@ class CachegrindParser2_Output_Format_Test extends PHPUnit_Framework_TestCase
             cost_memory_self int,
             cost_memory_peak_self int,
             path varchar
-        )");
+        )"
+        );
 
         $this->assertEquals('PDO', get_class($this->_db));
     }
@@ -74,10 +77,13 @@ class CachegrindParser2_Output_Format_Test extends PHPUnit_Framework_TestCase
     {
         $outputFile = tempnam('/tmp', 'testFormatOutput_') . '.dot';
         $format = new CachegrindParser2_Output_Format(
-                    $this->_db, $outputFile, 'dot');
+            $this->_db, $outputFile, 'dot'
+        );
 
-        $this->assertEquals('CachegrindParser2_Output_Format',
-                            get_class($format));
+        $this->assertEquals(
+            'CachegrindParser2_Output_Format',
+            get_class($format)
+        );
     }
 
 
@@ -94,7 +100,8 @@ class CachegrindParser2_Output_Format_Test extends PHPUnit_Framework_TestCase
         $outputFile = tempnam('/tmp', 'testFormatOutput_') . '.dot';
 
         $format = new CachegrindParser2_Output_Format(
-            $this->_db, $outputFile, 'dot');
+            $this->_db, $outputFile, 'dot'
+        );
 
         $format->format();
 
