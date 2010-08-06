@@ -20,7 +20,7 @@ require_once 'CachegrindParser/Input/Filter.php';
 class DepthFilter implements Filter
 {
 
-    private $depth;
+    private $_depth;
 
     /**
      * Creates a new DepthFilter instance.
@@ -28,8 +28,9 @@ class DepthFilter implements Filter
      * @param integer $depth The number of levels after which the graph
      *                       should be pruned.
      */
-    function __construct($depth) {
-        $this->depth = $depth;
+    function __construct($depth)
+    {
+        $this->_depth = $depth;
     }
 
     /**
@@ -37,14 +38,14 @@ class DepthFilter implements Filter
      */
     public function filter(\CachegrindParser\Data\Calltree &$tree)
     {
-        $Queue1 = array($tree->getRoot());
-        $Queue2 = array();
+        $queue = array($tree->getRoot());
+        $queueNext = array();
         $curDepth = 0; // Depth of elements in the queue we're working on.
 
-        $current =& $Queue1;
-        $next    =& $Queue2;
+        $current =& $queue;
+        $next    =& $queueNext;
         do {
-            if ($curDepth < $this->depth) {
+            if ($curDepth < $this->_depth) {
                 while ($current) {
                     foreach (array_pop($current)->getChildren() as $child) {
                         array_push($next, $child);

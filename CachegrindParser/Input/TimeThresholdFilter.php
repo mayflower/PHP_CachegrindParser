@@ -21,7 +21,7 @@ require_once 'CachegrindParser/Input/Filter.php';
 class TimeThresholdFilter implements Filter
 {
 
-    private $percentage;
+    private $_percentage;
 
     /**
      * Creates a new TimeTreshold instance.
@@ -29,9 +29,10 @@ class TimeThresholdFilter implements Filter
      * @param float $percentage Calls will be removed if they take less than
      *                            this percentage of the total costs.
      */
-    function __construct($percentage) {
+    function __construct($percentage)
+    {
         assert($percentage <= 1 && $percentage >= 0);
-        $this->percentage = $percentage;
+        $this->_percentage = $percentage;
     }
 
     /**
@@ -43,7 +44,7 @@ class TimeThresholdFilter implements Filter
 
         $queue = $tree->getRoot()->getChildren();
         $summary = $tree->getSummary();
-        $minTime = $this->percentage * $summary['time'];
+        $minTime = $this->_percentage * $summary['time'];
 
         while ($queue) {
             $node = array_pop($queue);

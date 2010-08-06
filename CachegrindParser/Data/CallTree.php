@@ -23,11 +23,11 @@ use \CachegrindParser\Input as Input;
  */
 class CallTree
 {
-    private $summary;
-    private $root;
+    private $_summary;
+    private $_root;
 
     /** Stores the filters we will use when parsing. */
-    private $filters = array();
+    private $_filters = array();
 
     /**
      * Creates a new CallTreeNode object with the given data.
@@ -40,8 +40,8 @@ class CallTree
      */
     function __construct(CallTreeNode $root, $summary)
     {
-        $this->root     = $root;
-        $this->summary  = $summary;
+        $this->_root     = $root;
+        $this->_summary  = $summary;
     }
 
     /**
@@ -51,7 +51,7 @@ class CallTree
      */
     public function getRoot()
     {
-        return $this->root;
+        return $this->_root;
     }
 
     /**
@@ -64,7 +64,7 @@ class CallTree
      */
     public function getSummary()
     {
-        return $this->summary;
+        return $this->_summary;
     }
 
     /**
@@ -72,7 +72,7 @@ class CallTree
      * to the tree after calling this.
      */
     public function combineSimilarSubtrees() {
-        $queue = array($this->root);
+        $queue = array($this->_root);
         while ($queue) {
             $node = array_shift($queue);
             $node->combineSimilarChildren();
@@ -93,14 +93,16 @@ class CallTree
             $this->getRoot()->mergeChild( $child );
         }
 
-        $this->summary = self::combineSummaryArrays( $this->getSummary(), $tree->getSummary() );
+        $this->_summary = self::combineSummaryArrays(
+            $this->getSummary(), $tree->getSummary()
+        );
     }
 
     /**
      * Filter the tree
      */
     public function filterTree() {
-        foreach ($this->filters as $filter)
+        foreach ($this->_filters as $filter)
             $filter->filter( $this );
     }
 
@@ -111,24 +113,24 @@ class CallTree
      */
     public function addFilter(Input\Filter $filter)
     {
-        $this->filters[] = $filter;
+        $this->_filters[] = $filter;
     }
 
     /*
      * Combines two summary arrays. Time and cycles will be added, mem
      * and peakmem will be the max of the two values.
      *
-     * @param array $a1 The first cost array.
-     * @param array $a2 The second cost array.
+     * @param array $first The first cost array.
+     * @param array $second The second cost array.
      * @return array A combined cost array.
      */
-    public static function combineSummaryArrays($a1, $a2)
+    public static function combineSummaryArrays($first, $second)
     {
         return array(
-            'time'    => $a1['time']   + $a2['time'],
-            'cycles'  => $a1['cycles'] + $a2['cycles'],
-            'mem'     => max($a1['mem'], $a2['mem']),
-            'peakmem' => max($a1['peakmem'], $a2['peakmem']),
+            'time'    => $first['time']   + $second['time'],
+            'cycles'  => $first['cycles'] + $second['cycles'],
+            'mem'     => max($first['mem'], $second['mem']),
+            'peakmem' => max($first['peakmem'], $second['peakmem']),
         );
     }
 

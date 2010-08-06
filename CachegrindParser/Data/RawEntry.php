@@ -16,12 +16,12 @@ namespace CachegrindParser\Data;
 class RawEntry
 {
 
-    private $fl;
-    private $fn;
+    private $_fl;
+    private $_fn;
 
-    private $costs;
+    private $_costs;
 
-    private $subcalls = 0;
+    private $_subcalls = 0;
 
     /**
      * Creates a new RawEntry object with the given values.
@@ -35,10 +35,10 @@ class RawEntry
      */
     function __construct($filename, $funcname, $costs)
     {
-        $this->fl = $filename;
-        $this->fn = $funcname;
+        $this->_fl = $filename;
+        $this->_fn = $funcname;
 
-        $this->costs = $costs;
+        $this->_costs = $costs;
     }
 
     /**
@@ -48,7 +48,7 @@ class RawEntry
      */
     public function addCall( $count )
     {
-        $this->subcalls += $count;
+        $this->_subcalls += $count;
     }
 
 
@@ -59,7 +59,7 @@ class RawEntry
      */
     public function getFilename()
     {
-        return $this->fl;
+        return $this->_fl;
     }
 
     /**
@@ -69,7 +69,7 @@ class RawEntry
      */
     public function getFuncname()
     {
-        return $this->fn;
+        return $this->_fn;
     }
 
     /**
@@ -82,7 +82,7 @@ class RawEntry
      */
     public function getCosts()
     {
-        return $this->costs;
+        return $this->_costs;
     }
 
     /**
@@ -92,7 +92,7 @@ class RawEntry
      */
     public function getSubcalls()
     {
-        return $this->subcalls;
+        return $this->_subcalls;
     }
 }
 

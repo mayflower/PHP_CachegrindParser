@@ -30,7 +30,7 @@ class CostsRating
         $nodeQueue = $tree->getRoot()->getChildren();
         $total = $tree->getSummary();
 
-        while($nodeQueue) {
+        while ($nodeQueue) {
             $node = array_pop($nodeQueue);
             $ratings = array();
             $costs = $node->getCosts();

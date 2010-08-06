@@ -20,20 +20,20 @@ namespace CachegrindParser\Data;
 class CallTreeNode
 {
 
-    private $fl;
-    private $fn;
-    private $path;
+    private $_fl;
+    private $_fn;
+    private $_path;
 
-    private $costs;
-    private $inclusiveCostsCache;
+    private $_costs;
+    private $_inclusiveCostsCache;
 
     /** Tracks with how many siblings this node was combined. */
-    private $count;
+    private $_count;
 
-    private $costRatings;
+    private $_costRatings;
 
-    private $children = array();
-    private $parent;
+    private $_children = array();
+    private $_parent;
 
     /**
      * Creates a new CallTreeNode object with the given values
@@ -47,11 +47,12 @@ class CallTreeNode
      */
     function __construct($filename, $funcname, $costs)
     {
-        $this->fl = $filename;
-        $this->fn = $funcname;
-        $this->path = basename($filename) . $funcname; // without filename, less memory usage
-        $this->costs = $costs;
-        $this->count = 1;
+        $this->_fl = $filename;
+        $this->_fn = $funcname;
+        // without filename, less memory usage
+        $this->_path = basename($filename) . $funcname;
+        $this->_costs = $costs;
+        $this->_count = 1;
     }
 
     /**
@@ -71,11 +72,11 @@ class CallTreeNode
      */
     public function addChild(CallTreeNode $child)
     {
-        assert(!isset($child->parent));
-        $this->children[] = $child;
-        $child->parent = $this;
-        if ( strpos( $child->path, $this->path . '//' ) !== 0 )
-            $child->path = $this->path . '//' . $child->path;
+        assert(!isset($child->_parent));
+        $this->_children[] = $child;
+        $child->_parent = $this;
+        if (strpos($child->_path, $this->_path . '//') !== 0)
+            $child->_path = $this->_path . '//' . $child->_path;
 
         $this->resetInclusiveCostsCache();
     }
@@ -83,39 +84,42 @@ class CallTreeNode
     /**
      * Merges a new child node into the tree.
      *
-     * @param PhpCachegrind\Data\CallTreeNode $child The child node to be merged.
+     * @param PhpCachegrind\Data\CallTreeNode $child The child node to
+     *        be merged.
      */
     public function mergeChild(CallTreeNode $child)
     {
-        $candidate = $this->getChildByPath( $child->path );
+        $candidate = $this->getChildByPath($child->_path);
 
-        if ( $candidate != null ) {
+        if ($candidate != null) {
 
-            foreach ($child->children as $subChild) {
-                $candidate->mergeChild( $subChild );
+            foreach ($child->_children as $subChild) {
+                $candidate->mergeChild($subChild);
             }
-            $candidate->costs = self::combineCostArrays($child->costs, $candidate->costs);
-            $candidate->count += $child->count;
+            $candidate->_costs = self::combineCostArrays(
+                $child->_costs, $candidate->_costs
+            );
+            $candidate->_count += $child->_count;
 
             // and candidate's cache
             $candidate->resetInclusiveCostsCache();
-        }
-          else {
+        } else {
               // Reset references
-              unset($child->parent);
+              unset($child->_parent);
 
-              $this->addChild( $child );
-          }
+              $this->addChild($child);
+        }
     }
 
     /*
      * Resets the inclusive Costs cache.
      */
-    private function resetInclusiveCostsCache() {
-        if (isset($this->inclusiveCostsCache)) {
-            unset($this->inclusiveCostsCache);
-            if ($this->parent) {
-                $this->parent->resetInclusiveCostsCache();
+    private function resetInclusiveCostsCache()
+    {
+        if (isset($this->_inclusiveCostsCache)) {
+            unset($this->_inclusiveCostsCache);
+            if ($this->_parent) {
+                $this->_parent->resetInclusiveCostsCache();
             }
         }
     }
@@ -130,7 +134,7 @@ class CallTreeNode
      */
     public function getCosts()
     {
-        return $this->costs;
+        return $this->_costs;
     }
 
     /**
@@ -141,16 +145,18 @@ class CallTreeNode
      */
     public function getInclusiveCosts()
     {
-        if (!isset($this->inclusiveCostsCache)) {
-            $inclCosts = $this->costs;
+        if (!isset($this->_inclusiveCostsCache)) {
+            $inclCosts = $this->_costs;
 
-            foreach ($this->children as $child) {
-                $inclCosts = self::combineCostArrays($inclCosts,
-                                    $child->getInclusiveCosts());
+            foreach ($this->_children as $child) {
+                $inclCosts = self::combineCostArrays(
+                    $inclCosts,
+                    $child->getInclusiveCosts()
+                );
             }
-            $this->inclusiveCostsCache = $inclCosts;
+            $this->_inclusiveCostsCache = $inclCosts;
         }
-        return $this->inclusiveCostsCache;
+        return $this->_inclusiveCostsCache;
     }
 
     /**
@@ -163,7 +169,7 @@ class CallTreeNode
      */
     public function setCostRatings($ratings)
     {
-        $this->costRatings = $ratings;
+        $this->_costRatings = $ratings;
     }
 
     /**
@@ -176,8 +182,8 @@ class CallTreeNode
      */
     public function getCostRatings()
     {
-        assert(isset($this->costRatings));
-        return $this->costRatings;
+        assert(isset($this->_costRatings));
+        return $this->_costRatings;
     }
 
     /**
@@ -187,7 +193,7 @@ class CallTreeNode
      */
     public function getFilename()
     {
-        return $this->fl;
+        return $this->_fl;
     }
 
     /**
@@ -197,7 +203,7 @@ class CallTreeNode
      */
     public function getFuncname()
     {
-        return $this->fn;
+        return $this->_fn;
     }
 
     /**
@@ -207,7 +213,7 @@ class CallTreeNode
      */
     public function getPath()
     {
-        return $this->path;
+        return $this->_path;
     }
 
 
@@ -220,7 +226,7 @@ class CallTreeNode
     public function getChildren()
     {
         // We might have holes in our array
-        return array_values($this->children);
+        return array_values($this->_children);
     }
 
     /**
@@ -230,8 +236,8 @@ class CallTreeNode
      */
     public function getChildByPath( $path )
     {
-        foreach ($this->children as $child) {
-            if ( $child->path == $path )
+        foreach ($this->_children as $child) {
+            if ($child->_path == $path)
                 return $child;
         }
         return null;
@@ -244,7 +250,7 @@ class CallTreeNode
      */
     public function getCallCount()
     {
-        return $this->count;
+        return $this->_count;
     }
 
     /**
@@ -255,21 +261,23 @@ class CallTreeNode
      */
     public function mergeIntoParent()
     {
-        assert($this->parent); // Make sure we're not the root node.
+        assert($this->_parent); // Make sure we're not the root node.
         // Confirm that we're our parent's child.
-        //assert(in_array($this, $this->parent->children));
+        //assert(in_array($this, $this->_parent->_children));
 
-        $this->parent->costs = self::combineCostArrays($this->parent->costs,
-                                                   $this->getInclusiveCosts());
+        $this->_parent->_costs = self::combineCostArrays(
+            $this->_parent->_costs,
+            $this->getInclusiveCosts()
+        );
 
         // mark deleted node as dropped (unset does not always work ...)
-        $this->fn = 'dropped';
+        $this->_fn = 'dropped';
 
         // strict: exact match, avoid nested loop error
-        $idx = array_search($this, $this->parent->children, true);
+        $idx = array_search($this, $this->_parent->_children, true);
 
-        unset($this->parent->children[$idx]);
-        unset($this->parent);
+        unset($this->_parent->_children[$idx]);
+        unset($this->_parent);
     }
 
     /**
@@ -280,27 +288,31 @@ class CallTreeNode
     public function combineSimilarChildren()
     {
         // re-key our children.
-        $this->children = array_values($this->children);
+        $this->_children = array_values($this->_children);
 
-        for ($i = count($this->children) - 1; $i >= 0; $i--) {
+        for ($i = count($this->_children) - 1; $i >= 0; $i--) {
             $merged = false;
-            $child = $this->children[$i];
+            $child = $this->_children[$i];
             for ($j = $i - 1; $j >= 0 && $merged == false; $j--) {
-                $candidate = $this->children[$j];
-                if ($candidate->fn === $child->fn &&
-                        $candidate->fl === $child->fl) {
+                $candidate = $this->_children[$j];
+                if ($candidate->_fn === $child->_fn &&
+                    $candidate->_fl === $child->_fl) {
                     // Merge child into candidate
                     // Combine the children and the costs.
-                    $candidate->children = array_merge($candidate->children,
-                                                       $child->children);
-                    $candidate->costs = self::combineCostArrays($child->costs,
-                                                            $candidate->costs);
+                    $candidate->_children = array_merge(
+                        $candidate->_children,
+                        $child->_children
+                    );
+                    $candidate->_costs = self::combineCostArrays(
+                        $child->_costs,
+                        $candidate->_costs
+                    );
 
-                    $candidate->count += $child->count;
+                    $candidate->_count += $child->_count;
 
                     // Reset references
-                    unset($this->children[$i]);
-                    unset($child->parent);
+                    unset($this->_children[$i]);
+                    unset($child->_parent);
 
                     // and candidate's cache
                     $candidate->resetInclusiveCostsCache();
@@ -310,24 +322,24 @@ class CallTreeNode
                 }
             }
         }
-        $this->children = array_values($this->children);
+        $this->_children = array_values($this->_children);
     }
 
     /*
      * Combines two costs arrays. Time and cycles will be added, mem
      * and peakmem will be the max of the two values.
      *
-     * @param array $a1 The first cost array.
-     * @param array $a2 The second cost array.
+     * @param array $first The first cost array.
+     * @param array $second The second cost array.
      * @return array A combined cost array.
      */
-    private static function combineCostArrays($a1, $a2)
+    private static function combineCostArrays($first, $second)
     {
         return array(
-            'time'    => $a1['time']   + $a2['time'],
-            'cycles'  => $a1['cycles'] + $a2['cycles'],
-            'mem'     => max($a1['mem'], $a2['mem']),
-            'peakmem' => max($a1['peakmem'], $a2['peakmem']),
+            'time'    => $first['time']   + $second['time'],
+            'cycles'  => $first['cycles'] + $second['cycles'],
+            'mem'     => max($first['mem'], $second['mem']),
+            'peakmem' => max($first['peakmem'], $second['peakmem']),
         );
     }
 }

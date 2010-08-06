@@ -18,10 +18,10 @@ namespace CachegrindParser\Data;
  */
 class RawCall
 {
-    private $cfn;
+    private $_cfn;
 
-    private $calls;
-    private $costs;
+    private $_calls;
+    private $_costs;
 
     /**
      * Creates a new RawCall object with the given values.
@@ -36,10 +36,10 @@ class RawCall
      */
     function __construct($funcname, $callData, $costs)
     {
-        $this->cfn = $funcname;
-        $this->calls = $callData['calls'];
+        $this->_cfn = $funcname;
+        $this->_calls = $callData['calls'];
 
-        $this->costs = $costs;
+        $this->_costs = $costs;
     }
 
     /**
@@ -49,7 +49,7 @@ class RawCall
      */
     public function getFuncname()
     {
-        return $this->cfn;
+        return $this->_cfn;
     }
 
     /**
@@ -62,7 +62,7 @@ class RawCall
      */
     public function getCosts()
     {
-        return $this->costs;
+        return $this->_costs;
     }
 
     /**
@@ -72,7 +72,7 @@ class RawCall
      */
     public function getCalls()
     {
-        return $this->calls;
+        return $this->_calls;
     }
 }
 

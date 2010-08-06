@@ -24,7 +24,7 @@ class NoPhpFilter implements Filter
     {
         $nodeQueue = array($tree->getRoot());
 
-        while($nodeQueue) {
+        while ($nodeQueue) {
             $node = array_pop($nodeQueue);
 
             foreach ($node->getChildren() as $child) {
