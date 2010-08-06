@@ -36,8 +36,8 @@ $sqliteFile = 'database.sqlite';
 if (!empty($parameters['db']))
     $sqliteFile = $parameters['db'];
 
-$db = new PDO('sqlite:' . $sqliteFile);
-initDatabase($db);
+$dbo = new PDO('sqlite:' . $sqliteFile);
+initDatabase($dbo);
 
 
 // 3. Create a Tree
@@ -48,7 +48,7 @@ $timeMin = isset($parameters['time_min']) ? $parameters['time_min'] : 0;
 $quiet = isset($parameters['quiet']) ? true : false;
 
 $parser = new CachegrindParser2_Input_Parser(
-    $parameters['in'], $db, $timethreshold, $timeMin, $quiet);
+    $parameters['in'], $dbo, $timethreshold, $timeMin, $quiet);
 $parser->createTree();
 
 if (!isset($parameters['quiet']))
@@ -57,7 +57,7 @@ if (!isset($parameters['quiet']))
 
 // 4. create dot output
 $format = new CachegrindParser2_Output_Format(
-    $db, $parameters["out"], $parameters['format']);
+    $dbo, $parameters["out"], $parameters['format']);
 $format->format();
 
 
@@ -67,14 +67,15 @@ $format->format();
 /**
  * Initializes the database (drops tables first)
  *
- * @param object $db database handle (PDO)
+ * @param object $dbo database handle (PDO)
  */
-function initDatabase($db)
+function initDatabase($dbo)
 {
-    $db->exec("DROP TABLE IF EXISTS node;");
-    //$db->exec("VACUUM;");
+    $dbo->exec("DROP TABLE IF EXISTS node;");
+    //$dbo->exec("VACUUM;");
 
-    $db->exec("CREATE TABLE node (
+    $dbo->exec(
+    "CREATE TABLE node (
         part int,
         request varchar,
         filename varchar,
@@ -90,5 +91,6 @@ function initDatabase($db)
         cost_memory_self int,
         cost_memory_peak_self int,
         path varchar
-    )");
+    )"
+    );
 }
