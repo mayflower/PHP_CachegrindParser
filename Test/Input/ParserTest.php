@@ -63,7 +63,8 @@ fn=php::fclose
 
 ';
 
-    public function testGetCallTree() {
+    public function testGetCallTree()
+    {
         $parser = new Parser(self::testinput);
 
         // build what we expect.
@@ -72,23 +73,29 @@ fn=php::fclose
 
         // root
         // |-> php::fclose
-        $root->addChild(new CallTreeNode('php:internal', 'php::fclose',
-                                         toCostArray(10, 500, 0, 0)));
+        $root->addChild(new CallTreeNode(
+            'php:internal', 'php::fclose',
+            toCostArray(10, 500, 0, 0))
+        );
 
         // root
         // |-> php::fclose
         // |-> {main}
-        $main = new CallTreeNode('index.php', '{main}',
-                                 toCostArray(21, 30, 0, 70));
+        $main = new CallTreeNode(
+            'index.php', '{main}',
+            toCostArray(21, 30, 0, 70)
+        );
         $root->addChild($main);
 
         // root
         // |-> php::fclose
         // |-> {main}
         //     |-> SomeClass::getInstance
-        $getInstance = new CallTreeNode('SomeClass.php',
-                                        'SomeClass::getInstance',
-                                        toCostArray(76, 1088, 0, 0));
+        $getInstance = new CallTreeNode(
+            'SomeClass.php',
+            'SomeClass::getInstance',
+            toCostArray(76, 1088, 0, 0)
+        );
         $main->addChild($getInstance);
 
         // root
@@ -96,9 +103,11 @@ fn=php::fclose
         // |-> {main}
         //     |-> SomeClass::getInstance
         //         |-> SomeClass->__construct
-        $construct = new CallTreeNode('SomeClass.php',
-                                      'SomeClass->__construct',
-                                      toCostArray(45, 472, 0, 0));
+        $construct = new CallTreeNode(
+            'SomeClass.php',
+            'SomeClass->__construct',
+            toCostArray(45, 472, 0, 0)
+        );
         $getInstance->addChild($construct);
 
         // root
@@ -107,9 +116,11 @@ fn=php::fclose
         //     |-> SomeClass::getInstance
         //         |-> SomeClass->__construct
         //             |-> php::spl_autoload_register
-        $sar = new CallTreeNode('php:internal',
-                                'php::spl_autoload_register',
-                                toCostArray(7, 336, 0, 10));
+        $sar = new CallTreeNode(
+            'php:internal',
+            'php::spl_autoload_register',
+            toCostArray(7, 336, 0, 10)
+        );
         $construct->addChild($sar);
 
         $expected = new CallTree($root, toCostArray(159, 1088, 0, 10));
