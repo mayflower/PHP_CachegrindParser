@@ -37,7 +37,7 @@ class XMLFormatter implements Formatter
         // We don't want the root of the tree here.
         $nodeQueue = $tree->getRoot()->getChildren();
 
-        while($nodeQueue) {
+        while ($nodeQueue) {
             $node = array_pop($nodeQueue);
             if ( $node->getFuncname() == 'dropped' )
                 continue;
@@ -99,7 +99,7 @@ class XMLFormatter implements Formatter
         // 4. Get or create the called functions elements
         if ($node->getChildren()) {
             $calledFunctionsElement = $callElement->addChild('calledFunctions');
-            foreach($node->getChildren() as $child) {
+            foreach ($node->getChildren() as $child) {
 
                 if ( $child->getFuncname() == 'dropped' )
                     continue;
@@ -138,8 +138,10 @@ class XMLFormatter implements Formatter
             $classElement['name'] = $className;
         }
 
-        $methodElement = $classElement->xpath('./method[@name="'
-                                              . $methodName . '"]');
+        $methodElement = $classElement->xpath(
+            './method[@name="'.
+            $methodName . '"]'
+        );
         if ($methodElement) {
             $methodElement = $methodElement[0];
         } else {
@@ -161,8 +163,10 @@ class XMLFormatter implements Formatter
     private static function insertFunction(\SimpleXMLElement $parentElement,
                                            $funcName)
     {
-        $funcElement = $parentElement->xpath('./function[@name="'
-                                             . $funcName . '"]');
+        $funcElement = $parentElement->xpath(
+            './function[@name="'.
+            $funcName . '"]'
+        );
         if ($funcElement) {
             $funcElement = $funcElement[0];
         } else {

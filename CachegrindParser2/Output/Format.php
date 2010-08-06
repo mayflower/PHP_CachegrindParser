@@ -104,7 +104,8 @@ class CachegrindParser2_Output_Format
     private function _formatDot()
     {
         $output = "digraph {\n".
-                  "node [shape=box,style=rounded,fontname=arial,fontsize=17];\n".
+                  "node [shape=box,style=rounded,fontname=arial,".
+                  "fontsize=17];\n".
                   "edge [color=lightgrey];\n";
 
         $sql = "
@@ -126,7 +127,8 @@ class CachegrindParser2_Output_Format
 
         $sql = "
             SELECT path, sum(count) as count, function_name, filename,
-                group_concat(DISTINCT request)||' ('||(max(part)+1)||'x)' as request,
+                group_concat(DISTINCT request)||' ('||(max(part)+1)||'x)'
+                    as request,
                 sum(cost_time) as cost_time,
                 sum(cost_cycles) as cost_cycles,
                 max(cost_memory) as cost_memory,
@@ -144,7 +146,9 @@ class CachegrindParser2_Output_Format
         foreach ($rows as $row) {
 
             // output edges and nodes
-            $penWidth = min(75, max( 1, ceil(($row['cost_time'] / max($rootCosts['cost_time'], 1)) * 30))); // thickness of edge 1-75
+            // thickness of edge 1-75
+            $penWidth = min(75, max( 1, ceil(($row['cost_time'] /
+                        max($rootCosts['cost_time'], 1)) * 30)));
 
             $edgeLabel =  $row['count'] . 'x';
             $edgeLabel .= ' [' . round($row['cost_time']/1000) . ' ms]';
@@ -169,8 +173,10 @@ class CachegrindParser2_Output_Format
     /**
      * Format a dot label (including costs, filename, function, etc)
      *
-     * @param array $row Array(Keys: function_name, filename, cost_cycles, cost_memory, cost_memory_peak, cost_time)
-     * @param array $rootCosts Total costs of the request Array(Keys: cost_cycles, cost_memory, cost_memory_peak, cost_time)
+     * @param array $row Array(Keys: function_name, filename, cost_cycles,
+     *                               cost_memory, cost_memory_peak, cost_time)
+     * @param array $rootCosts Total costs of the request Array(
+     *              Keys: cost_cycles, cost_memory, cost_memory_peak, cost_time)
      * @return string Dot language code
      */
     private function _formatDotLabel($row, $rootCosts)
@@ -185,10 +191,10 @@ class CachegrindParser2_Output_Format
 
         // Format nodeName #{60%}...#{limit - 60% - 3}
         if ( strlen( $nodeName ) > $limit ) {
-            $first_length = round($limit * 0.6);
-            $second_length = $limit - $first_length - 3;
-            $nodeName = substr( $nodeName, 0, $first_length ) . '...' .
-                        substr( $nodeName, -$second_length );
+            $firstLength = round($limit * 0.6);
+            $secondLength = $limit - $firstLength - 3;
+            $nodeName = substr( $nodeName, 0, $firstLength ) . '...' .
+                        substr( $nodeName, -$secondLength );
         }
 
         // Format nodeFile ...#{limit - 3}
@@ -204,7 +210,8 @@ class CachegrindParser2_Output_Format
         $output .= '<tr><td align="right">Incl. Costs</td><td></td>';
         $output .= '<td align="right">Own Costs</td></tr>'."\n";
 
-        foreach ( array('cost_cycles', 'cost_memory', 'cost_memory_peak', 'cost_time') as $key ) {
+        foreach ( array('cost_cycles', 'cost_memory', 'cost_memory_peak',
+                  'cost_time') as $key ) {
             $rating = 0;
             $keySelf = $key . '_self';
 
@@ -221,9 +228,12 @@ class CachegrindParser2_Output_Format
                 $bgColor = 'yellow';
 
             $output .= "<tr>";
-            $output .= "<td align='right' bgcolor='{$bgColor}'>{$row[$key]}</td>\n";
-            $output .= "<td align='center' bgcolor='{$bgColor}'> &nbsp;{$key}&nbsp; </td>\n";
-            $output .= "<td align='right' bgcolor='{$bgColor}'>{$row[$keySelf]}</td>\n";
+            $output .= "<td align='right' bgcolor='{$bgColor}'>{$row[$key]}".
+                       "</td>\n";
+            $output .= "<td align='center' bgcolor='{$bgColor}'> &nbsp;{$key}".
+                       "&nbsp; </td>\n";
+            $output .= "<td align='right' bgcolor='{$bgColor}'>".
+                       "{$row[$keySelf]}</td>\n";
             $output .= "</tr>\n";
         }
         $output .= '</table></td></tr>';

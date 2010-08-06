@@ -77,7 +77,8 @@ class CachegrindParser2_Input_Parser
      * @param float $timeMin time of cost_time to drop a node
      * @param boolean $quiet dont output debug/progress information
      */
-    public function __construct($file, $db, $timethreshold = 0, $timeMin, $quiet = false)
+    public function __construct($file, $db, $timethreshold = 0, $timeMin = 0,
+                                $quiet = false)
     {
         if (empty($file) || !file_exists($file) ||
             filesize($file) == 0 || !is_readable($file))
@@ -139,7 +140,7 @@ class CachegrindParser2_Input_Parser
                 $bufferFirstLine = array_shift($buffer);
 
             if (!$this->_quiet)
-                echo ' '.round($pos/1048576,2);
+                echo ' '.round($pos/1048576, 2);
 
             foreach (array_reverse($buffer) as $block) {
                 $block = trim($block);
@@ -164,7 +165,9 @@ class CachegrindParser2_Input_Parser
                 $recordNode = $this->_parseRecordNode($block, $part);
 
                 // parse all cost lines
-                $recordNode = array_merge($recordNode,self::_parseCosts($block));
+                $recordNode = array_merge(
+                    $recordNode, self::_parseCosts($block)
+                );
 
                 // block that contains only the request, don't process,
                 // store request filename
@@ -174,12 +177,17 @@ class CachegrindParser2_Input_Parser
                 }
 
                 // Drop out unneeded nodes
-                if ($this->_filter($recordNode['function_name'], $rootCosts, $recordNode, $recordNode['path']))
+                if ($this->_filter(
+                        $recordNode['function_name'], $rootCosts, $recordNode,
+                        $recordNode['path']
+                   ))
                     continue;
 
                 $fields = implode(',', array_keys($recordNode));
                 $values = "'" . implode("','", $recordNode) . "'";
-                $this->_db->exec("INSERT INTO node ({$fields}) VALUES({$values})");
+                $this->_db->exec(
+                    "INSERT INTO node ({$fields}) VALUES({$values})"
+                );
 
                 // parse subcalls, set subCallRefs (function => path),
                 // set SubCallCounts (function => count)
@@ -214,7 +222,7 @@ class CachegrindParser2_Input_Parser
             $recordNode['count']             = 1;
 
             // set the request filename
-            if (!empty($func[4]) && strpos($block,'{main}'))
+            if (!empty($func[4]) && strpos($block, '{main}'))
                 $recordNode['request'] = basename($func[4]);
 
         } else {
@@ -252,7 +260,8 @@ class CachegrindParser2_Input_Parser
      *
      * @param string $nodePath         path of current node
      * @param string $block     Current call block
-     * @param array $rootCosts     Array with keys: cost_time, cost_cycles, cost_memory, cost_memory_peak
+     * @param array $rootCosts     Array with keys: cost_time, cost_cycles,
+     *                             cost_memory, cost_memory_peak
      */
     private function _parseSubCalls($nodePath, $block, $rootCosts)
     {
@@ -315,10 +324,10 @@ class CachegrindParser2_Input_Parser
                 $recordNode['cost_cycles']       += $cost[3];
 
                 $recordNode['cost_memory']       =
-                    max($cost[2],$recordNode['cost_memory']);
+                    max($cost[2], $recordNode['cost_memory']);
 
                 $recordNode['cost_memory_peak']  =
-                    max($cost[4],$recordNode['cost_memory_peak']);
+                    max($cost[4], $recordNode['cost_memory_peak']);
             }
         }
 
@@ -339,8 +348,8 @@ class CachegrindParser2_Input_Parser
      * @param string $path Node path
      * @return boolean $functionName true = exclude, false = include
      */
-    private function _filter($functionName, $rootCosts, $recordNode, $path) {
-
+    private function _filter($functionName, $rootCosts, $recordNode, $path)
+    {
         // $depth = substr_count($path, '##');
 
         if (strncmp('php::', $functionName, 5) == 0
@@ -396,13 +405,13 @@ class CachegrindParser2_Input_Parser
                     $rootCosts['cost_cycles']       += $summary[2];
 
                     $rootCosts['cost_memory']       =
-                        max($summary[1],$rootCosts['cost_memory']);
+                        max($summary[1], $rootCosts['cost_memory']);
 
                     $rootCosts['cost_memory_peak']  =
-                        max($summary[3],$rootCosts['cost_memory_peak']);
+                        max($summary[3], $rootCosts['cost_memory_peak']);
                 }
             }
-            $lastData = substr($data, strrpos($data,"\n"));
+            $lastData = substr($data, strrpos($data, "\n"));
         }
         fclose($fp);
 

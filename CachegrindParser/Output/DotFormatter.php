@@ -32,7 +32,8 @@ class DotFormatter implements Formatter
         $rootInclCosts = $root->getInclusiveCosts();
         $rootTotalTime = $rootInclCosts['time'];
 
-        $output  = "digraph {\nnode [shape=box,style=rounded,fontname=arial,fontsize=17];\nedge [color=lightgrey];\n";
+        $output  = "digraph {\nnode [shape=box,style=rounded,fontname=arial,".
+                   "fontsize=17];\nedge [color=lightgrey];\n";
         $output .= '"' . md5($root->getPath()) . '" [label="{root}"];' . "\n";
 
         $nodeQueue = array();
@@ -54,13 +55,17 @@ class DotFormatter implements Formatter
                 $childInclCosts = $child->getInclusiveCosts();
                 $childTotalTime = $childInclCosts['time'];
 
-                $penWidth = max( 1, ceil(($childTotalTime / $rootTotalTime) * 30)); // thickness of edge
+                // thickness of edge
+                $penWidth = max(
+                    1, ceil(($childTotalTime / $rootTotalTime) * 30)
+                );
 
                 // Add the child's node
                 $output .= $childID . ' [label=' . self::label($child) . "];\n";
                 // And the edge
                 $output .= $parentID . '->' . $childID;
-                $output .= ' [label=' . self::edgeLabel($child) . ",penwidth={$penWidth}];\n";
+                $output .= ' [label=' . self::edgeLabel($child) . ",penwidth=".
+                           "{$penWidth}];\n";
 
                 array_push($nodeQueue, $child);
             }
@@ -102,19 +107,21 @@ class DotFormatter implements Formatter
         $limit = 40;
 
         // Format nodeName #{60%}...#{limit - 60% - 3}
-        if ( strlen( $nodeName ) > $limit ) {
-            $first_length = round($limit * 0.6);
-            $second_length = $limit - $first_length - 3;
-            $nodeName = substr( $nodeName, 0, $first_length ) . '...' . substr( $nodeName, -$second_length );
+        if (strlen($nodeName) > $limit) {
+            $firstLength = round($limit * 0.6);
+            $secondLength = $limit - $firstLength - 3;
+            $nodeName = substr($nodeName, 0, $firstLength) . '...' .
+                        substr($nodeName, -$secondLength);
         }
 
         // Format nodeFile ...#{limit - 3}
-        if ( strlen( $nodeFile ) > $limit )
-            $nodeFile = '...' . substr( $nodeFile, ($limit - 3) * (-1) );
+        if (strlen($nodeFile) > $limit)
+            $nodeFile = '...' . substr($nodeFile, ($limit - 3) * (-1));
 
         $label  = "<<table border='0'>\n";
         $label .= "<tr><td border='0' align='center' bgcolor='#ED7404'>";
-        $label .= "<font color='white'> " . htmlentities( $nodeFile ) . " <br/>" . htmlentities( $nodeName ) . "</font></td></tr>";
+        $label .= "<font color='white'> " . htmlentities($nodeFile) .
+                  " <br/>" . htmlentities($nodeName) . "</font></td></tr>";
 
         $ratings = $node->getCostRatings();
         $costs = $node->getCosts();
@@ -129,10 +136,13 @@ class DotFormatter implements Formatter
             $bgcolor = self::colorFromRating($ratings[$n]);
 
             $label .= "<tr>";
-            $label .= "<td align='right' bgcolor='{$bgcolor}'>{$inclusiveCosts[$n]}</td>\n";
-            $label .= "<td align='center' bgcolor='{$bgcolor}'> &nbsp;{$n}&nbsp; </td>\n";
+            $label .= "<td align='right' bgcolor='{$bgcolor}'>".
+                      "{$inclusiveCosts[$n]}</td>\n";
+            $label .= "<td align='center' bgcolor='{$bgcolor}'> &nbsp;{$n}".
+                      "&nbsp; </td>\n";
             $label .= "<td align='right' bgcolor='{$bgcolor}'>{$v}</td>\n";
-            // $label .= "<td fixedsize='true' width='10' height='10' bgcolor='{$bgcolor}'></td>\n
+            // $label .= "<td fixedsize='true' width='10' height='10'
+            // bgcolor='{$bgcolor}'></td>\n
             $label .= "</tr>\n";
         }
         $label .= '</table></td></tr>';
