@@ -168,11 +168,12 @@ class Parser
                 while(isset($lines[$curLine]) && $lines[$curLine] != '') {
                     if (strncmp('cfn=', $lines[$curLine], 4) != 0) {
                         // This doesn't look like a call, panik
-                        die("parse error on line {$curLine}. (Current line: {$lines[$curLine]}) (Script line: "
-                            . __LINE__ . ")\n");
+                        die("parse error on line {$curLine}. (Current line: ".
+                            "{$lines[$curLine]}) (Script line: ".
+                            __LINE__ . ")\n");
                     }
                     // $calleeName = substr($lines[$curLine], 4);
-                    $entry->addCall( self::parseCallLine($lines[$curLine + 1]) );
+                    $entry->addCall(self::parseCallLine($lines[$curLine + 1]));
                     $curLine += 3;
                     $subCalls++;
                 }
