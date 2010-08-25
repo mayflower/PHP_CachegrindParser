@@ -72,12 +72,12 @@ class CachegrindParser2_Input_Parser
      * Constructor for CachegrindParser2_Input_Parser
      *
      * @param string $file Filename to parse
-     * @param object $db Database handle (PDO)
+     * @param object $dbo Database handle (PDO)
      * @param float $timethreshold Percentage of total cost_time to drop a node
      * @param float $timeMin time of cost_time to drop a node
      * @param boolean $quiet dont output debug/progress information
      */
-    public function __construct($file, $db, $timethreshold = 0, $timeMin = 0,
+    public function __construct($file, $dbo, $timethreshold = 0, $timeMin = 0,
                                 $quiet = false)
     {
         if (empty($file) || !file_exists($file) ||
@@ -85,10 +85,10 @@ class CachegrindParser2_Input_Parser
             throw new Exception('Cannot read ' . $file);
 
         $this->_file             = $file;
-        $this->_db                 = $db;
-        $this->_quiet             = $quiet;
-        $this->_timethreshold     = $timethreshold;
-        $this->_timeMin             = $timeMin;
+        $this->_db               = $dbo;
+        $this->_quiet            = $quiet;
+        $this->_timethreshold    = $timethreshold;
+        $this->_timeMin          = $timeMin;
     }
 
 
@@ -105,7 +105,7 @@ class CachegrindParser2_Input_Parser
         // get "summary: *" aggregated
         $rootCosts = self::_getSummaries($this->_file);
 
-        if (!($fp = fopen($this->_file, 'r')))
+        if (!($fpr = fopen($this->_file, 'r')))
             throw new Exception('Unable to read: ' . $this->_file);
 
         $bufferFirstLine = '';
@@ -131,8 +131,8 @@ class CachegrindParser2_Input_Parser
             }
 
             // seek from end
-            fseek($fp, (-1)*$pos, SEEK_END);
-            $data = fread($fp, $bufferLength);
+            fseek($fpr, (-1)*$pos, SEEK_END);
+            $data = fread($fpr, $bufferLength);
 
             // split into blocks, append uncomplete block
             $buffer = explode("\n\n", $data . $bufferFirstLine);
@@ -194,7 +194,7 @@ class CachegrindParser2_Input_Parser
                 $this->_parseSubCalls($recordNode['path'], $block, $rootCosts);
             }
         }
-        fclose($fp);
+        fclose($fpr);
         $this->_db->commit();
     }
 
@@ -233,13 +233,13 @@ class CachegrindParser2_Input_Parser
             $recordNode['part']             = $part;
             $recordNode['count']             = 1;
 
-            $id = $recordNode['id'];
+            $rid = $recordNode['id'];
             $funcName = $recordNode['function_name'];
 
             // parent node from stack by id+name or by name
             // (ID can be 0 in some cases!)
-            if (isset($this->_subCallRefs[$id . $funcName]))
-                $recordNode['path'] = $this->_subCallRefs[$id . $funcName];
+            if (isset($this->_subCallRefs[$rid . $funcName]))
+                $recordNode['path'] = $this->_subCallRefs[$rid . $funcName];
 
             elseif (isset($this->_subCallRefs[$funcName]))
                 $recordNode['path'] = $this->_subCallRefs[$funcName];
@@ -277,8 +277,8 @@ class CachegrindParser2_Input_Parser
             foreach ($subCalls as $subCall) {
 
                 $funcName     = $subCall[1];
-                $count         = $subCall[2];
-                $id         = $subCall[3];
+                $count        = $subCall[2];
+                $rid          = $subCall[3];
                 $path         = $nodePath . '##' . $subCall[1];
 
                 if ($this->_filter($funcName, $rootCosts, array(), $path))
@@ -286,7 +286,7 @@ class CachegrindParser2_Input_Parser
 
                 // add subcalls to stack by id+name or name
                 // (ID can be 0 in some cases!)
-                $this->_subCallRefs[$id . $funcName] = $path;
+                $this->_subCallRefs[$rid . $funcName] = $path;
                 $this->_subCallRefs[$funcName] = $path;
                 $this->_subCallCounts[$funcName] = $count;
             }
@@ -348,8 +348,9 @@ class CachegrindParser2_Input_Parser
      * @param string $path Node path
      * @return boolean $functionName true = exclude, false = include
      */
-    private function _filter($functionName, $rootCosts, $recordNode, $path)
+    private function _filter($functionName, $rootCosts, $recordNode)
     {
+    	// 4th parameter: , $path
         // $depth = substr_count($path, '##');
 
         if (strncmp('php::', $functionName, 5) == 0
@@ -389,12 +390,12 @@ class CachegrindParser2_Input_Parser
             'cost_memory_peak' => 0,
         );
 
-        if (!($fp = fopen($file, 'r')))
+        if (!($fpr = fopen($file, 'r')))
             throw new Exception('Unable to read ' . $file);
 
         $lastData = '';
-        while (!feof($fp)) {
-            $data = fread($fp, 65536);
+        while (!feof($fpr)) {
+            $data = fread($fpr, 65536);
 
             $summaries = array();
             preg_match_all("/summary: (.+?)\n/", $lastData.$data, $summaries);
@@ -413,7 +414,7 @@ class CachegrindParser2_Input_Parser
             }
             $lastData = substr($data, strrpos($data, "\n"));
         }
-        fclose($fp);
+        fclose($fpr);
 
         return $rootCosts;
     }

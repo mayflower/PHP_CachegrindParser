@@ -150,8 +150,9 @@ class CachegrindParser2_Output_Format
             // output edges and nodes
             // thickness of edge 1-75
             $penWidth = min(
-                75, max(1, ceil(($row['cost_time'] /
-                max($rootCosts['cost_time'], 1)) * 30))
+                75, max(1, ceil(
+                    ($row['cost_time'] / max($rootCosts['cost_time'], 1)) * 30
+                ))
             );
 
             $edgeLabel =  $row['count'] . 'x';
