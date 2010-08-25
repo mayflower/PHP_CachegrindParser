@@ -39,7 +39,7 @@ class CachegrindParser2_Output_Format_Test extends PHPUnit_Framework_TestCase
         $this->_db = new PDO('sqlite:' . $tmpFile);
 
         $this->_db->exec(
-        "CREATE TABLE node (
+            "CREATE TABLE node (
             part int,
             request varchar,
             filename varchar,
@@ -117,21 +117,21 @@ class CachegrindParser2_Output_Format_Test extends PHPUnit_Framework_TestCase
 
         // test node IDs
         $mainPath = md5('{main}');
-        $test1Path = md5('{main}##test1');
-        $test2Path = md5('{main}##test1##test2');
-        $test3Path = md5('{main}##test1##test2##test3');
-        $test4Path = md5('{main}##test4');
+        $testPath = md5('{main}##test1');
+        $testPathTwo = md5('{main}##test1##test2');
+        $testPathThree = md5('{main}##test1##test2##test3');
+        $testPathFour = md5('{main}##test4');
 
         $this->assertContains($mainPath, $data);
-        $this->assertContains($test1Path, $data);
-        $this->assertContains($test2Path, $data);
-        $this->assertContains($test3Path, $data);
-        $this->assertContains($test4Path, $data);
+        $this->assertContains($testPath, $data);
+        $this->assertContains($testPathTwo, $data);
+        $this->assertContains($testPathThree, $data);
+        $this->assertContains($testPathFour, $data);
 
-        $this->assertContains("\"{$mainPath}\" -> \"{$test1Path}\"", $data);
-        $this->assertContains("\"{$test1Path}\" -> \"{$test2Path}\"", $data);
-        $this->assertContains("\"{$test2Path}\" -> \"{$test3Path}\"", $data);
-        $this->assertContains("\"{$mainPath}\" -> \"{$test4Path}\"", $data);
+        $this->assertContains("\"{$mainPath}\" -> \"{$testPath}\"", $data);
+        $this->assertContains("\"{$testPath}\" -> \"{$testPathTwo}\"", $data);
+        $this->assertContains("\"{$testPathTwo}\" -> \"{$testPathThree}\"", $data);
+        $this->assertContains("\"{$mainPath}\" -> \"{$testPathFour}\"", $data);
 
         // TODO test costs
         // TODO test private methods

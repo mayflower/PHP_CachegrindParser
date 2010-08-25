@@ -76,8 +76,8 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     public function testConstructor()
     {
         $parser = new CachegrindParser2_Input_Parser(
-                    self::$_cachegrindTemplate, $this->_db, 0, true
-                  );
+            self::$_cachegrindTemplate, $this->_db, 0, true
+        );
 
         $this->assertEquals(
             'CachegrindParser2_Input_Parser',
@@ -156,17 +156,17 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     {
         // cachegrind block example,
         $block = preg_replace(
-        "/\n\\s+/", "\n", trim('
-            fl=/home/data/www/htdocs/example.php
-            fn=test2
-            7 141 120 0 0
-            cfn=test3
-            calls=1 0 0
-            11 16 40 0 0
-            cfn=test3
-            calls=1 0 0
-            12 7 0 0 0
-        ')
+	        "/\n\\s+/", "\n", trim('
+	            fl=/home/data/www/htdocs/example.php
+	            fn=test2
+	            7 141 120 0 0
+	            cfn=test3
+	            calls=1 0 0
+	            11 16 40 0 0
+	            cfn=test3
+	            calls=1 0 0
+	            12 7 0 0 0
+	        ')
         );
 
         $resultExpected = array (
@@ -219,17 +219,17 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     {
         // cachegrind block example,
         $block = preg_replace(
-        "/\n\\s+/", "\n", trim('
-            fl=/home/data/www/htdocs/example.php
-            fn=test2
-            7 141 120 0 0
-            cfn=test3
-            calls=1 0 0
-            11 16 40 0 0
-            cfn=test3
-            calls=1 0 0
-            12 7 0 0 0
-        ')
+	        "/\n\\s+/", "\n", trim('
+	            fl=/home/data/www/htdocs/example.php
+	            fn=test2
+	            7 141 120 0 0
+	            cfn=test3
+	            calls=1 0 0
+	            11 16 40 0 0
+	            cfn=test3
+	            calls=1 0 0
+	            12 7 0 0 0
+	        ')
         );
 
         $nodePath = '{main}##test1';
@@ -277,17 +277,17 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     {
         // cachegrind block example,
         $block = preg_replace(
-        "/\n\\s+/", "\n", trim('
-            fl=/home/data/www/htdocs/example.php
-            fn=test2
-            7 141 120 1 0
-            cfn=test3
-            calls=1 0 0
-            11 16 40 2 3
-            cfn=test3
-            calls=1 4 5
-            12 7 9 7 8
-        ')
+	        "/\n\\s+/", "\n", trim('
+	            fl=/home/data/www/htdocs/example.php
+	            fn=test2
+	            7 141 120 1 0
+	            cfn=test3
+	            calls=1 0 0
+	            11 16 40 2 3
+	            cfn=test3
+	            calls=1 4 5
+	            12 7 9 7 8
+	        ')
         );
 
         $expectedResults = array(
