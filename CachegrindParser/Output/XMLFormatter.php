@@ -91,20 +91,20 @@ class XMLFormatter implements Formatter
             $costsElement[$name] = $value;
         }
 
-        $inclusiveCostsElement = $callElement->addChild('inclusiveCosts');
+        $inclusiveElement = $callElement->addChild('inclusiveCosts');
         foreach ($node->getInclusiveCosts() as $name => $value) {
-            $inclusiveCostsElement[$name] = $value;
+            $inclusiveElement[$name] = $value;
         }
 
         // 4. Get or create the called functions elements
         if ($node->getChildren()) {
-            $calledFunctionsElement = $callElement->addChild('calledFunctions');
+            $calledElement = $callElement->addChild('calledFunctions');
             foreach ($node->getChildren() as $child) {
 
                 if ($child->getFuncname() == 'dropped')
                     continue;
 
-                $e = $calledFunctionsElement->addChild('function');
+                $e = $calledElement->addChild('function');
                 $e['file'] = $child->getFilename();
                 $e['name'] = $child->getFuncname();
                 $e['id']   = md5($child->getPath());

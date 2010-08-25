@@ -91,7 +91,7 @@ class CallTree
     public function combineTrees(CallTree $tree)
     {
 
-        foreach ($tree->getRoot()->getChildren() as $key=>$child) {
+        foreach ($tree->getRoot()->getChildren() as $child) {
             $this->getRoot()->mergeChild($child);
         }
 

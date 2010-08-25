@@ -40,8 +40,6 @@ class DotFormatter implements Formatter
         array_push($nodeQueue, $root);
         while ($nodeQueue) {
             $parent = array_shift($nodeQueue);
-
-            $parentName = '"' . $parent->getFuncname() . '"';
             $parentID = '"' . md5($parent->getPath()) . '"';
 
             foreach ($parent->getChildren() as $child) {
