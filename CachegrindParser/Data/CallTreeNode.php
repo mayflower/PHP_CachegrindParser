@@ -234,7 +234,7 @@ class CallTreeNode
      *
      * @return Data\CallTreeNode CallTreeNore or null if not found
      */
-    public function getChildByPath( $path )
+    public function getChildByPath($path)
     {
         foreach ($this->_children as $child) {
             if ($child->_path == $path)

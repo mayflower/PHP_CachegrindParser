@@ -89,8 +89,8 @@ class CallTree
      */
     public function combineTrees(CallTree $tree) {
 
-        foreach ( $tree->getRoot()->getChildren() as $key=>$child ) {
-            $this->getRoot()->mergeChild( $child );
+        foreach ($tree->getRoot()->getChildren() as $key=>$child) {
+            $this->getRoot()->mergeChild($child);
         }
 
         $this->_summary = self::combineSummaryArrays(
@@ -103,7 +103,7 @@ class CallTree
      */
     public function filterTree() {
         foreach ($this->_filters as $filter)
-            $filter->filter( $this );
+            $filter->filter($this);
     }
 
     /**

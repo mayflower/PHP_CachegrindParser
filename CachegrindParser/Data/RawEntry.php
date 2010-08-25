@@ -46,7 +46,7 @@ class RawEntry
      *
      * @param int $count Number of subCalls
      */
-    public function addCall( $count )
+    public function addCall($count)
     {
         $this->_subcalls += $count;
     }
