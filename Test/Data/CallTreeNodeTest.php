@@ -25,17 +25,21 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
      */
     public function testInclusiveCosts()
     {
-        $n1 = new CallTreeNode('file1', 'func1', toCostArray( 2,  3,  5,  7));
-        $n2 = new CallTreeNode('file2', 'func2', toCostArray(11, 14, 17, 19));
-        $n3 = new CallTreeNode('file3', 'func3', toCostArray( 1,  3,  7, 29));
+        $node = new CallTreeNode('file1', 'func1', toCostArray(2,  3,  5,  7));
+        $nodeChild = new CallTreeNode(
+            'file2', 'func2', toCostArray(11, 14, 17, 19)
+        );
+        $nodeSubChild = new CallTreeNode(
+            'file3', 'func3', toCostArray(1,  3,  7, 29)
+        );
 
-        $n1->addChild($n2);
-        $n1->addChild($n3);
-        $c = $n1->getInclusiveCosts();
-        $this->assertEquals(14, $c['time']);
-        $this->assertEquals(14, $c['mem']);
-        $this->assertEquals(29, $c['cycles']);
-        $this->assertEquals(29, $c['peakmem']);
+        $node->addChild($nodeChild);
+        $node->addChild($nodeSubChild);
+        $costs = $node->getInclusiveCosts();
+        $this->assertEquals(14, $costs['time']);
+        $this->assertEquals(14, $costs['mem']);
+        $this->assertEquals(29, $costs['cycles']);
+        $this->assertEquals(29, $costs['peakmem']);
     }
 
     /**
@@ -44,20 +48,25 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
      */
     public function testInclusiveCostsWithNewChildren()
     {
-        $n1 = new CallTreeNode('file1', 'func1', toCostArray( 2,  3,  5,  7));
-        $n2 = new CallTreeNode('file2', 'func2', toCostArray(11, 14, 17, 19));
-        $n3 = new CallTreeNode('file3', 'func3', toCostArray( 1,  3,  7, 29));
-        $n4 = new CallTreeNode('file4', 'func4', toCostArray( 2, 97,  2,  3));
+        $node = new CallTreeNode('file1', 'func1', toCostArray(2,  3,  5,  7));
+        $nodeChild = new CallTreeNode(
+            'file2', 'func2', toCostArray(11, 14, 17, 19)
+        );
+        $nodeSubChild = new CallTreeNode(
+            'file3', 'func3', toCostArray(1,  3,  7, 29)
+        );
+        $nodeSubSubChild = new CallTreeNode(
+            'file4', 'func4', toCostArray(2, 97,  2,  3)
+        );
 
-        $n1->addChild($n2);
-        $c = $n1->getInclusiveCosts();
-        $n2->addChild($n3);
-        $n2->addChild($n4);
-        $c = $n1->getInclusiveCosts();
-        $this->assertEquals(16, $c['time']);
-        $this->assertEquals(97, $c['mem']);
-        $this->assertEquals(31, $c['cycles']);
-        $this->assertEquals(29, $c['peakmem']);
+        $node->addChild($nodeChild);
+        $nodeChild->addChild($nodeSubChild);
+        $nodeChild->addChild($nodeSubSubChild);
+        $costs = $node->getInclusiveCosts();
+        $this->assertEquals(16, $costs['time']);
+        $this->assertEquals(97, $costs['mem']);
+        $this->assertEquals(31, $costs['cycles']);
+        $this->assertEquals(29, $costs['peakmem']);
     }
 
     /**
@@ -65,21 +74,27 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
      */
     public function testMergeChild()
     {
-        $n1 = new CallTreeNode('file1', 'func1', toCostArray( 2,  3,  5,  7));
-        $n2 = new CallTreeNode('file2', 'func2', toCostArray(11, 14, 17, 19));
-        $n1->addChild($n2);
+        $node = new CallTreeNode('file1', 'func1', toCostArray(2,  3,  5,  7));
+        $nodeChild = new CallTreeNode(
+            'file2', 'func2', toCostArray(11, 14, 17, 19)
+        );
+        $node->addChild($nodeChild);
 
-        $n1b = new CallTreeNode('file1', 'func1', toCostArray(22, 23, 25, 27));
-        $n2b = new CallTreeNode('file2', 'func2', toCostArray(12, 15, 18, 20));
-        $n1b->addChild($n2b);
+        $nodeb = new CallTreeNode(
+            'file1', 'func1', toCostArray(22, 23, 25, 27)
+        );
+        $nodeChildb = new CallTreeNode(
+            'file2', 'func2', toCostArray(12, 15, 18, 20)
+        );
 
-        $n1->mergeChild($n2b);
+        $nodeb->addChild($nodeChildb);
+        $node->mergeChild($nodeChildb);
 
-        $c = $n2->getCosts();
-        $this->assertEquals(23, $c['time']);
-        $this->assertEquals(15, $c['mem']);
-        $this->assertEquals(35, $c['cycles']);
-        $this->assertEquals(20, $c['peakmem']);
+        $costs = $nodeChild->getCosts();
+        $this->assertEquals(23, $costs['time']);
+        $this->assertEquals(15, $costs['mem']);
+        $this->assertEquals(35, $costs['cycles']);
+        $this->assertEquals(20, $costs['peakmem']);
     }
 
 
@@ -89,17 +104,19 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
      */
     public function testMergeIntoParent()
     {
-        $n1 = new CallTreeNode('file1', 'func1', toCostArray( 2,  3,  5,  7));
-        $n2 = new CallTreeNode('file2', 'func2', toCostArray(11, 14, 17, 19));
+        $node = new CallTreeNode('file1', 'func1', toCostArray(2,  3,  5,  7));
+        $nodeRef = new CallTreeNode(
+            'file2', 'func2', toCostArray(11, 14, 17, 19)
+        );
 
-        $n1->addChild($n2);
-        $n2->mergeIntoParent();
+        $node->addChild($nodeRef);
+        $nodeRef->mergeIntoParent();
 
-        $c = $n1->getCosts();
-        $this->assertEquals(13, $c['time']);
-        $this->assertEquals(14, $c['mem']);
-        $this->assertEquals(22, $c['cycles']);
-        $this->assertEquals(19, $c['peakmem']);
+        $costs = $node->getCosts();
+        $this->assertEquals(13, $costs['time']);
+        $this->assertEquals(14, $costs['mem']);
+        $this->assertEquals(22, $costs['cycles']);
+        $this->assertEquals(19, $costs['peakmem']);
     }
 
     /**
@@ -107,21 +124,27 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
      */
     public function testSimilarChildren()
     {
-        $n1 = new CallTreeNode('parent', 'pfunc', toCostArray( 2,  3,  5,  7));
-        $n2 = new CallTreeNode('somefile', 'func', toCostArray(11, 14, 17, 19));
-        $n3 = new CallTreeNode('somefile', 'func', toCostArray(1,  3,  7, 29));
+        $node = new CallTreeNode(
+            'parent', 'pfunc', toCostArray(2,  3,  5,  7)
+        );
+        $nodeChild = new CallTreeNode(
+            'somefile', 'func', toCostArray(11, 14, 17, 19)
+        );
+        $nodeSubChild = new CallTreeNode(
+            'somefile', 'func', toCostArray(1,  3,  7, 29)
+        );
 
-        $n1->addChild($n2);
-        $n1->addChild($n3);
+        $node->addChild($nodeChild);
+        $node->addChild($nodeSubChild);
 
-        $n1->combineSimilarChildren();
-        $children = $n1->getChildren();
+        $node->combineSimilarChildren();
+        $children = $node->getChildren();
         $this->assertEquals(1, count($children));
-        $c = $children[0]->getCosts();
+        $costs = $children[0]->getCosts();
 
-        $this->assertEquals(12, $c['time']);
-        $this->assertEquals(14, $c['mem']);
-        $this->assertEquals(24, $c['cycles']);
-        $this->assertEquals(29, $c['peakmem']);
+        $this->assertEquals(12, $costs['time']);
+        $this->assertEquals(14, $costs['mem']);
+        $this->assertEquals(24, $costs['cycles']);
+        $this->assertEquals(29, $costs['peakmem']);
     }
 }
