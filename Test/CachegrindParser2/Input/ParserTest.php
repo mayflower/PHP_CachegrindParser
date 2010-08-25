@@ -38,23 +38,23 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
         $this->_db = new PDO('sqlite:' . $tmpFile);
 
         $this->_db->exec(
-        "CREATE TABLE node (
-            part int,
-            request varchar,
-            filename varchar,
-            function_name varchar,
-            count int,
-            id int,
-            cost_time int,
-            cost_cycles int,
-            cost_memory int,
-            cost_memory_peak int,
-            cost_time_self int,
-            cost_cycles_self int,
-            cost_memory_self int,
-            cost_memory_peak_self int,
-            path varchar
-        )"
+	        "CREATE TABLE node (
+	            part int,
+	            request varchar,
+	            filename varchar,
+	            function_name varchar,
+	            count int,
+	            id int,
+	            cost_time int,
+	            cost_cycles int,
+	            cost_memory int,
+	            cost_memory_peak int,
+	            cost_time_self int,
+	            cost_cycles_self int,
+	            cost_memory_self int,
+	            cost_memory_peak_self int,
+	            path varchar
+	        )"
         );
 
         $this->assertEquals('PDO', get_class($this->_db));
@@ -156,18 +156,17 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     {
         // cachegrind block example,
         $block = preg_replace(
-	        "/\n\\s+/", "\n", trim('
-	            fl=/home/data/www/htdocs/example.php
-	            fn=test2
-	            7 141 120 0 0
-	            cfn=test3
-	            calls=1 0 0
-	            11 16 40 0 0
-	            cfn=test3
-	            calls=1 0 0
-	            12 7 0 0 0
-	        ')
-        );
+            "/\n\\s+/", "\n", trim('
+                fl=/home/data/www/htdocs/example.php
+                fn=test2
+                7 141 120 0 0
+                cfn=test3
+                calls=1 0 0
+                11 16 40 0 0
+                cfn=test3
+                calls=1 0 0
+                12 7 0 0 0'
+        ));
 
         $resultExpected = array (
             'filename' => '/home/data/www/htdocs/example.php',
@@ -219,18 +218,17 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     {
         // cachegrind block example,
         $block = preg_replace(
-	        "/\n\\s+/", "\n", trim('
-	            fl=/home/data/www/htdocs/example.php
-	            fn=test2
-	            7 141 120 0 0
-	            cfn=test3
-	            calls=1 0 0
-	            11 16 40 0 0
-	            cfn=test3
-	            calls=1 0 0
-	            12 7 0 0 0
-	        ')
-        );
+            "/\n\\s+/", "\n", trim('
+                fl=/home/data/www/htdocs/example.php
+                fn=test2
+                7 141 120 0 0
+                cfn=test3
+                calls=1 0 0
+                11 16 40 0 0
+                cfn=test3
+                calls=1 0 0
+                12 7 0 0 0'
+        ));
 
         $nodePath = '{main}##test1';
 
@@ -277,18 +275,17 @@ class CachegrindParser2_Input_Parser_Test extends PHPUnit_Framework_TestCase
     {
         // cachegrind block example,
         $block = preg_replace(
-	        "/\n\\s+/", "\n", trim('
-	            fl=/home/data/www/htdocs/example.php
-	            fn=test2
-	            7 141 120 1 0
-	            cfn=test3
-	            calls=1 0 0
-	            11 16 40 2 3
-	            cfn=test3
-	            calls=1 4 5
-	            12 7 9 7 8
-	        ')
-        );
+            "/\n\\s+/", "\n", trim('
+                fl=/home/data/www/htdocs/example.php
+                fn=test2
+                7 141 120 1 0
+                cfn=test3
+                calls=1 0 0
+                11 16 40 2 3
+                cfn=test3
+                calls=1 4 5
+                12 7 9 7 8'
+        ));
 
         $expectedResults = array(
             'cost_time' => 164,

@@ -19,18 +19,37 @@ require_once 'PHPUnit/Framework.php';
 
 class CallTreeNodeTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * Build cost array
+     *
+     * @param int $time
+     * @param int $mem
+     * @param int $cycles
+     * @param int $peakmem
+     */
+    public static function toCostArray($time, $mem, $cycles, $peakmem)
+    {
+        return array(
+            'time'    => $time,
+            'mem'     => $mem,
+            'cycles'  => $cycles,
+            'peakmem' => $peakmem,
+        );
+    }
 
     /**
      * Tests if inclusive costs are calculated correctly.
      */
     public function testInclusiveCosts()
     {
-        $node = new CallTreeNode('file1', 'func1', toCostArray(2, 3, 5, 7));
+        $node = new CallTreeNode(
+            'file1', 'func1', self::toCostArray(2, 3, 5, 7)
+        );
         $nodeChild = new CallTreeNode(
-            'file2', 'func2', toCostArray(11, 14, 17, 19)
+            'file2', 'func2', self::toCostArray(11, 14, 17, 19)
         );
         $nodeSubChild = new CallTreeNode(
-            'file3', 'func3', toCostArray(1, 3, 7, 29)
+            'file3', 'func3', self::toCostArray(1, 3, 7, 29)
         );
 
         $node->addChild($nodeChild);
@@ -48,15 +67,17 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
      */
     public function testInclusiveCostsWithNewChildren()
     {
-        $node = new CallTreeNode('file1', 'func1', toCostArray(2, 3, 5, 7));
+        $node = new CallTreeNode(
+            'file1', 'func1', self::toCostArray(2, 3, 5, 7)
+        );
         $nodeChild = new CallTreeNode(
-            'file2', 'func2', toCostArray(11, 14, 17, 19)
+            'file2', 'func2', self::toCostArray(11, 14, 17, 19)
         );
         $nodeSubChild = new CallTreeNode(
-            'file3', 'func3', toCostArray(1, 3, 7, 29)
+            'file3', 'func3', self::toCostArray(1, 3, 7, 29)
         );
         $nodeSubSubChild = new CallTreeNode(
-            'file4', 'func4', toCostArray(2, 97, 2, 3)
+            'file4', 'func4', self::toCostArray(2, 97, 2, 3)
         );
 
         $node->addChild($nodeChild);
@@ -74,17 +95,19 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
      */
     public function testMergeChild()
     {
-        $node = new CallTreeNode('file1', 'func1', toCostArray(2, 3, 5, 7));
+        $node = new CallTreeNode(
+            'file1', 'func1', self::toCostArray(2, 3, 5, 7)
+        );
         $nodeChild = new CallTreeNode(
-            'file2', 'func2', toCostArray(11, 14, 17, 19)
+            'file2', 'func2', self::toCostArray(11, 14, 17, 19)
         );
         $node->addChild($nodeChild);
 
         $nodeb = new CallTreeNode(
-            'file1', 'func1', toCostArray(22, 23, 25, 27)
+            'file1', 'func1', self::toCostArray(22, 23, 25, 27)
         );
         $nodeChildb = new CallTreeNode(
-            'file2', 'func2', toCostArray(12, 15, 18, 20)
+            'file2', 'func2', self::toCostArray(12, 15, 18, 20)
         );
 
         $nodeb->addChild($nodeChildb);
@@ -104,9 +127,11 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
      */
     public function testMergeIntoParent()
     {
-        $node = new CallTreeNode('file1', 'func1', toCostArray(2, 3, 5, 7));
+        $node = new CallTreeNode(
+            'file1', 'func1', self::toCostArray(2, 3, 5, 7)
+        );
         $nodeRef = new CallTreeNode(
-            'file2', 'func2', toCostArray(11, 14, 17, 19)
+            'file2', 'func2', self::toCostArray(11, 14, 17, 19)
         );
 
         $node->addChild($nodeRef);
@@ -125,13 +150,13 @@ class CallTreeNodeTest extends PHPUnit_Framework_TestCase
     public function testSimilarChildren()
     {
         $node = new CallTreeNode(
-            'parent', 'pfunc', toCostArray(2, 3, 5, 7)
+            'parent', 'pfunc', self::toCostArray(2, 3, 5, 7)
         );
         $nodeChild = new CallTreeNode(
-            'somefile', 'func', toCostArray(11, 14, 17, 19)
+            'somefile', 'func', self::toCostArray(11, 14, 17, 19)
         );
         $nodeSubChild = new CallTreeNode(
-            'somefile', 'func', toCostArray(1, 3, 7, 29)
+            'somefile', 'func', self::toCostArray(1, 3, 7, 29)
         );
 
         $node->addChild($nodeChild);

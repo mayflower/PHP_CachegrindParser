@@ -130,7 +130,9 @@ class CachegrindParser2_Output_Format_Test extends PHPUnit_Framework_TestCase
 
         $this->assertContains("\"{$mainPath}\" -> \"{$testPath}\"", $data);
         $this->assertContains("\"{$testPath}\" -> \"{$testPathTwo}\"", $data);
-        $this->assertContains("\"{$testPathTwo}\" -> \"{$testPathThree}\"", $data);
+        $this->assertContains(
+            "\"{$testPathTwo}\" -> \"{$testPathThree}\"", $data
+        );
         $this->assertContains("\"{$mainPath}\" -> \"{$testPathFour}\"", $data);
 
         // TODO test costs
