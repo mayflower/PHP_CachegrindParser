@@ -350,7 +350,7 @@ class CachegrindParser2_Input_Parser
      */
     private function _filter($functionName, $rootCosts, $recordNode)
     {
-    	// 4th parameter: , $path
+        // 4th parameter: , $path
         // $depth = substr_count($path, '##');
 
         if (strncmp('php::', $functionName, 5) == 0

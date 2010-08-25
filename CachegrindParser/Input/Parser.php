@@ -152,16 +152,16 @@ class Parser
             } else {
                 // Regular block
                 // Strip fl= from file name and fn from funcname.
-                $fl = substr($lines[$curLine], 3);
-                $fn = substr($lines[$curLine + 1], 3);
-                if (strncmp($fn, '{main}', 6) == 0) {
+                $file = substr($lines[$curLine], 3);
+                $func = substr($lines[$curLine + 1], 3);
+                if (strncmp($func, '{main}', 6) == 0) {
                     $costs = self::parseCostLine($lines[$curLine + 5]);
                     $curLine += 6;
                 } else {
                     $costs = self::parseCostLine($lines[$curLine + 2]);
                     $curLine += 3;
                 }
-                $entry = new Data\RawEntry($fl, $fn, $costs);
+                $entry = new Data\RawEntry($file, $func, $costs);
                 $subCalls = 0;
 
                 // Now check for subcalls

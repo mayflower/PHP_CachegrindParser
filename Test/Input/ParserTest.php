@@ -92,9 +92,11 @@ fn=php::fclose
 
         // root
         // |-> php::fclose
-        $root->addChild(new CallTreeNode(
-            'php:internal', 'php::fclose',
-            self::toCostArray(10, 500, 0, 0))
+        $root->addChild(
+            new CallTreeNode(
+                'php:internal', 'php::fclose',
+                self::toCostArray(10, 500, 0, 0)
+            )
         );
 
         // root
