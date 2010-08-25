@@ -86,7 +86,8 @@ class cachegrindparser
      * @param array $excludes skip parts by matching one of the excludes
      * @param array $includes use only parts by matching one of the includes
      */
-    public static function createTree($file, $quiet, $parts, $excludes, $includes)
+    public static function createTree($file, $quiet, $parts, $excludes,
+        $includes)
     {
         // maximum limit to parse a part, 64M
         $limit = 64*1048576;
