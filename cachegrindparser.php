@@ -22,7 +22,7 @@ use CachegrindParser\Input;
 
 define("VERSION", "development");
 
-ini_set( 'memory_limit', '1524M' );
+ini_set('memory_limit', '1524M');
 
 // We need to do the following:
 // 1. Get the in-/output file and the desired formatting from the command line
@@ -31,10 +31,10 @@ $parameters = parseOptions();
 // 2. Create a Tree object
 $tree = createTree(
     $parameters["input"], $parameters["quiet"], $parameters['parts'],
-    $parameters['exclude'], $parameters['include'] );
+    $parameters['exclude'], $parameters['include']);
 
 // 3. Filter the tree
-if ( !$parameters["quiet"] )
+if (!$parameters["quiet"])
     echo " apply filters";
 
 foreach ($parameters['filters'] as $filter) {
@@ -43,27 +43,27 @@ foreach ($parameters['filters'] as $filter) {
 $tree->filterTree();
 
 // 4. Format it according to (1)
-if ( !$parameters["quiet"] )
+if (!$parameters["quiet"])
     echo " render output";
 
 $output = $parameters["formatter"]->format($tree);
 
 // convert dot to svg or png
-if ( $parameters["format"] == "svg" || $parameters["format"] == "png" ) {
-    $dotFile = tempnam( "/tmp", "cachegrind_" ) . ".dot";
-    file_put_contents( $dotFile, $output, LOCK_EX);
+if ($parameters["format"] == "svg" || $parameters["format"] == "png") {
+    $dotFile = tempnam("/tmp", "cachegrind_") . ".dot";
+    file_put_contents($dotFile, $output, LOCK_EX);
 
     // call dot (graphviz package)
     $cmd = "dot -T{$parameters["format"]} -o" .
-            escapeshellarg( $parameters["output"] ) . " " .
-            escapeshellarg( $dotFile ) . " 2>&1";
+            escapeshellarg($parameters["output"]) . " " .
+            escapeshellarg($dotFile) . " 2>&1";
 
-    exec( $cmd, $output );
-    if ( !empty( $output ) )
-        throw new Exception( "Failed executing dot:\n" .
-                             implode( "\n", $output ) );
+    exec($cmd, $output);
+    if (!empty($output))
+        throw new Exception("Failed executing dot:\n" .
+                             implode("\n", $output));
 
-    @unlink( $dotFile );
+    @unlink($dotFile);
 }
 else {
     // 5. Print it to the file given in (1)
@@ -79,11 +79,11 @@ else {
  *
  * @param string $file Filename to parse (can be multi part)
  * @param boolean $quiet true: Don't print out progress information
- * @param array $parts Array( int min, int max )
+ * @param array $parts Array(int min, int max)
  * @param array $excludes skip parts by matching one of the excludes
  * @param array $includes use only parts by matching one of the includes
  */
-function createTree( $file, $quiet, $parts, $excludes, $includes )
+function createTree($file, $quiet, $parts, $excludes, $includes)
 {
     // maximum limit to parse a part, 64M
     $limit = 64*1048576;
@@ -96,42 +96,42 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
     // create empty tree
     $tree = Input\Parser::getRootTree();
 
-    if (!($fp = fopen( $file, 'r' )))
-        throw new Exception( 'Unable to read ' . $file );
+    if (!($fp = fopen($file, 'r')))
+        throw new Exception('Unable to read ' . $file);
 
-    $fpFilesize = filesize( $file );
+    $fpFilesize = filesize($file);
 
-    while ( !feof( $fp ) ) {
+    while (!feof($fp)) {
 
         $line = fgets($fp);
         $numLines++;
-        $numData += strlen( $line );
+        $numData += strlen($line);
         $progress = number_format((($numData / $fpFilesize) * 100), 2) . '%';
 
         // check for a new part (boundary match or end of file)
-        if ( strpos($line, '==== NEW PROFILING FILE') === 0 || feof( $fp ) ) {
+        if (strpos($line, '==== NEW PROFILING FILE') === 0 || feof($fp)) {
 
             // empty part
-            if ( strlen($inputData) < 100 ) {
+            if (strlen($inputData) < 100) {
                 $inputData = '';
                 continue;
             }
             $numParts++;
 
             // min. / max. parts
-            if ( !empty( $parts[0] ) && $parts[0] > $numParts ) {
-                if ( !$quiet )
+            if (!empty($parts[0]) && $parts[0] > $numParts) {
+                if (!$quiet)
                     echo "-- skip part {$numParts}, parts range, read progress".
                          " {$progress}\n";
 
                 $inputData = '';
                 continue;
             }
-            if ( !empty( $parts[1] ) && $parts[1] < $numParts )
+            if (!empty($parts[1]) && $parts[1] < $numParts)
                 break;
 
-            if ( strlen($inputData) > $limit ) {
-                if ( !$quiet )
+            if (strlen($inputData) > $limit) {
+                if (!$quiet)
                     echo "-- skip part {$numParts}, too large: length ".
                         strlen($inputData)." line {$numLines} read progress ".
                         "{$progress}\n";
@@ -140,12 +140,12 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
                 continue;
             }
 
-            foreach ( $excludes as $key => $exclude ) {
-                $excludes[$key] = preg_quote( $exclude );
+            foreach ($excludes as $key => $exclude) {
+                $excludes[$key] = preg_quote($exclude);
             }
-            $regexp = implode( '|', $excludes );
-            if ( !empty( $regexp ) && preg_match( "!{$regexp}!", $inputData ) ) {
-                if ( !$quiet )
+            $regexp = implode('|', $excludes);
+            if (!empty($regexp) && preg_match("!{$regexp}!", $inputData)) {
+                if (!$quiet)
                     echo "-- skip part {$numParts}, match exclusion, read ".
                          "progress {$progress}\n";
 
@@ -153,12 +153,12 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
                 continue;
             }
 
-            foreach ( $includes as $key => $include ) {
-                $includes[$key] = preg_quote( $include );
+            foreach ($includes as $key => $include) {
+                $includes[$key] = preg_quote($include);
             }
-            $regexp = implode( '|', $includes );
-            if (!empty( $regexp ) && preg_match("!{$regexp}!", $inputData)) {
-                if ( !$quiet )
+            $regexp = implode('|', $includes);
+            if (!empty($regexp) && preg_match("!{$regexp}!", $inputData)) {
+                if (!$quiet)
                     echo "-- skip part {$numParts}, match exclusion, read ".
                          "progress {$progress}\n";
 
@@ -167,28 +167,28 @@ function createTree( $file, $quiet, $parts, $excludes, $includes )
             }
 
 
-            if ( trim($inputData) != '' ) {
+            if (trim($inputData) != '') {
 
-                if ( !$quiet )
+                if (!$quiet)
                     echo "## part {$numParts} length ".strlen($inputData).
                          " line {$numLines} read progress {$progress}";
 
-                $parser = new Input\Parser( $inputData );
+                $parser = new Input\Parser($inputData);
                 $currTree = $parser->getCallTree();
 
-                if ( strlen($inputData) < 10 * 1048576 ) {
-                    if ( !$quiet )
+                if (strlen($inputData) < 10 * 1048576) {
+                    if (!$quiet)
                         echo " combine similar";
 
                     $currTree->combineSimilarSubtrees();
                 }
 
-                if ( !$quiet )
+                if (!$quiet)
                     echo " combine trees";
 
-                $tree->combineTrees( $currTree );
+                $tree->combineTrees($currTree);
 
-                if ( !$quiet ) {
+                if (!$quiet) {
                     echo " memory ".memory_get_usage(true);
                     echo " memory peak ".memory_get_peak_usage(true);
                     echo "\n";
@@ -314,22 +314,22 @@ function parseOptions()
     $ret["output"] = $opts["out"];
 
     // only extract some parts of the file
-    $ret["parts"] = isset( $opts["parts"] ) ?
-                    explode( ',', $opts["parts"] ) :
+    $ret["parts"] = isset($opts["parts"]) ?
+                    explode(',', $opts["parts"]) :
                     array();
 
     // skip parts by matching one of the excludes
-    $ret["exclude"] = isset( $opts["exclude"] ) ?
-                      explode( ',', $opts["exclude"] ) :
+    $ret["exclude"] = isset($opts["exclude"]) ?
+                      explode(',', $opts["exclude"]) :
                       array();
 
     // include only parts by matching one of the includes
-    $ret["include"] = isset( $opts["include"] ) ?
-                      explode( ',', $opts["include"] ) :
+    $ret["include"] = isset($opts["include"]) ?
+                      explode(',', $opts["include"]) :
                       array();
 
     // don't display additional information
-    $ret["quiet"] = isset( $opts["quiet"] ) ? true : false;
+    $ret["quiet"] = isset($opts["quiet"]) ? true : false;
 
     return $ret;
 }
