@@ -121,8 +121,10 @@ class CachegrindParser2_Output_Format
         $rootCosts = $this->_dbo->query($sql)->fetch();
 
         if (empty($rootCosts)) {
-            trigger_error('Could not find a "summary:" section in the file.',
-                E_USER_WARNING);
+            trigger_error(
+                'Could not find a "summary:" section in the file.',
+                E_USER_WARNING
+            );
         }
 
         $sql = "
@@ -147,8 +149,10 @@ class CachegrindParser2_Output_Format
 
             // output edges and nodes
             // thickness of edge 1-75
-            $penWidth = min(75, max(1, ceil(($row['cost_time'] /
-                        max($rootCosts['cost_time'], 1)) * 30)));
+            $penWidth = min(
+                75, max(1, ceil(($row['cost_time'] /
+                max($rootCosts['cost_time'], 1)) * 30))
+            );
 
             $edgeLabel =  $row['count'] . 'x';
             $edgeLabel .= ' [' . round($row['cost_time']/1000) . ' ms]';

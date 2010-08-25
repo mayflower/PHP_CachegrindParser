@@ -178,9 +178,9 @@ class CachegrindParser2_Input_Parser
 
                 // Drop out unneeded nodes
                 if ($this->_filter(
-                        $recordNode['function_name'], $rootCosts, $recordNode,
-                        $recordNode['path']
-                   ))
+                    $recordNode['function_name'], $rootCosts, $recordNode,
+                    $recordNode['path']
+                ))
                     continue;
 
                 $fields = implode(',', array_keys($recordNode));

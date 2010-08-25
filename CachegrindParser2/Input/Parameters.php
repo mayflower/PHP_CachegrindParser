@@ -98,6 +98,38 @@ class CachegrindParser2_Input_Parameters
     }
 
 
+	/**
+	 * Initializes the database (drops tables first)
+	 *
+	 * @param object $dbo database handle (PDO)
+	 */
+	public static function initDatabase($dbo)
+	{
+	    $dbo->exec("DROP TABLE IF EXISTS node;");
+	    //$dbo->exec("VACUUM;");
+
+	    $dbo->exec(
+	        "CREATE TABLE node (
+	            part int,
+	            request varchar,
+	            filename varchar,
+	            function_name varchar,
+	            count int,
+	            id int,
+	            cost_time int,
+	            cost_cycles int,
+	            cost_memory int,
+	            cost_memory_peak int,
+	            cost_time_self int,
+	            cost_cycles_self int,
+	            cost_memory_self int,
+	            cost_memory_peak_self int,
+	            path varchar
+	        )"
+	    );
+	}
+
+
     /**
      * Prints the version of this script to stdout.
      */

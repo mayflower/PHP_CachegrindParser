@@ -30,7 +30,7 @@ require_once "CachegrindParser/Data/CallTreeNode.php";
 class Parser
 {
     /** Stores the input for later use. */
-    private $inputData;
+    private $_inputData;
 
     /**
      * Creates a new Parser instance.
@@ -39,7 +39,7 @@ class Parser
      */
     function __construct($inputData)
     {
-        $this->inputData = $inputData;
+        $this->_inputData = $inputData;
     }
 
     /**
@@ -86,12 +86,12 @@ class Parser
         $root = self::getRoot();
         array_push($parent, $root);
 
-        foreach($entries as $key=>$entry) {
+        foreach ($entries as $key=>$entry) {
             $node = Data\CallTreeNode::fromRawEntry($entry);
             end($parent)->addChild($node);
             array_push($childrenLeft, array_pop($childrenLeft) -1);
 
-            if(end($childrenLeft) == 0) {
+            if (end($childrenLeft) == 0) {
                 array_pop($parent);
                 array_pop($childrenLeft);
             }
@@ -111,7 +111,7 @@ class Parser
             'cycles' => 1,
             'peakmem' => 1
         );
-        foreach (explode("\n", $this->inputData) as $line) {
+        foreach (explode("\n", $this->_inputData) as $line) {
             if (strncmp($line, 'summary:', 8) == 0) {
                 $summaryTokens = explode(' ', $line);
                 $summary['time']    = $summaryTokens[1];
@@ -136,7 +136,7 @@ class Parser
      */
     private function getEntryList()
     {
-        $lines = explode("\n", trim($this->inputData));
+        $lines = explode("\n", trim($this->_inputData));
 
         // This makes our array indices the same as the file's line numbers
         array_unshift($lines, '');
@@ -144,7 +144,7 @@ class Parser
         $entries = array(); // Here we'll store the generated entries.
 
         //TODO: More input validation here
-        while($curLine + 1 < count($lines)) {
+        while ($curLine + 1 < count($lines)) {
             if (strncmp($lines[$curLine], 'fl=', 3) != 0) {
                 // Don't know what to do, panic
                 die("parse error on line {$curLine}. (Script line: "
@@ -165,7 +165,7 @@ class Parser
                 $subCalls = 0;
 
                 // Now check for subcalls
-                while(isset($lines[$curLine]) && $lines[$curLine] != '') {
+                while (isset($lines[$curLine]) && $lines[$curLine] != '') {
                     if (strncmp('cfn=', $lines[$curLine], 4) != 0) {
                         // This doesn't look like a call, panik
                         die("parse error on line {$curLine}. (Current line: ".
