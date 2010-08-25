@@ -39,7 +39,7 @@ class XMLFormatter implements Formatter
 
         while ($nodeQueue) {
             $node = array_pop($nodeQueue);
-            if ( $node->getFuncname() == 'dropped' )
+            if ($node->getFuncname() == 'dropped')
                 continue;
 
             self::addCall($root, $node);
@@ -101,7 +101,7 @@ class XMLFormatter implements Formatter
             $calledFunctionsElement = $callElement->addChild('calledFunctions');
             foreach ($node->getChildren() as $child) {
 
-                if ( $child->getFuncname() == 'dropped' )
+                if ($child->getFuncname() == 'dropped')
                     continue;
 
                 $e = $calledFunctionsElement->addChild('function');

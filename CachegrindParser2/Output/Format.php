@@ -17,7 +17,7 @@ class CachegrindParser2_Output_Format
      * database handle
      * @var object
      */
-    private $_db = null;
+    private $_dbo = null;
 
 
     /**
@@ -41,11 +41,11 @@ class CachegrindParser2_Output_Format
      * @param string $file Output filename
      * @param string $format Output format
      */
-    public function __construct($db, $file, $format)
+    public function __construct($dbo, $file, $format)
     {
-        $this->_db         = $db;
+        $this->_dbo     = $dbo;
         $this->_file    = $file;
-        $this->_format     = $format;
+        $this->_format  = $format;
     }
 
 
@@ -79,22 +79,22 @@ class CachegrindParser2_Output_Format
         $this->_formatDot();
 
         // copy dot file to /tmp
-        $dotFile = tempnam('/tmp', 'cachegrind_' ) . '.dot';
+        $dotFile = tempnam('/tmp', 'cachegrind_') . '.dot';
         copy($this->_file, $dotFile);
 
         // convert dot file to image (uses GraphViz package)
         $cmd = "dot -T" . $this->_format . " -o" .
             escapeshellarg($this->_file) . " " .
-            escapeshellarg( $dotFile ) . " 2>&1";
+            escapeshellarg($dotFile) . " 2>&1";
 
         $output = array();
         exec($cmd, $output);
-        if ( !empty( $output ) )
+        if (!empty($output))
             throw new Exception("Failed executing dot:\n" .
                 implode("\n", $output));
 
         // remove temp-file
-        @unlink( $dotFile );
+        @unlink($dotFile);
     }
 
 
@@ -118,7 +118,7 @@ class CachegrindParser2_Output_Format
             WHERE path = '{main}'
             GROUP BY path
         ";
-        $rootCosts = $this->_db->query($sql)->fetch();
+        $rootCosts = $this->_dbo->query($sql)->fetch();
 
         if (empty($rootCosts)) {
             trigger_error('Could not find a "summary:" section in the file.',
@@ -142,12 +142,12 @@ class CachegrindParser2_Output_Format
             GROUP BY path
             ORDER by path
         ";
-        $rows = $this->_db->query($sql);
+        $rows = $this->_dbo->query($sql);
         foreach ($rows as $row) {
 
             // output edges and nodes
             // thickness of edge 1-75
-            $penWidth = min(75, max( 1, ceil(($row['cost_time'] /
+            $penWidth = min(75, max(1, ceil(($row['cost_time'] /
                         max($rootCosts['cost_time'], 1)) * 30)));
 
             $edgeLabel =  $row['count'] . 'x';
@@ -190,28 +190,28 @@ class CachegrindParser2_Output_Format
         $limit = 40;
 
         // Format nodeName #{60%}...#{limit - 60% - 3}
-        if ( strlen( $nodeName ) > $limit ) {
+        if (strlen($nodeName) > $limit) {
             $firstLength = round($limit * 0.6);
             $secondLength = $limit - $firstLength - 3;
-            $nodeName = substr( $nodeName, 0, $firstLength ) . '...' .
-                        substr( $nodeName, -$secondLength );
+            $nodeName = substr($nodeName, 0, $firstLength) . '...' .
+                        substr($nodeName, -$secondLength);
         }
 
         // Format nodeFile ...#{limit - 3}
-        if ( strlen( $nodeFile ) > $limit )
-            $nodeFile = '...' . substr( $nodeFile, ($limit - 3) * (-1) );
+        if (strlen($nodeFile) > $limit)
+            $nodeFile = '...' . substr($nodeFile, ($limit - 3) * (-1));
 
         $output  = "<<table border='0'>\n";
         $output .= "<tr><td border='0' align='center' bgcolor='#ED7404'>";
-        $output .= "<font color='white'> " . htmlentities( $nodeFile ) .
-                   " <br/>" . htmlentities( $nodeName ) . "</font></td></tr>";
+        $output .= "<font color='white'> " . htmlentities($nodeFile) .
+                   " <br/>" . htmlentities($nodeName) . "</font></td></tr>";
 
         $output .= '<tr><td><table border="0">';
         $output .= '<tr><td align="right">Incl. Costs</td><td></td>';
         $output .= '<td align="right">Own Costs</td></tr>'."\n";
 
-        foreach ( array('cost_cycles', 'cost_memory', 'cost_memory_peak',
-                  'cost_time') as $key ) {
+        foreach (array('cost_cycles', 'cost_memory', 'cost_memory_peak',
+                  'cost_time') as $key) {
             $rating = 0;
             $keySelf = $key . '_self';
 

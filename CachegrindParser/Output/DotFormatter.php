@@ -47,7 +47,7 @@ class DotFormatter implements Formatter
             foreach ($parent->getChildren() as $child) {
 
                 // Workaround: deleted nodes marked as dropped
-                if ( $child->getFuncname() == 'dropped' )
+                if ($child->getFuncname() == 'dropped')
                     continue;
 
                 $childID = '"' . md5($child->getPath()) . '"';
@@ -86,7 +86,7 @@ class DotFormatter implements Formatter
         $inclusiveCosts = $node->getInclusiveCosts();
         $label =  $node->getCallCount() . 'x';
 
-        if ( !empty( $inclusiveCosts['time'] ) )
+        if (!empty($inclusiveCosts['time']))
             $label .= ' [' . round($inclusiveCosts['time']/1000) . ' ms]';
 
         return '"' . $label . '"';
