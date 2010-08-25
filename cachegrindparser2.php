@@ -37,7 +37,7 @@ if (!empty($parameters['db']))
     $sqliteFile = $parameters['db'];
 
 $dbo = new PDO('sqlite:' . $sqliteFile);
-initDatabase($dbo);
+CachegrindParser2_Input_Parameters::initDatabase($dbo);
 
 
 // 3. Create a Tree
@@ -62,35 +62,3 @@ $format->format();
 
 
 // 5. done.
-
-
-/**
- * Initializes the database (drops tables first)
- *
- * @param object $dbo database handle (PDO)
- */
-function initDatabase($dbo)
-{
-    $dbo->exec("DROP TABLE IF EXISTS node;");
-    //$dbo->exec("VACUUM;");
-
-    $dbo->exec(
-    "CREATE TABLE node (
-        part int,
-        request varchar,
-        filename varchar,
-        function_name varchar,
-        count int,
-        id int,
-        cost_time int,
-        cost_cycles int,
-        cost_memory int,
-        cost_memory_peak int,
-        cost_time_self int,
-        cost_cycles_self int,
-        cost_memory_self int,
-        cost_memory_peak_self int,
-        path varchar
-    )"
-    );
-}

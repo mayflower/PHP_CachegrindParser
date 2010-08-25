@@ -31,7 +31,8 @@ $parameters = parseOptions();
 // 2. Create a Tree object
 $tree = createTree(
     $parameters["input"], $parameters["quiet"], $parameters['parts'],
-    $parameters['exclude'], $parameters['include']);
+    $parameters['exclude'], $parameters['include']
+);
 
 // 3. Filter the tree
 if (!$parameters["quiet"])
@@ -64,8 +65,7 @@ if ($parameters["format"] == "svg" || $parameters["format"] == "png") {
                              implode("\n", $output));
 
     @unlink($dotFile);
-}
-else {
+} else {
     // 5. Print it to the file given in (1)
     //NOTE: Locking might not be neccessary here
     file_put_contents($parameters["output"], $output, LOCK_EX);
@@ -96,20 +96,20 @@ function createTree($file, $quiet, $parts, $excludes, $includes)
     // create empty tree
     $tree = Input\Parser::getRootTree();
 
-    if (!($fp = fopen($file, 'r')))
+    if (!($fpr = fopen($file, 'r')))
         throw new Exception('Unable to read ' . $file);
 
     $fpFilesize = filesize($file);
 
-    while (!feof($fp)) {
+    while (!feof($fpr)) {
 
-        $line = fgets($fp);
+        $line = fgets($fpr);
         $numLines++;
         $numData += strlen($line);
         $progress = number_format((($numData / $fpFilesize) * 100), 2) . '%';
 
         // check for a new part (boundary match or end of file)
-        if (strpos($line, '==== NEW PROFILING FILE') === 0 || feof($fp)) {
+        if (strpos($line, '==== NEW PROFILING FILE') === 0 || feof($fpr)) {
 
             // empty part
             if (strlen($inputData) < 100) {
@@ -200,7 +200,7 @@ function createTree($file, $quiet, $parts, $excludes, $includes)
             $inputData .= $line;
         }
     }
-    fclose($fp);
+    fclose($fpr);
 
     return $tree;
 }
@@ -291,13 +291,13 @@ function parseOptions()
                 $ret['filters'][] = new Input\DepthFilter($depth);
                 break;
             case (strncmp($name, 'timethreshold=', 14) == 0):
-               $percentage = (float) substr($name, 14);
-               if ($percentage < 0 || $percentage > 1) {
-                   usageFilters();
-                   exit(3);
-               }
-               $ret['filters'][] = new Input\TimeThresholdFilter($percentage);
-               break;
+                $percentage = (float) substr($name, 14);
+                if ($percentage < 0 || $percentage > 1) {
+                    usageFilters();
+                    exit(3);
+                }
+                $ret['filters'][] = new Input\TimeThresholdFilter($percentage);
+                break;
             default:
                 echo "Invalid filter: {$name}\n";
                 usageFilters();
