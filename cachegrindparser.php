@@ -28,6 +28,11 @@ ini_set('memory_limit', '1524M');
 // 1. Get the in-/output file and the desired formatting from the command line
 $parameters = cachegrindparser::parseOptions();
 
+// ungültige Parameter => exit
+if ($parameters === false) {
+	exit(1);
+}
+
 // 2. Create a Tree object
 $tree = cachegrindparser::createTree(
     $parameters["input"], $parameters["quiet"], $parameters['parts'],
@@ -218,6 +223,7 @@ class cachegrindparser
      * @return array Array with: input => input data
      *                           output => output filename
      *                           formatter => output formatter
+     *                           or false if parameters are invalid
      */
     public static function parseOptions()
     {
@@ -245,10 +251,11 @@ class cachegrindparser
         // Check if the user just wants info.
         if (isset($opts["help"]) || isset($opts["h"])) {
             self::_usage();
-            exit;
+            return false;
+
         } else if (isset($opts["version"]) || isset($opts["v"])) {
             self::_version();
-            exit;
+            return false;
         }
 
         // Check if we're given each mandatory argument exactly once
@@ -256,7 +263,7 @@ class cachegrindparser
             (!isset($opts["out"])    || is_array($opts["out"])) ||
             (!isset($opts["format"]) || is_array($opts["format"]))) {
             self::_usage();
-            exit(1);
+            return false;
         }
 
         // Select the Formatter
@@ -271,7 +278,7 @@ class cachegrindparser
             break;
         default:
             self::_usageFormatters();
-            exit(2);
+            return false;
         }
         $ret["format"] = $opts["format"];
 
@@ -293,7 +300,7 @@ class cachegrindparser
                     $depth = (integer) substr($name, 6);
                     if ($depth <= 0) {
                         self::_usageFilters();
-                        exit(3);
+                        return false;
                     }
                     $ret['filters'][] = new Input\DepthFilter($depth);
                     break;
@@ -301,7 +308,7 @@ class cachegrindparser
                     $percentage = (float) substr($name, 14);
                     if ($percentage < 0 || $percentage > 1) {
                         self::_usageFilters();
-                        exit(3);
+                        return false;
                     }
                     $ret['filters'][] = new Input\TimeThresholdFilter(
                         $percentage
@@ -310,7 +317,7 @@ class cachegrindparser
                 default:
                     echo "Invalid filter: {$name}\n";
                     self::_usageFilters();
-                    exit(3);
+                    return false;
                 }
             }
         }
@@ -318,7 +325,7 @@ class cachegrindparser
         $ret["input"] = $opts["in"];
         if (!file_exists($ret["input"])) {
             self::_inputError();
-            exit(3);
+            return false;
         }
         $ret["output"] = $opts["out"];
 
