@@ -65,16 +65,10 @@ class CachegrindParser2_Input_Parameters
         }
 
         // Check if we're given each mandatory argument exactly once
-        if (empty($opts['format']) || is_array($opts['format'])) {
-            echo "Error: missing parameters: format\n";
-            $this->_usage();
-        }
-        if (empty($opts['in']) || is_array($opts['in'])) {
-            echo "Error: missing parameters: --in\n";
-            $this->_usage();
-        }
-        if (empty($opts['out']) || is_array($opts['out'])) {
-            echo "Error: missing parameters: --out\n";
+        if (empty($opts['format']) || is_array($opts['format']) ||
+            empty($opts['in']) || is_array($opts['in']) ||
+            empty($opts['out']) || is_array($opts['out'])) {
+            echo "Error: missing parameters\n";
             $this->_usage();
         }
 
