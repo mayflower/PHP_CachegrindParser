@@ -244,10 +244,10 @@ class cachegrindparser
 
         // Check if the user just wants info.
         if (isset($opts["help"]) || isset($opts["h"])) {
-            cachegrindparser::usage();
+            self::_usage();
             exit;
         } else if (isset($opts["version"]) || isset($opts["v"])) {
-            cachegrindparser::version();
+            self::_version();
             exit;
         }
 
@@ -255,7 +255,7 @@ class cachegrindparser
         if ((!isset($opts["in"])     || is_array($opts["in"])) ||
             (!isset($opts["out"])    || is_array($opts["out"])) ||
             (!isset($opts["format"]) || is_array($opts["format"]))) {
-            cachegrindparser::usage();
+            self::_usage();
             exit(1);
         }
 
@@ -270,7 +270,7 @@ class cachegrindparser
             $ret["formatter"] = new CachegrindParser\Output\DotFormatter();
             break;
         default:
-            cachegrindparser::usageFormatters();
+            self::_usageFormatters();
             exit(2);
         }
         $ret["format"] = $opts["format"];
@@ -292,7 +292,7 @@ class cachegrindparser
                 case (strncmp($name, 'depth=', 6) == 0):
                     $depth = (integer) substr($name, 6);
                     if ($depth <= 0) {
-                        cachegrindparser::usageFilters();
+                        self::_usageFilters();
                         exit(3);
                     }
                     $ret['filters'][] = new Input\DepthFilter($depth);
@@ -300,7 +300,7 @@ class cachegrindparser
                 case (strncmp($name, 'timethreshold=', 14) == 0):
                     $percentage = (float) substr($name, 14);
                     if ($percentage < 0 || $percentage > 1) {
-                        cachegrindparser::usageFilters();
+                        self::_usageFilters();
                         exit(3);
                     }
                     $ret['filters'][] = new Input\TimeThresholdFilter(
@@ -309,7 +309,7 @@ class cachegrindparser
                     break;
                 default:
                     echo "Invalid filter: {$name}\n";
-                    cachegrindparser::usageFilters();
+                    self::_usageFilters();
                     exit(3);
                 }
             }
@@ -317,7 +317,7 @@ class cachegrindparser
 
         $ret["input"] = $opts["in"];
         if (!file_exists($ret["input"])) {
-            cachegrindparser::inputError();
+            self::_inputError();
             exit(3);
         }
         $ret["output"] = $opts["out"];
@@ -346,7 +346,7 @@ class cachegrindparser
     /**
      * Prints the version of this script to stdout.
      */
-    public static function version()
+    private static function _version()
     {
         echo "PhpCachegrindParser version " . VERSION . "\n";
     }
@@ -354,16 +354,16 @@ class cachegrindparser
     /**
      * Prints information about the Formatters.
      */
-    public static function usageFormatters()
+    private static function _usageFormatters()
     {
         echo "Error: invalid formatter\n";
-        cachegrindparser::usage();
+        self::_usage();
     }
 
     /**
      * Prints an explanation about a missing or empty input file.
      */
-    public static function inputError()
+    private static function _inputError()
     {
         echo "
             Couldn't find valid input data. Check that the input file exists
@@ -374,7 +374,7 @@ class cachegrindparser
     /**
      * Prints usage information to standard output.
      */
-    public static function usage()
+    private static function _usage()
     {
         echo "Error: missing parameters\n";
         echo "Usage: php cachegrindparser.php --in <file_in> --out <file_out> ".
@@ -391,9 +391,9 @@ class cachegrindparser
     /**
      * Prints information about Filters.
      */
-    public static function usageFilters()
+    private static function _usageFilters()
     {
         echo "Error: invalid filters\n";
-        cachegrindparser::usage();
+        self::_usage();
     }
 }
