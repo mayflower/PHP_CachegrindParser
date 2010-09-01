@@ -147,8 +147,9 @@ class Parser
         while ($curLine + 1 < count($lines)) {
             if (strncmp($lines[$curLine], 'fl=', 3) != 0) {
                 // Don't know what to do, panic
-                die("parse error on line {$curLine}. (Script line: "
-                    . __LINE__ . ", line: {$lines[$curLine]})\n");
+                throw new Exception("parse error on line {$curLine}. " .
+                    "(Script line: " .
+                    __LINE__ . ", line: {$lines[$curLine]})\n");
             } else {
                 // Regular block
                 // Strip fl= from file name and fn from funcname.
@@ -168,7 +169,8 @@ class Parser
                 while (isset($lines[$curLine]) && $lines[$curLine] != '') {
                     if (strncmp('cfn=', $lines[$curLine], 4) != 0) {
                         // This doesn't look like a call, panik
-                        die("parse error on line {$curLine}. (Current line: ".
+                        throw new Exception("parse error on line {$curLine}. ".
+                            "(Current line: ".
                             "{$lines[$curLine]}) (Script line: ".
                             __LINE__ . ")\n");
                     }
