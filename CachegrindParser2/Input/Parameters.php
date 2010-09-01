@@ -57,7 +57,6 @@ class CachegrindParser2_Input_Parameters
         // Check if the user just wants info.
         if (isset($opts['help']) || isset($opts['h'])) {
             $this->_usage();
-            exit;
         }
 
         if (isset($opts['version']) || isset($opts['v'])) {
@@ -66,22 +65,26 @@ class CachegrindParser2_Input_Parameters
         }
 
         // Check if we're given each mandatory argument exactly once
-        if ((empty($opts['in'])     || is_array($opts['in'])) ||
-            (empty($opts['out'])    || is_array($opts['out'])) ||
-            (empty($opts['format']) || is_array($opts['format']))) {
-            echo "Error: missing parameters\n";
+        if (empty($opts['format']) || is_array($opts['format'])) {
+            echo "Error: missing parameters: format\n";
             $this->_usage();
-            exit(1);
+        }
+        if (empty($opts['in']) || is_array($opts['in'])) {
+            echo "Error: missing parameters: --in\n";
+            $this->_usage();
+        }
+        if (empty($opts['out']) || is_array($opts['out'])) {
+            echo "Error: missing parameters: --out\n";
+            $this->_usage();
         }
 
         if (!in_array($opts['format'], array('xml','dot','svg','png'))) {
             $this->_usageFormatters();
-            exit(2);
         }
 
         if (!file_exists($opts['in'])) {
             $this->_inputError();
-            exit(3);
+            $this->_usage();
         }
         $this->_parameters = $opts;
     }
@@ -178,5 +181,6 @@ class CachegrindParser2_Input_Parameters
 
         echo "Note: Please be careful that some parameters require '='".
              " as value separator\n";
+        exit(1);
     }
 }
