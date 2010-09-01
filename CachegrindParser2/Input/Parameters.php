@@ -165,9 +165,13 @@ class CachegrindParser2_Input_Parameters
     private function _usage()
     {
         echo "Usage: php cachegrindparser2.php --in <file_in> --out <file_out>".
-             " --format xml|dot|svg|png\n\n";
+             " --format dot|svg|png [options] \n\n";
 
-        echo "Optional: --timethreshold=0.## --quiet\n";
+        echo "Options:\n";
+        echo "--timethreshold=0.## (minimum cost time in relation to total)\n";
+        echo "--time_min=###       (minimum cost time in ns)\n";
+        echo "--db=<file_db>       (SQLite database file)\n";
+        echo "--quiet              (no progress output)\n\n";
         echo "Dot to SVG with letter page size: dot -Gsize=11,7 ".
              "-Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
 
