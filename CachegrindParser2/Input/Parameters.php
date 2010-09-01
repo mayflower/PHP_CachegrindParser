@@ -179,6 +179,6 @@ class CachegrindParser2_Input_Parameters
         echo "Note: SVG export needs the package 'graphviz'\n\n";
 
         echo "Note: Please be careful that some parameters require '='".
-             " as value reparator\n";
+             " as value separator\n";
     }
 }
