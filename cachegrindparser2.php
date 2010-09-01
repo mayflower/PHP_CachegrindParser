@@ -30,6 +30,9 @@ require 'CachegrindParser2/Output/Format.php';
 $parameters = new CachegrindParser2_Input_Parameters();
 $parameters = $parameters->getParameters();
 
+if (empty($parameters)) {
+    exit(1);
+}
 
 // 2. Initialize database
 $sqliteFile = 'database.sqlite';
