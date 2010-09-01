@@ -106,7 +106,7 @@ class CallTree
     public function filterTree()
     {
         foreach ($this->_filters as $filter)
-            $filter->filter($this);
+            $filter->applyFilter($this);
     }
 
     /**

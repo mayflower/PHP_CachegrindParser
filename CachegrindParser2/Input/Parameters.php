@@ -25,8 +25,6 @@ class CachegrindParser2_Input_Parameters
      * Parses the options.
      *
      * Dies after printing some help if the command-line options are wrong.
-     *
-     * @return array Array with: parameter key => parameter value
      */
     public function __construct()
     {

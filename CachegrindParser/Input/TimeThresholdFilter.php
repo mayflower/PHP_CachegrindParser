@@ -38,7 +38,7 @@ class TimeThresholdFilter implements Filter
     /**
      * Implements filter as defined in the interface Filter.
      */
-    public function filter(\CachegrindParser\Data\Calltree &$tree)
+    public function applyFilter(\CachegrindParser\Data\Calltree &$tree)
     {
         $queue = array($tree->getRoot());
 

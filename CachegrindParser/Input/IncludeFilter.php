@@ -21,7 +21,7 @@ require_once 'CachegrindParser/Input/Filter.php';
 class IncludeFilter implements Filter
 {
 
-    public function filter(\CachegrindParser\Data\Calltree &$tree)
+    public function applyFilter(\CachegrindParser\Data\Calltree &$tree)
     {
         $nodeQueue = array($tree->getRoot());
 

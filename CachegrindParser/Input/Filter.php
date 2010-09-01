@@ -28,5 +28,5 @@ interface Filter
      *
      * @param CachegrindParser\Data\CallTree The tree to filter.
      */
-    public function filter(\CacheGrindParser\Data\CallTree &$param);
+    public function applyFilter(\CacheGrindParser\Data\CallTree &$param);
 }
