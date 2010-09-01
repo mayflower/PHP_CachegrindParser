@@ -176,6 +176,9 @@ class CachegrindParser2_Input_Parameters
              "-Gratio=compress -Gcenter=true -Tsvg -o<file_out> <file_in>\n";
 
         echo "Dot to SVG with screen size: dot -Tsvg -o<file_out> <file_in>\n";
-        echo "Note: SVG export needs the package 'graphviz'\n";
+        echo "Note: SVG export needs the package 'graphviz'\n\n";
+
+        echo "Note: Please be careful that some parameters require '='".
+             " as value reparator\n";
     }
 }
