@@ -57,11 +57,12 @@ class CachegrindParser2_Input_Parameters
         // Check if the user just wants info.
         if (isset($opts['help']) || isset($opts['h'])) {
             $this->_usage();
+            return;
         }
 
         if (isset($opts['version']) || isset($opts['v'])) {
             $this->_version();
-            exit;
+            return;
         }
 
         // Check if we're given each mandatory argument exactly once
@@ -70,15 +71,17 @@ class CachegrindParser2_Input_Parameters
             empty($opts['out']) || is_array($opts['out'])) {
             echo "Error: missing parameters\n";
             $this->_usage();
+            return;
         }
 
         if (!in_array($opts['format'], array('xml','dot','svg','png'))) {
             $this->_usageFormatters();
+            return;
         }
 
         if (!file_exists($opts['in'])) {
             $this->_inputError();
-            $this->_usage();
+            return;
         }
         $this->_parameters = $opts;
     }
@@ -175,6 +178,5 @@ class CachegrindParser2_Input_Parameters
 
         echo "Note: Please be careful that some parameters require '='".
              " as value separator\n";
-        exit(1);
     }
 }
