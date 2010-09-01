@@ -30,7 +30,7 @@ $parameters = cachegrindparser::parseOptions();
 
 // ungültige Parameter => exit
 if ($parameters === false) {
-	exit(1);
+    exit(1);
 }
 
 // 2. Create a Tree object
